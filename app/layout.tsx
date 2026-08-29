@@ -1,16 +1,17 @@
-import { Geist, Geist_Mono, Space_Grotesk, Oxanium } from "next/font/google"
+import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
+import { ThemeProvider } from '@/components/theme-provider'
+import { cn } from '@/lib/utils'
 
-const oxaniumHeading = Oxanium({subsets:['latin'],variable:'--font-heading'});
+import './globals.css'
 
-const spaceGrotesk = Space_Grotesk({subsets:['latin'],variable:'--font-sans'})
+const oxaniumHeading = Oxanium({ subsets: ['latin'], variable: '--font-heading' })
+
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-sans' })
 
 const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
+  subsets: ['latin'],
+  variable: '--font-mono',
 })
 
 export default function RootLayout({
@@ -22,7 +23,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", spaceGrotesk.variable, oxaniumHeading.variable)}
+      className={cn('antialiased', fontMono.variable, 'font-sans', spaceGrotesk.variable, oxaniumHeading.variable)}
     >
       <body>
         <ThemeProvider>{children}</ThemeProvider>
