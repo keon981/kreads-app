@@ -1,6 +1,8 @@
 import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
+import { AppSidebar } from '@/components/layouts/app-sidebar'
 import { ThemeProvider } from '@/components/theme-provider'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 
 import './globals.css'
@@ -26,7 +28,14 @@ export default function RootLayout({
       className={cn('antialiased', fontMono.variable, 'font-sans', spaceGrotesk.variable, oxaniumHeading.variable)}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset className="items-center">
+              {children}
+            </SidebarInset>
+          </SidebarProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
