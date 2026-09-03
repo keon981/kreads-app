@@ -14,20 +14,19 @@ export default function Page() {
             id="keon981"
             avatarImage="https://github.com/evilrabbit.png"
           >
-            zxc
+            {/* bio */}
+
           </CommentHeader>
           <CommentItemGroup className="">
             {Array.from({ length: 20 }, (_, i) => (
-              <CommentItem key={i}>
-
-              </CommentItem>
+              <CommentItem key={i}>{i}</CommentItem>
             ))}
           </CommentItemGroup>
         </div>
       </article>
 
       {/* footer */}
-      <footer className="mb-17 w-full h-12 flex justify-center items-center">
+      <footer className="mb-17 w-full h-12 flex justify-center items-center text-muted-foreground">
         <p>© 2026</p>
       </footer>
     </section>

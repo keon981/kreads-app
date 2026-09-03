@@ -3,7 +3,7 @@ import React from 'react'
 function AppHeader() {
   return (
     <header
-      className="sticky top-0 z-20 h-18 w-full flex shrink-0 items-center gap-2 bg-background"
+      className="sticky top-0 z-20 h-18 w-full flex shrink-0 items-center gap-2 bg-background/95 md:bg-background"
     >
       {/* bottom */}
       <div className="absolute bottom-0 left-2 w-[98%] md:border-b border-border"></div>
