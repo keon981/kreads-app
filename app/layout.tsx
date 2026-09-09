@@ -1,8 +1,8 @@
 import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
-import { AppSidebar } from '@/components/layouts/app-sidebar'
+import { AppSidebar, AppSidebarInset } from '@/components/layouts/app-sidebar'
 import { ThemeProvider } from '@/components/theme-provider'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { SidebarProvider } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 
 import './globals.css'
@@ -31,9 +31,13 @@ export default function RootLayout({
         <ThemeProvider>
           <SidebarProvider>
             <AppSidebar />
-            <SidebarInset className="items-center">
+            <AppSidebarInset
+              name="Keon"
+              id="keon981"
+              avatarImage="https://github.com/evilrabbit.png"
+            >
               {children}
-            </SidebarInset>
+            </AppSidebarInset>
           </SidebarProvider>
         </ThemeProvider>
       </body>
