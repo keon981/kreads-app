@@ -2,7 +2,7 @@ import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
 import { AppSidebar, AppSidebarInset } from '@/components/layouts/app-sidebar'
 import { ThemeProvider } from '@/components/theme-provider'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { SidebarProvider } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 
 import './globals.css'

@@ -36,11 +36,11 @@ function CommentHeader({ name, id, children, avatarImage }: {
 }) {
   return (
     <Card className="bg-transparent border-0 rounded-none">
-      <CardHeader className="[--card-spacing:--spacing(6)]">
-        <CardTitle>{name}</CardTitle>
-        <CardDescription>{id}</CardDescription>
+      <CardHeader className="[--card-spacing:--spacing(4)] gap-0">
+        <CardTitle className="text-2xl/tight">{name}</CardTitle>
+        <CardDescription>@{id}</CardDescription>
         <CardAction>
-          <Avatar className="size-10">
+          <Avatar className="size-16">
             <AvatarImage src={avatarImage} />
             <AvatarFallback>
               {id.slice(0, 2).toUpperCase()}
@@ -51,7 +51,7 @@ function CommentHeader({ name, id, children, avatarImage }: {
       </CardHeader>
       <CardContent>{children}</CardContent>
       <CardFooter className="bg-transparent border-transparent rounded-none">
-        <Button type="submit" className="w-full">
+        <Button type="submit" variant="outline" className="w-full">
           Share
         </Button>
       </CardFooter>

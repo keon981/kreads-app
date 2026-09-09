@@ -1,6 +1,6 @@
 'use client'
 
-import { RiArrowUpDownLine, RiBankCardLine, RiCheckboxCircleLine, RiLogoutBoxLine, RiNotificationLine, RiSparklingLine, RiUserLine } from '@remixicon/react'
+import { RiArrowUpDownLine, RiBankCardLine, RiCheckboxCircleLine, RiLogoutBoxLine, RiNotificationLine, RiSparklingLine } from '@remixicon/react'
 
 import {
   Avatar,
