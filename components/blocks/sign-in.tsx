@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 
 import { RiGithubFill } from '@remixicon/react'
@@ -5,13 +7,12 @@ import { RiGithubFill } from '@remixicon/react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { signInWithGitHub } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
 
 export function SignInCard({
@@ -41,8 +42,8 @@ export function SignInCard({
 
 export function SignInButton({ children, ...props }: React.ComponentProps<typeof Button>) {
   return (
-    <Button type="submit" {...props}>
-      {children ?? '登入'}
+    <Button onClick={signInWithGitHub} {...props}>
+      {children}
     </Button>
   )
 }

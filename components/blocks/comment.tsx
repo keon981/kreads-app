@@ -1,3 +1,5 @@
+'use client'
+
 import { RiChat1Line, RiHeartLine, RiShareForwardLine } from '@remixicon/react'
 
 import {
@@ -38,7 +40,7 @@ function CommentHeader({ name, id, children, avatarImage }: {
     <Card className="bg-transparent border-0 rounded-none">
       <CardHeader className="[--card-spacing:--spacing(4)] gap-0">
         <CardTitle className="text-2xl/tight">{name}</CardTitle>
-        <CardDescription>@{id}</CardDescription>
+        <CardDescription>{id}</CardDescription>
         <CardAction>
           <Avatar className="size-16">
             <AvatarImage src={avatarImage} />
