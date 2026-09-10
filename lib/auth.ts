@@ -4,10 +4,12 @@ import { betterAuth } from 'better-auth/minimal'
 import process from 'node:process'
 
 import { db } from '@/db/drizzle' // your drizzle instance
+import * as schema from '@/db/schema/auth-schema'
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: 'pg',
+    schema,
   }),
   emailAndPassword: {
     enabled: false,

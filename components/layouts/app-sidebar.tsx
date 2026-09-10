@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 
-import { RiArchiveLine, RiCommandLine, RiDeleteBinLine, RiFileLine, RiGithubFill, RiInboxLine, RiSendPlaneLine } from '@remixicon/react'
+import { RiArchiveLine, RiCommandLine, RiDeleteBinLine, RiFileLine, RiInboxLine, RiSendPlaneLine } from '@remixicon/react'
 
 import { NavUser } from '@/components/layouts/nav-user'
 import {
@@ -12,16 +12,11 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
-  SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-
-import { CommentHeader } from '../blocks/comment'
-import { SignInButton, SignInCard } from '../blocks/sign-in'
-import AppHeader from './app-header'
 
 // This is sample data
 const data = {
@@ -144,46 +139,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarFooter>
       </Sidebar>
     </Sidebar>
-  )
-}
-
-interface AppSidebarInsetProps extends React.ComponentProps<typeof CommentHeader> {
-
-}
-
-export function AppSidebarInset({
-  children,
-  ...commentHeaderProps
-}: AppSidebarInsetProps) {
-  return (
-    <SidebarInset className="flex-row items-start justify-center gap-4">
-      <div className="hidden md:block md:size-px"></div>
-      <section className="relative w-full md:w-160 md:max-w-160 flex flex-col items-center min-h-dvh md:pb-18 md:bg-card">
-        <AppHeader />
-
-        {/* acticle */}
-        <article className="size-full flex flex-col">
-          <div className="grow min-h-0 overflow-hidden rounded-3xl md:border md:border-t-0 border-border">
-            <CommentHeader {...commentHeaderProps}>
-              {/* bio */}
-            </CommentHeader>
-            {/* main post */}
-            {children}
-          </div>
-        </article>
-
-        {/* footer */}
-        <footer className="mb-17 w-full h-12 flex justify-center items-center text-muted-foreground">
-          <p>© 2026</p>
-        </footer>
-      </section>
-      <div className="fixed top-6 right-4 z-20 lg:relative lg:top-0 lg:right-0 lg:mt-18 w-fit">
-        <SignInButton className="lg:hidden p-4 rounded-full">
-          <RiGithubFill />
-          登入 GitHub
-        </SignInButton>
-        <SignInCard className="hidden lg:flex w-80" />
-      </div>
-    </SidebarInset>
   )
 }
