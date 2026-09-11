@@ -1,8 +1,39 @@
-import React from 'react'
+import { CommentItem, CommentItemGroup } from '@/components/blocks/comment'
+import ArticleLayout from '@/components/layouts/article-layout'
+import { getGitHubUser } from '@/lib/github'
 
-function Page() {
+async function Page() {
+  const user = await getGitHubUser()
+  if (!user) {
+    return (
+      <ArticleLayout
+        isAuth
+        name=""
+        id=""
+        avatarImage=""
+      >
+        <CommentItemGroup className="">
+          {Array.from({ length: 20 }, (_, i) => (
+            <CommentItem key={i}>{i}</CommentItem>
+          ))}
+        </CommentItemGroup>
+      </ArticleLayout>
+    )
+  }
+
   return (
-    <div>Profile page</div>
+    <ArticleLayout
+      isAuth
+      name={user.name ?? ''}
+      id={user.login}
+      avatarImage={user.avatar_url}
+    >
+      <CommentItemGroup className="">
+        {Array.from({ length: 20 }, (_, i) => (
+          <CommentItem key={i}>{i}</CommentItem>
+        ))}
+      </CommentItemGroup>
+    </ArticleLayout>
   )
 }
 

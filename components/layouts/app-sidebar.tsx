@@ -2,9 +2,16 @@
 
 import * as React from 'react'
 
-import { RiArchiveLine, RiCommandLine, RiDeleteBinLine, RiFileLine, RiInboxLine, RiSendPlaneLine } from '@remixicon/react'
+import {
+  RiAddLargeLine,
+  RiBookmarkLine,
+  RiCommandLine,
+  RiHome9Line,
+  RiListSettingsFill,
+  RiSearchLine,
+  RiUserLine,
+} from '@remixicon/react'
 
-import { NavUser } from '@/components/layouts/nav-user'
 import {
   Sidebar,
   SidebarContent,
@@ -15,75 +22,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from '@/components/ui/sidebar'
 
-// This is sample data
-const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
-  navMain: [
-    {
-      title: 'Inbox',
-      url: '#',
-      icon: (
-        <RiInboxLine />
-      ),
-      isActive: true,
-    },
-    {
-      title: 'Drafts',
-      url: '#',
-      icon: (
-        <RiFileLine />
-      ),
-      isActive: false,
-    },
-    {
-      title: 'Sent',
-      url: '#',
-      icon: (
-        <RiSendPlaneLine />
-      ),
-      isActive: false,
-    },
-    {
-      title: 'Junk',
-      url: '#',
-      icon: (
-        <RiArchiveLine />
-      ),
-      isActive: false,
-    },
-    {
-      title: 'Trash',
-      url: '#',
-      icon: (
-        <RiDeleteBinLine />
-      ),
-      isActive: false,
-    },
-  ],
-}
+import { CommentInputDialog } from '../blocks/comment'
+import { DialogTrigger } from '../ui/dialog'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  // Note: I'm using state to show active item.
-  // IRL you should use the url/router.
-  const [activeItem, setActiveItem] = React.useState(data.navMain[0])
-  const { setOpen } = useSidebar()
-
   return (
     <Sidebar
       collapsible="icon"
       className="overflow-hidden *:data-[sidebar=sidebar]:flex-row"
       {...props}
     >
-      {/* This is the first sidebar */}
-      {/* We disable collapsible and adjust width to icon. */}
-      {/* This will make the sidebar appear as icons. */}
       <Sidebar
         collapsible="none"
         className="w-[calc(var(--sidebar-width-icon)+1px)]! border-r"
@@ -110,32 +60,49 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupContent className="px-1.5 md:px-0">
-              <SidebarMenu>
-                {data.navMain.map(item => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      tooltip={{
-                        children: item.title,
-                        hidden: false,
-                      }}
-                      onClick={() => {
-                        setActiveItem(item)
-                        setOpen(true)
-                      }}
-                      isActive={activeItem?.title === item.title}
-                      className="px-2.5 md:px-2"
-                    >
-                      {item.icon}
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+              <SidebarMenu className="gap-2">
+                {/* Home -> Keon981 Page */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <RiHome9Line />
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                {/* Search */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <RiSearchLine />
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                {/* new post  */}
+                <SidebarMenuItem>
+                  <CommentInputDialog>
+                    <DialogTrigger render={<SidebarMenuButton variant="outline" />}>
+                      <RiAddLargeLine />
+                    </DialogTrigger>
+                  </CommentInputDialog>
+                </SidebarMenuItem>
+
+                {/* Bookmark */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <RiBookmarkLine />
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                {/* Profile */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton>
+                    <RiUserLine />
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
-          <NavUser user={data.user} />
+          <RiListSettingsFill />
         </SidebarFooter>
       </Sidebar>
     </Sidebar>

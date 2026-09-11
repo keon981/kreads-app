@@ -8,15 +8,15 @@ import {
   AvatarImage,
 } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import {
   Item,
   ItemActions,
@@ -26,38 +26,42 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/components/ui/item'
+import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
-import { ButtonGroup } from '../ui/button-group'
-
-function CommentHeader({ name, id, children, avatarImage }: {
-  name: string
-  id: string
-  children?: React.ReactNode
-  avatarImage: string
+function CommentInputDialog({ children, ...props }: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
+  children: React.ReactNode
 }) {
   return (
-    <Card className="bg-transparent border-0 rounded-none">
-      <CardHeader className="[--card-spacing:--spacing(4)] gap-0">
-        <CardTitle className="text-2xl/tight">{name}</CardTitle>
-        <CardDescription>{id}</CardDescription>
-        <CardAction>
-          <Avatar className="size-16">
-            <AvatarImage src={avatarImage} />
-            <AvatarFallback>
-              {id.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+    <Dialog {...props}>
+      {children}
+      {/* <div>
 
-        </CardAction>
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-      <CardFooter className="bg-transparent border-transparent rounded-none">
-        <Button type="submit" variant="outline" className="w-full">
-          Share
-        </Button>
-      </CardFooter>
-    </Card>
+        <p>有什麼新鮮事？</p>
+        <DialogTrigger render={<Button variant="outline">Share</Button>} />
+
+      </div> */}
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Share link</DialogTitle>
+          <DialogDescription>
+            Anyone who has this link will be able to view this.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex items-center gap-2">
+          <div className="grid flex-1 gap-2">
+            <Label htmlFor="link" className="sr-only">
+              Link
+            </Label>
+            <Input
+              id="link"
+              defaultValue="https://ui.shadcn.com/docs/installation"
+              readOnly
+            />
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -113,7 +117,7 @@ function CommentItemGroup({ className, ...props }: React.ComponentProps<typeof I
 }
 
 export {
-  CommentHeader,
+  CommentInputDialog,
   CommentItem,
   CommentItemGroup,
 }
