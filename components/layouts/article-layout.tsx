@@ -27,7 +27,7 @@ function AppHeader() {
 }
 
 interface Props extends React.ComponentProps<typeof AboutCard> {
-  isAuth: boolean
+  isAuth?: boolean
 }
 
 export default function ArticleLayout({
@@ -49,17 +49,16 @@ export default function ArticleLayout({
             {children}
           </div>
         </article>
-        {!!isAuth && (
-          <div className="fixed top-6 right-4 z-20 lg:relative lg:top-0 lg:right-0 lg:mt-18 w-fit">
-            <SignInButton className="lg:hidden p-4 rounded-full">
-              <RiGithubFill />
-              登入 GitHub
-            </SignInButton>
-            <SignInCard className="hidden lg:flex w-80" />
-          </div>
-        )}
-
       </section>
+      {!isAuth && (
+        <div className="fixed top-6 right-4 z-20 lg:relative lg:top-0 lg:right-0 lg:mt-18 w-fit">
+          <SignInButton className="lg:hidden p-4 rounded-full">
+            <RiGithubFill />
+            登入 GitHub
+          </SignInButton>
+          <SignInCard className="hidden lg:flex w-80" />
+        </div>
+      )}
     </>
   )
 }
