@@ -10,7 +10,7 @@ export function signInWithGitHub() {
     provider: 'github',
     callbackURL: '/',
     // errorCallbackURL: '/error',
-    // newUserCallbackURL: '/welcome',
+    newUserCallbackURL: '/auth/register',
   })
 }
 
