@@ -7,7 +7,6 @@ export default async function Page() {
   if (!user) {
     return (
       <ArticleLayout
-        isAuth
         name=""
         id=""
         avatarImage=""
