@@ -89,7 +89,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
-          <SidebarMenuButton>
+          <SidebarMenuButton variant="native" className="hover:text-foreground">
             <RiListSettingsFill />
           </SidebarMenuButton>
         </SidebarFooter>
