@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import React, { useState } from 'react'
 
 import {
   RiAddLargeLine,
@@ -25,9 +25,14 @@ import {
 } from '@/components/ui/sidebar'
 
 import { CommentInputDialog } from '../blocks/comment'
+import { SignInDialog } from '../blocks/sign-in'
 import { DialogTrigger } from '../ui/dialog'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false)
+
+  const triggerSignInDialog = () => setIsSignInDialogOpen(b => !b)
+
   return (
     <Sidebar
       collapsible="icon"
@@ -37,6 +42,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <Sidebar collapsible="none">
         <SidebarHeader>
           <SidebarMenu>
+            {/* Logo */}
             <SidebarMenuItem className=" py-2 ">
               <SidebarMenuButton variant="native" size="lg" className="[&_svg]:size-9 size-9! p-0 text-foreground">
                 <RiCommandLine />
@@ -80,7 +86,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                 {/* Profile */}
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
+                  <SidebarMenuButton onClick={triggerSignInDialog}>
                     <RiUserLine />
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -94,6 +100,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuButton>
         </SidebarFooter>
       </Sidebar>
+      <SignInDialog
+        open={isSignInDialogOpen}
+        onOpenChange={setIsSignInDialogOpen}
+      />
     </Sidebar>
   )
 }

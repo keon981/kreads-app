@@ -1,15 +1,16 @@
 import { headers } from 'next/headers'
 
+import { cache } from 'react'
+
 import { Octokit } from '@octokit/rest'
 
-import { auth } from '@/lib/auth'
+import { auth, getSessionCache } from '@/lib/auth'
 
 export async function getGitHubToken() {
-  const nextHeaders = await headers()
-
-  const session = await auth.api.getSession({ headers: nextHeaders })
+  const session = await getSessionCache()
   if (!session) return null
 
+  const nextHeaders = await headers()
   const accounts = await auth.api.listUserAccounts({ headers: nextHeaders })
   const github = accounts.find(a => a.providerId === 'github')
   if (!github) return null
@@ -22,11 +23,11 @@ export async function getGitHubToken() {
   return accessToken
 }
 
-export async function getGitHubUser() {
+export const getGitHubUser = cache(async () => {
   const token = await getGitHubToken()
   if (!token) return null
 
   const octokit = new Octokit({ auth: token })
   const { data } = await octokit.rest.users.getAuthenticated()
   return data
-}
+})
