@@ -5,6 +5,7 @@ import { cache } from 'react'
 
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth/minimal'
+import { admin } from 'better-auth/plugins'
 
 import process from 'node:process'
 
@@ -19,6 +20,9 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: false,
   },
+  plugins: [
+    admin(),
+  ],
   socialProviders: {
     github: {
       clientId: process.env.GITHUB_CLIENT_ID as string,

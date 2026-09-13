@@ -30,8 +30,6 @@ function AuthProvider({
 }: {
   children: React.ReactNode
 } & AuthContextProps) {
-  console.log('user===', user)
-
   const contextValue = useMemo(() => isAuth
     ? ({
       isAuth,

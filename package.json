@@ -10,7 +10,9 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "drizzle:generate": "vpx drizzle-kit generate",
+    "drizzle:migrate": "vpx drizzle-kit migrate"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
