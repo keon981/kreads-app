@@ -1,36 +1,30 @@
-import { CommentItem, CommentItemGroup } from '@/components/blocks/comment'
-import ArticleLayout from '@/components/layouts/article-layout'
-import { getGitHubUser } from '@/lib/github'
+'use client'
 
-async function Page() {
-  const user = await getGitHubUser()
-  if (!user) {
-    return (
-      <ArticleLayout
-        isAuth
-        name=""
-        id=""
-        avatarImage=""
-      >
-        <CommentItemGroup className="">
-          {Array.from({ length: 20 }, (_, i) => (
-            <CommentItem key={i}>{i}</CommentItem>
-          ))}
-        </CommentItemGroup>
-      </ArticleLayout>
-    )
-  }
+import { redirect } from 'next/navigation'
+
+import { CommentItem, CommentItemGroup, CommentItemSkeleton } from '@/components/blocks/comment'
+import ArticleLayout from '@/components/layouts/article-layout'
+import { useAuth } from '@/contexts/auth-provider'
+
+function Page() {
+  const { user } = useAuth()
+  if (!user) redirect('/')
 
   return (
     <ArticleLayout
-      isAuth
       name={user.name ?? ''}
-      id={user.login}
-      avatarImage={user.avatar_url}
+      id={user?.id}
+      avatarUrl={user?.avatarUrl}
     >
       <CommentItemGroup className="">
+        <CommentItemSkeleton />
         {Array.from({ length: 20 }, (_, i) => (
-          <CommentItem key={i}>{i}</CommentItem>
+          <CommentItem
+            title={user.name ?? ''}
+            avatarUrl={user.avatarUrl}
+            key={i}
+          >{i}
+          </CommentItem>
         ))}
       </CommentItemGroup>
     </ArticleLayout>
