@@ -1,14 +1,20 @@
 'use client'
 
+import type { Url } from 'next/dist/shared/lib/router/router'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+
 import React, { useState } from 'react'
 
 import {
   RiAddLargeLine,
   RiBookmarkLine,
   RiCommandLine,
+  RiHome9Fill,
   RiHome9Line,
   RiListSettingsFill,
   RiSearchLine,
+  RiUserFill,
   RiUserLine,
 } from '@remixicon/react'
 
@@ -23,6 +29,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { useAuth } from '@/contexts/auth-provider'
 
 import { CommentInputDialog } from '../blocks/comment'
 import { SignInDialog } from '../blocks/sign-in'
@@ -30,8 +37,13 @@ import { DialogTrigger } from '../ui/dialog'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false)
+  const pathName = usePathname()
+  const { isAuth } = useAuth()
 
-  const triggerSignInDialog = () => setIsSignInDialogOpen(b => !b)
+  const triggerSignInDialog = () => {
+    if (isAuth) return
+    setIsSignInDialogOpen(b => !b)
+  }
 
   return (
     <Sidebar
@@ -56,9 +68,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu className="gap-1">
                 {/* Home -> Keon981 Page */}
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <RiHome9Line />
-                  </SidebarMenuButton>
+                  <SidebarMenuLink
+                    href="/"
+                    isActive={pathName === '/'}
+                  >
+                    {pathName === '/' ? <RiHome9Fill /> : <RiHome9Line />}
+                  </SidebarMenuLink>
                 </SidebarMenuItem>
 
                 {/* Search */}
@@ -71,7 +86,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {/* new post  */}
                 <SidebarMenuItem>
                   <CommentInputDialog>
-                    <DialogTrigger render={<SidebarMenuButton variant="outline" />}>
+                    <DialogTrigger
+                      render={<SidebarMenuButton variant="outline" />}
+                      onClick={(e) => {
+                        if (isAuth) return
+                        e.preventBaseUIHandler()
+                        triggerSignInDialog()
+                      }}
+                    >
                       <RiAddLargeLine />
                     </DialogTrigger>
                   </CommentInputDialog>
@@ -86,16 +108,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                 {/* Profile */}
                 <SidebarMenuItem>
-                  <SidebarMenuButton onClick={triggerSignInDialog}>
-                    <RiUserLine />
-                  </SidebarMenuButton>
+                  <SidebarMenuLink
+                    href="/profile"
+                    isActive={pathName === '/profile'}
+                    onClick={triggerSignInDialog}
+                  >
+                    {pathName === '/profile' ? <RiUserFill /> : <RiUserLine />}
+                  </SidebarMenuLink>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
-          <SidebarMenuButton variant="native" className="hover:text-foreground">
+          <SidebarMenuButton
+            variant="native"
+            onClick={triggerSignInDialog}
+            className="hover:text-foreground"
+          >
             <RiListSettingsFill />
           </SidebarMenuButton>
         </SidebarFooter>
@@ -106,4 +136,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       />
     </Sidebar>
   )
+}
+
+function SidebarMenuLink({
+  href,
+  ...props
+}: React.ComponentProps<typeof SidebarMenuButton> & { href: Url }) {
+  const { isAuth } = useAuth()
+  if (!isAuth) {
+    return <SidebarMenuButton {...props} />
+  }
+
+  return <SidebarMenuButton render={<Link href={href} />} {...props} />
 }

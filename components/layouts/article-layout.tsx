@@ -36,14 +36,14 @@ export default function ArticleLayout({
   children,
   name = '',
   id = '',
-  avatarImage = '',
+  avatarUrl,
 }: Props) {
   const { isAuth } = useAuth()
   const aboutCard = useMemo(() => ({
     name,
     id,
-    avatarImage,
-  }), [name, id, avatarImage])
+    avatarUrl,
+  }), [name, id, avatarUrl])
 
   return (
     <>

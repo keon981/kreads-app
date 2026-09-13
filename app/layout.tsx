@@ -24,6 +24,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const user = await getGitHubUser()
+  const isAuth = !!user
 
   return (
     <html
@@ -33,7 +34,14 @@ export default async function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <AuthProvider isAuth={!!user}>
+          <AuthProvider
+            isAuth={!!isAuth}
+            user={{
+              id: `@${user?.login}`,
+              name: user?.name,
+              avatarUrl: user?.avatar_url,
+            }}
+          >
             <SidebarProvider>
               <AppSidebar />
               <SidebarInset className="flex-row items-start justify-center gap-4">

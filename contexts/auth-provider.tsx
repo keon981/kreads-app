@@ -4,6 +4,11 @@ import React, { use, useMemo } from 'react'
 
 interface AuthContextProps {
   isAuth: boolean
+  user: null | {
+    id: string | undefined
+    name: string | null | undefined
+    avatarUrl: string | undefined
+  }
 }
 
 const AuthContext = React.createContext<AuthContextProps | null>(null)
@@ -21,13 +26,21 @@ function useAuth() {
 function AuthProvider({
   children,
   isAuth,
+  user,
 }: {
   children: React.ReactNode
-  isAuth: boolean
-}) {
-  const contextValue = useMemo(() => ({
-    isAuth,
-  }), [isAuth])
+} & AuthContextProps) {
+  console.log('user===', user)
+
+  const contextValue = useMemo(() => isAuth
+    ? ({
+      isAuth,
+      user,
+    })
+    : ({
+      isAuth,
+      user: null,
+    }), [isAuth, user])
 
   return (
     <AuthContext value={contextValue}>

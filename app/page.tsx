@@ -9,7 +9,7 @@ export default async function Page() {
     <ArticleLayout
       name={user?.name ?? ''}
       id={user?.login}
-      avatarImage={user?.avatar_url}
+      avatarUrl={user?.avatar_url}
     >
       <CommentItemGroup className="">
         {Array.from({ length: 20 }, (_, i) => (

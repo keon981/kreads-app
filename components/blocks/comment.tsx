@@ -1,5 +1,7 @@
 'use client'
 
+import { Suspense } from 'react'
+
 import { RiChat1Line, RiHeartLine, RiShareForwardLine } from '@remixicon/react'
 
 import {
@@ -19,7 +21,6 @@ import {
 import { Input } from '@/components/ui/input'
 import {
   Item,
-  ItemActions,
   ItemContent,
   ItemDescription,
   ItemGroup,
@@ -28,6 +29,8 @@ import {
 } from '@/components/ui/item'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+
+import { Skeleton } from '../ui/skeleton'
 
 function CommentInputDialog({ children, ...props }: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
   children: React.ReactNode
@@ -66,20 +69,27 @@ function CommentInputDialog({ children, ...props }: Omit<React.ComponentProps<ty
 }
 
 function CommentItem({
+  title,
   children,
+  avatarUrl,
 }: {
-  children: React.ReactNode
-}) {
+  avatarUrl?: string
+  avatarFallback?: string
+} & React.ComponentProps<typeof Item>) {
   return (
     <Item className="rounded-none border-0 border-t p-3" variant="outline">
       <ItemMedia>
         <Avatar className="size-10">
-          <AvatarImage src="https://github.com/evilrabbit.png" />
-          <AvatarFallback>ER</AvatarFallback>
+          <AvatarImage src={avatarUrl} />
+          <AvatarFallback>
+            {title?.slice(0, 2).toUpperCase()}
+          </AvatarFallback>
         </Avatar>
       </ItemMedia>
       <ItemContent>
-        <ItemTitle className="ps-2.5 text-base/tight font-bold">Basic Item</ItemTitle>
+        <ItemTitle className="ps-2.5 text-base/tight font-bold">
+          {title}
+        </ItemTitle>
         <ItemDescription className="mt-1 ps-2.5 text-foreground text-base/tight">
           {children}
         </ItemDescription>
@@ -97,11 +107,37 @@ function CommentItem({
           </Button>
         </ButtonGroup>
       </ItemContent>
-      <ItemActions>
-        <Button variant="outline" size="sm">
-          Action
-        </Button>
-      </ItemActions>
+    </Item>
+  )
+}
+
+function CommentItemSkeleton() {
+  return (
+    <Item className="rounded-none border-0 border-t p-3" variant="outline">
+      <ItemMedia>
+        <Avatar className="size-10 after:border-transparent">
+          <Skeleton className="size-full rounded-full" />
+        </Avatar>
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle className="ps-2.5 text-base/tight font-bold">
+          <Skeleton className="w-25 h-4" />
+        </ItemTitle>
+        <ItemDescription className="mt-1 ps-2.5 text-foreground text-base/tight">
+          <Skeleton render={<span />} className="w-90% h-4" />
+        </ItemDescription>
+        {/* footer button group */}
+        <ButtonGroup className="px-0">
+          {
+            Array.from({ length: 3 }, (_, i) => (
+              <div className="p-1.5" key={i}>
+                <Skeleton className="size-6 rounded-full" />
+              </div>
+
+            ))
+          }
+        </ButtonGroup>
+      </ItemContent>
     </Item>
   )
 }
@@ -120,4 +156,5 @@ export {
   CommentInputDialog,
   CommentItem,
   CommentItemGroup,
+  CommentItemSkeleton,
 }

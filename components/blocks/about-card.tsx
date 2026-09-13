@@ -1,3 +1,5 @@
+import { useRouter } from 'next/navigation'
+
 import {
   Avatar,
   AvatarFallback,
@@ -13,23 +15,32 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { signOut } from '@/lib/auth-client'
 
-export function AboutCard({ name, id, children, avatarImage }: {
+export function AboutCard({ name, id, children, avatarUrl }: {
   name: string
   id: string
   children?: React.ReactNode
-  avatarImage: string
+  avatarUrl?: string
 }) {
+  const router = useRouter()
+  const handleSignOut = async () => {
+    await signOut()
+    router.refresh()
+  }
+
   return (
     <Card className="bg-transparent border-0 rounded-none">
       <CardHeader className="[--card-spacing:--spacing(4)] gap-0">
-        <CardTitle className="text-2xl/tight">{name}</CardTitle>
+        <CardTitle className="text-2xl/tight">
+          {name}
+        </CardTitle>
         <CardDescription>{id}</CardDescription>
         <CardAction>
           <Avatar className="size-16">
-            <AvatarImage src={avatarImage} />
+            <AvatarImage src={avatarUrl} />
             <AvatarFallback>
-              {id.slice(0, 2).toUpperCase()}
+              {name.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
 
@@ -37,7 +48,7 @@ export function AboutCard({ name, id, children, avatarImage }: {
       </CardHeader>
       <CardContent>{children}</CardContent>
       <CardFooter className="bg-transparent border-transparent rounded-none">
-        <Button type="submit" variant="outline" className="w-full">
+        <Button type="submit" variant="outline" className="w-full" onClick={handleSignOut}>
           Share
         </Button>
       </CardFooter>
