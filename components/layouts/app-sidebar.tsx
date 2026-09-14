@@ -18,6 +18,7 @@ import {
   RiUserLine,
 } from '@remixicon/react'
 
+import { DialogTrigger } from '@/components/ui/dialog'
 import {
   Sidebar,
   SidebarContent,
@@ -33,7 +34,6 @@ import { useAuth } from '@/contexts/auth-provider'
 
 import { SignInDialog } from '../blocks/sign-in'
 import { NewPostFormDialog } from '../form/new-post-dialog'
-import { DialogTrigger } from '../ui/dialog'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false)

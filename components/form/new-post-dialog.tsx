@@ -5,6 +5,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogClose,
@@ -13,24 +14,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-
-import { Button } from '../ui/button'
-import { Textarea } from '../ui/textarea'
+import { Textarea } from '@/components/ui/textarea'
 
 function NewPostFormDialog({
   children,
   avatarUrl,
   name,
   className,
+  action,
   ...props
 }: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
   children: React.ReactNode
   avatarUrl?: string
   name?: string | null
   className?: string
+  action?: React.FormHTMLAttributes<HTMLFormElement>['action']
 }) {
   return (
-    <form className={className}>
+    <form action={action} className={className}>
       <Dialog {...props}>
         {children}
         {/* <div>

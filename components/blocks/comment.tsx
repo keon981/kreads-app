@@ -1,6 +1,6 @@
 'use client'
 
-import { RiChat1Line, RiHeartLine, RiShareForwardLine } from '@remixicon/react'
+import { RiChat1Line, RiHeartLine, RiMoreLine, RiShareForwardLine } from '@remixicon/react'
 
 import {
   Avatar,
@@ -17,9 +17,8 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/components/ui/item'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-
-import { Skeleton } from '../ui/skeleton'
 
 function CommentItem({
   title,
@@ -40,8 +39,9 @@ function CommentItem({
         </Avatar>
       </ItemMedia>
       <ItemContent>
-        <ItemTitle className="ps-2.5 text-base/tight font-bold">
-          {title}
+        <ItemTitle className="w-full flex ps-2.5 text-base/tight font-bold">
+          <h4 className="flex-1">{title}</h4>
+          <Button variant="ghost" size="icon-sm"><RiMoreLine /></Button>
         </ItemTitle>
         <ItemDescription className="mt-1 ps-2.5 text-foreground text-base/tight">
           {children}
