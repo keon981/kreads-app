@@ -31,8 +31,8 @@ import {
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/contexts/auth-provider'
 
-import { CommentInputDialog } from '../blocks/comment'
 import { SignInDialog } from '../blocks/sign-in'
+import { NewPostFormDialog } from '../form/new-post-dialog'
 import { DialogTrigger } from '../ui/dialog'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -85,7 +85,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                 {/* new post  */}
                 <SidebarMenuItem>
-                  <CommentInputDialog
+                  <NewPostFormDialog
                     name={user?.name}
                     avatarUrl={user?.avatarUrl}
                   >
@@ -99,7 +99,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     >
                       <RiAddLargeLine />
                     </DialogTrigger>
-                  </CommentInputDialog>
+                  </NewPostFormDialog>
                 </SidebarMenuItem>
 
                 {/* Bookmark */}

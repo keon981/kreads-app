@@ -2,9 +2,8 @@
 
 import { redirect } from 'next/navigation'
 
-import { RiAddLargeLine } from '@remixicon/react'
-
-import { CommentInputDialog, CommentItem, CommentItemGroup, CommentItemSkeleton } from '@/components/blocks/comment'
+import { CommentItem, CommentItemGroup, CommentItemSkeleton } from '@/components/blocks/comment'
+import { NewPostFormDialog } from '@/components/form/new-post-dialog'
 import ArticleLayout from '@/components/layouts/article-layout'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -29,7 +28,7 @@ function Page() {
             {user?.name?.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <CommentInputDialog
+        <NewPostFormDialog
           name={user?.name}
           avatarUrl={user?.avatarUrl}
           className="flex flex-1"
@@ -45,7 +44,7 @@ function Page() {
           >
             發布
           </DialogTrigger>
-        </CommentInputDialog>
+        </NewPostFormDialog>
 
       </div>
 
