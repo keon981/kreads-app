@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 
-import { RiChat1Line, RiHeartLine, RiShareForwardLine } from '@remixicon/react'
+import { RiChat1Line, RiCloseLine, RiHeartLine, RiShareForwardLine } from '@remixicon/react'
 
 import {
   Avatar,
@@ -13,8 +13,10 @@ import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -27,44 +29,87 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/components/ui/item'
-import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
 import { Skeleton } from '../ui/skeleton'
+import { Textarea } from '../ui/textarea'
 
-function CommentInputDialog({ children, ...props }: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
+function CommentInputDialog({
+  children,
+  avatarUrl,
+  name,
+  className,
+  ...props
+}: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
   children: React.ReactNode
+  avatarUrl?: string
+  name?: string | null
+  className?: string
 }) {
   return (
-    <Dialog {...props}>
-      {children}
-      {/* <div>
+    <form className={className}>
+      <Dialog {...props}>
+        {children}
+        {/* <div>
 
         <p>有什麼新鮮事？</p>
         <DialogTrigger render={<Button variant="outline">Share</Button>} />
 
       </div> */}
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Share link</DialogTitle>
-          <DialogDescription>
-            Anyone who has this link will be able to view this.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex items-center gap-2">
-          <div className="grid flex-1 gap-2">
-            <Label htmlFor="link" className="sr-only">
-              Link
-            </Label>
-            <Input
-              id="link"
-              defaultValue="https://ui.shadcn.com/docs/installation"
-              readOnly
-            />
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        <DialogContent
+          showCloseButton={false}
+          className="p-0 w-155 sm:max-w-[calc(100%-2rem)]"
+        >
+          <DialogHeader className="flex-row h-14 px-4 justify-between items-center border-b">
+            <DialogClose>
+              <RiCloseLine />
+            </DialogClose>
+            <DialogTitle className="flex-1 text-center">新貼文</DialogTitle>
+            <div className="size-6" />
+          </DialogHeader>
+          <article className="flex flex-col px-6">
+            <section className="w-full flex gap-x-3">
+              {/* 頭像 */}
+              <div className="flex flex-col">
+                <Avatar>
+                  <AvatarImage src={avatarUrl} />
+                  <AvatarFallback>
+                    {name?.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="mt-3 flex-1 flex justify-center">
+                  <div className="w-0.5 h-full bg-accent border" />
+                </div>
+              </div>
+              {/* post */}
+              <div className="flex-1">
+                <h4 className="font-bold text-foreground text-base">{name}</h4>
+                <Textarea
+                  placeholder="有什麼新鮮事嗎？"
+                  name=""
+                  id=""
+                  className="px-0 bg-transparent! border-0 focus-visible:ring-0 focus-visible:border-0 resize-none md:text-base"
+                />
+              </div>
+            </section>
+            <section className="mt-2.5 ps-2 flex items-center gap-x-5 opacity-40">
+              <Avatar size="xs">
+                <AvatarImage src={avatarUrl} />
+                <AvatarFallback>
+                  {name?.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <p className="text-muted-foreground/50 cursor-not-allowed text-base">
+                新增到串文
+              </p>
+            </section>
+          </article>
+          <DialogFooter className="mx-0 mb-0 p-6 pt-1 border-0 bg-transparent">
+            <Button variant="outline">發佈</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </form>
   )
 }
 

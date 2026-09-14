@@ -38,7 +38,7 @@ import { DialogTrigger } from '../ui/dialog'
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false)
   const pathName = usePathname()
-  const { isAuth } = useAuth()
+  const { isAuth, user } = useAuth()
 
   const triggerSignInDialog = () => {
     if (isAuth) return
@@ -85,7 +85,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                 {/* new post  */}
                 <SidebarMenuItem>
-                  <CommentInputDialog>
+                  <CommentInputDialog
+                    name={user?.name}
+                    avatarUrl={user?.avatarUrl}
+                  >
                     <DialogTrigger
                       render={<SidebarMenuButton variant="outline" />}
                       onClick={(e) => {
