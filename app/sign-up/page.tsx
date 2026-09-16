@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { RestCard } from '@/components/blocks/rest-card'
+import { SignUpForm } from './sign-up-card'
 
 function Page() {
   return (
@@ -8,7 +8,7 @@ function Page() {
       <h2 className="text-3xl font-bold">
         Kreads APP
       </h2>
-      <RestCard />
+      <SignUpForm />
     </section>
   )
 }

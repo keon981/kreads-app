@@ -27,6 +27,7 @@ export const auth = betterAuth({
     github: {
       clientId: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      scope: ['public_repo'],
     },
   },
   baseURL: {
@@ -38,6 +39,16 @@ export const auth = betterAuth({
     fallback: process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : 'http://localhost:3000',
+  },
+  user: {
+    additionalFields: {
+      repoName: {
+        type: 'string',
+        required: false,
+        input: false,
+
+      },
+    },
   },
 })
 

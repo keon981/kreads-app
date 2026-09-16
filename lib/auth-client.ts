@@ -14,7 +14,7 @@ export function signInWithGitHub() {
     provider: 'github',
     callbackURL: '/',
     // errorCallbackURL: '/error',
-    newUserCallbackURL: '/auth/register',
+    newUserCallbackURL: '/sign-up',
   })
 }
 

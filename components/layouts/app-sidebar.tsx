@@ -68,12 +68,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu className="gap-1">
                 {/* Home -> Keon981 Page */}
                 <SidebarMenuItem>
-                  <SidebarMenuLink
-                    href="/"
-                    isActive={pathName === '/'}
-                  >
+                  <SidebarMenuButton render={<Link href="/" />} isActive={pathName === '/'}>
                     {pathName === '/' ? <RiHome9Fill /> : <RiHome9Line />}
-                  </SidebarMenuLink>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
 
                 {/* Search */}
