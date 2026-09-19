@@ -4,14 +4,13 @@ import { cache } from 'react'
 
 import { Octokit } from '@octokit/rest'
 
-import { auth, getSessionCache } from '@/lib/auth'
+import { auth, getListUserAccounts } from '@/lib/auth'
 
 export async function getGitHubToken() {
-  const session = await getSessionCache()
-  if (!session) return null
-
+  const accounts = await getListUserAccounts()
   const nextHeaders = await headers()
-  const accounts = await auth.api.listUserAccounts({ headers: nextHeaders })
+  if (!accounts || !nextHeaders) return null
+
   const github = accounts.find(a => a.providerId === 'github')
   if (!github) return null
 
@@ -31,3 +30,39 @@ export const getGitHubUser = cache(async () => {
   const { data } = await octokit.rest.users.getAuthenticated()
   return data
 })
+
+export async function hasGitHubScope(scope: string) {
+  const accounts = await getListUserAccounts()
+  if (!accounts) return false
+
+  const github = accounts.find(a => a.providerId === 'github')
+  return github?.scopes.includes(scope) ?? false
+}
+
+export function isRequestError(
+  error: unknown,
+): error is Error & { status: number } {
+  return error instanceof Error && 'status' in error
+}
+
+export async function findOrCreateRepo(token: string, name: string) {
+  const octokit = new Octokit({ auth: token })
+  const { data: me } = await octokit.rest.users.getAuthenticated()
+
+  try {
+    const { data } = await octokit.rest.repos.get({
+      owner: me.login,
+      repo: name,
+    })
+    return data
+  } catch (error) {
+    if (!isRequestError(error) || error.status !== 404) throw error
+  }
+
+  const { data } = await octokit.rest.repos.createForAuthenticatedUser({
+    name,
+    private: false,
+    auto_init: true,
+  })
+  return data
+}

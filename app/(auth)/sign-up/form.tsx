@@ -15,18 +15,23 @@ import {
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Password } from '@/components/ui/password'
+import { Spinner } from '@/components/ui/spinner'
 
 import { completeSignUpAction } from './action'
 
+import type { SignUpState } from './action'
+
 // import { completeSignUpAction } from './action'
 
-const initialState = {
+const initialState: SignUpState = {
   message: '',
 }
 
-export function SignUpForm() {
+export function SignUpForm({
+  error,
+}: { error?: string }) {
   const [state, formAction, isPending] = useActionState(completeSignUpAction, initialState)
-  console.log('formData---', isPending, state)
+  const message = state.message || error
 
   return (
     <Card className="w-full max-w-md pt-8 px-4 gap-6">
@@ -41,10 +46,9 @@ export function SignUpForm() {
         <CardContent>
           {/* invite code */}
           <div className="mt-4 flex flex-col gap-6">
-            <Field className="grid gap-2" data-invalid={false}>
+            <Field className="grid gap-2" data-invalid={!!message}>
               <FieldLabel className="text-base">邀請碼</FieldLabel>
               <Password id="invite_code" name="invite_code" placeholder="請輸入邀請碼" />
-              <FieldError errors={[{ message: 'invalid or used invitation code' }]} />
             </Field>
           </div>
 
@@ -61,11 +65,13 @@ export function SignUpForm() {
                   <RiGitRepositoryLine />
                 </InputGroupAddon>
               </InputGroup>
+              <FieldError errors={message ? [{ message }] : undefined} />
             </Field>
           </div>
         </CardContent>
-        <CardFooter className="-mt-(--card-spacing) pb-8 flex-col gap-2 bg-transparent border-0">
-          <Button type="submit" className="w-full">
+        <CardFooter className="pb-8 flex-col gap-2 bg-transparent border-0">
+          <Button type="submit" size="lg" className="w-full" disabled={isPending}>
+            {isPending && <Spinner data-icon="inline-start" />}
             完成註冊
           </Button>
         </CardFooter>

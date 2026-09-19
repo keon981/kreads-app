@@ -9,6 +9,15 @@ export const authClient = createAuthClient({
   ],
 })
 
+export function authorizeGitHubRepo() {
+  return authClient.linkSocial({
+    provider: 'github',
+    scopes: ['public_repo'],
+    callbackURL: '/sign-up',
+    errorCallbackURL: '/sign-up',
+  })
+}
+
 export function signInWithGitHub() {
   return authClient.signIn.social({
     provider: 'github',
