@@ -5,6 +5,7 @@ import { cache } from 'react'
 
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth/minimal'
+import { nextCookies } from 'better-auth/next-js'
 import { admin } from 'better-auth/plugins'
 
 import process from 'node:process'
@@ -22,6 +23,7 @@ export const auth = betterAuth({
   },
   plugins: [
     admin(),
+    nextCookies(), // make sure this is the last plugin in the array
   ],
   socialProviders: {
     github: {
@@ -39,15 +41,45 @@ export const auth = betterAuth({
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : 'http://localhost:3000',
   },
+  user: {
+    additionalFields: {
+      repoName: {
+        type: 'string',
+        required: false,
+        input: false,
+      },
+    },
+  },
+  account: {
+    accountLinking: {
+      trustedProviders: ['github'],
+    },
+  },
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 10 * 60, // Cache duration in seconds (10 min)
+    },
+  },
 })
 
 export const getSessionCache = cache(async () => {
   return auth.api.getSession({ headers: await headers() })
 })
 
-export const verifySession = cache(async () => {
+export const getListUserAccounts = cache(async () => {
+  const session = await getSessionCache()
+  if (!session) return null
+
+  const nextHeaders = await headers()
+  const accounts = await auth.api.listUserAccounts({ headers: nextHeaders })
+  return accounts
+})
+
+export const verifySession = cache(async (_url = '/') => {
   const session = await getSessionCache()
 
-  if (!session) redirect('/')
+  if (!session) redirect('/sign-in') // 登入失敗 or 登入過期，跳到登入頁面重新登入或註冊
+  if (!session.user.repoName) redirect('/sign-up')
   return session
 })
