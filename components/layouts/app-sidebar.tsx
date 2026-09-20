@@ -18,6 +18,7 @@ import {
   RiUserLine,
 } from '@remixicon/react'
 
+import { DialogTrigger } from '@/components/ui/dialog'
 import {
   Sidebar,
   SidebarContent,
@@ -31,14 +32,13 @@ import {
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/contexts/auth-provider'
 
-import { CommentInputDialog } from '../blocks/comment'
 import { SignInDialog } from '../blocks/sign-in'
-import { DialogTrigger } from '../ui/dialog'
+import { NewPostFormDialog } from '../form/new-post-dialog'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false)
   const pathName = usePathname()
-  const { isAuth } = useAuth()
+  const { isAuth, user } = useAuth()
 
   const triggerSignInDialog = () => {
     if (isAuth) return
@@ -68,12 +68,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu className="gap-1">
                 {/* Home -> Keon981 Page */}
                 <SidebarMenuItem>
-                  <SidebarMenuLink
-                    href="/"
-                    isActive={pathName === '/'}
-                  >
+                  <SidebarMenuButton render={<Link href="/" />} isActive={pathName === '/'}>
                     {pathName === '/' ? <RiHome9Fill /> : <RiHome9Line />}
-                  </SidebarMenuLink>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
 
                 {/* Search */}
@@ -85,7 +82,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                 {/* new post  */}
                 <SidebarMenuItem>
-                  <CommentInputDialog>
+                  <NewPostFormDialog
+                    name={user?.name}
+                    avatarUrl={user?.avatarUrl}
+                  >
                     <DialogTrigger
                       render={<SidebarMenuButton variant="outline" />}
                       onClick={(e) => {
@@ -96,7 +96,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     >
                       <RiAddLargeLine />
                     </DialogTrigger>
-                  </CommentInputDialog>
+                  </NewPostFormDialog>
                 </SidebarMenuItem>
 
                 {/* Bookmark */}

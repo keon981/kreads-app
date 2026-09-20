@@ -5,7 +5,7 @@ export default async function Layout({
 }: {
   children: React.ReactNode
 }) {
-  await verifySession()
+  await verifySession('/profile')
 
   return <>{children} </>
 }

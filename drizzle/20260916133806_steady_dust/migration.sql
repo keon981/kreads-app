@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "repo_name" text;
