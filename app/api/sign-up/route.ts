@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   const session = await getSessionCache()
   if (!session) redirect('/') // 登入過期或失敗
   if (isUserActive(session)) redirect(nextPath) // 帳戶已經註冊
-  if (!repoName) redirect('/sign-up')
+  if (!repoName) redirect(signUpPath(nextPath))
 
   // token
   const token = await getGitHubToken()
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
   // database
   await db
     .update(user)
-    .set({ repoName: fullName })
+    .set({ repoName: fullName, status: 'active' })
     .where(eq(user.id, session.user.id))
 
   redirect(nextPath)

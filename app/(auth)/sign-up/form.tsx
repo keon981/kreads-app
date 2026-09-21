@@ -16,6 +16,7 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Password } from '@/components/ui/password'
 import { Spinner } from '@/components/ui/spinner'
+import { safeNext } from '@/utils/navigation'
 
 import { completeSignUpAction } from './action'
 
@@ -46,7 +47,11 @@ export function SignUpForm({
         </CardHeader>
         <CardContent>
           {/* next router */}
-          <input type="hidden" name="next_path" defaultValue={nextPath} />
+          <input
+            type="hidden"
+            name="next_path"
+            defaultValue={safeNext(nextPath)}
+          />
           {/* invite code */}
           <div className="mt-4 flex flex-col gap-6">
             <Field className="grid gap-2" data-invalid={!!message}>
