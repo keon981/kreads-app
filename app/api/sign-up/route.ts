@@ -7,7 +7,7 @@ import { db } from '@/db/drizzle'
 import { user } from '@/db/schema/auth-schema'
 import { getSessionCache, signUpPath } from '@/lib/auth'
 import { findOrCreateRepo, getGitHubToken, isRequestError } from '@/lib/github'
-import { safeNext } from '@/lib/utils'
+import { safeNext } from '@/utils/navigation'
 
 export async function GET(request: NextRequest) {
   const nextPath = safeNext(request.nextUrl.searchParams.get('next'))

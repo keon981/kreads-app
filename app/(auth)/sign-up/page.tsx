@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import React from 'react'
 
 import { getSessionCache } from '@/lib/auth'
-import { safeNext } from '@/lib/utils'
+import { safeNext } from '@/utils/navigation'
 
 import { SignUpForm } from './form'
 
