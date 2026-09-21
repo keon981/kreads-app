@@ -4,6 +4,7 @@ import React from 'react'
 
 import { getSessionCache } from '@/lib/auth'
 import { safeNext } from '@/utils/navigation'
+import { isUserActive } from '@/utils/user'
 
 import { SignUpForm } from './form'
 
@@ -28,7 +29,7 @@ async function Page({
   const session = await getSessionCache()
   const nextPath = safeNext(next)
   if (!session) redirect('/sing-in')
-  if (session.user.repoName) redirect(nextPath)
+  if (isUserActive(session)) redirect(nextPath)
   const err = getError(error)
 
   return (

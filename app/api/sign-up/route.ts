@@ -8,6 +8,7 @@ import { user } from '@/db/schema/auth-schema'
 import { getSessionCache, signUpPath } from '@/lib/auth'
 import { findOrCreateRepo, getGitHubToken, isRequestError } from '@/lib/github'
 import { safeNext } from '@/utils/navigation'
+import { isUserActive } from '@/utils/user'
 
 export async function GET(request: NextRequest) {
   const nextPath = safeNext(request.nextUrl.searchParams.get('next'))
@@ -15,7 +16,8 @@ export async function GET(request: NextRequest) {
 
   // verify
   const session = await getSessionCache()
-  if (!session || session.user.repoName) redirect('/')
+  if (!session) redirect('/') // 登入過期或失敗
+  if (isUserActive(session)) redirect(nextPath) // 帳戶已經註冊
   if (!repoName) redirect('/sign-up')
 
   // token

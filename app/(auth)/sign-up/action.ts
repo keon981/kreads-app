@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import { auth, getSessionCache, signUpPath } from '@/lib/auth'
+import { isUserActive } from '@/utils/user'
 
 export interface SignUpRes {
   message?: string
@@ -19,7 +20,7 @@ export async function completeSignUpAction(
   // verify
   const session = await getSessionCache()
   if (!session) redirect('/sign-in') // 登入失敗 or 登入過期，跳到登入頁面重新登入或註冊
-  if (session.user.repoName) redirect(nextPath)
+  if (isUserActive(session)) redirect(nextPath)
 
   // get form
   const repoName = formData.get('repo_name')

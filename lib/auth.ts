@@ -12,6 +12,7 @@ import process from 'node:process'
 
 import { db } from '@/db/drizzle' // your drizzle instance
 import * as schema from '@/db/schema/auth-schema'
+import { isUserActive } from '@/utils/user'
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -100,6 +101,6 @@ export async function verifySession(url = '/') {
   const session = await getSessionCache()
 
   if (!session) redirect(signInPath(url)) // 登入失敗 or 登入過期，跳到登入頁面重新登入或註冊
-  if (!session.user.repoName) redirect(signUpPath(url))
+  if (!isUserActive(session)) redirect(signUpPath(url))
   return session
 }
