@@ -5,10 +5,12 @@ import { eq } from 'drizzle-orm'
 
 import { db } from '@/db/drizzle'
 import { user } from '@/db/schema/auth-schema'
-import { getSessionCache } from '@/lib/auth'
+import { getSessionCache, signUpPath } from '@/lib/auth'
 import { findOrCreateRepo, getGitHubToken, isRequestError } from '@/lib/github'
+import { safeNext } from '@/lib/utils'
 
 export async function GET(request: NextRequest) {
+  const nextPath = safeNext(request.nextUrl.searchParams.get('next'))
   const repoName = request.nextUrl.searchParams.get('repo')?.trim()
 
   // verify
@@ -29,16 +31,16 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const status = isRequestError(error) ? error.status : 0
     const code = getErrorStatus(status)
-    redirect(`/sign-up?${new URLSearchParams({ error: code })}`)
+    redirect(signUpPath(nextPath, code))
   }
 
-  //
+  // database
   await db
     .update(user)
     .set({ repoName: fullName })
     .where(eq(user.id, session.user.id))
 
-  redirect('/')
+  redirect(nextPath)
 }
 
 function getErrorStatus(status: number) {

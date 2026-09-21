@@ -76,10 +76,24 @@ export const getListUserAccounts = cache(async () => {
   return accounts
 })
 
-export const verifySession = cache(async (_url = '/') => {
+export function signInPath(next?: string) {
+  if (!next) return '/sign-in'
+
+  return `/sign-in?${new URLSearchParams({ next })}`
+}
+
+export function signUpPath(next?: string, error?: string) {
+  if (!next) return '/sign-up'
+
+  const params = new URLSearchParams({ next })
+  if (error) params.set('error', error)
+  return `/sign-up?${params}`
+}
+
+export async function verifySession(url = '/') {
   const session = await getSessionCache()
 
-  if (!session) redirect('/sign-in') // 登入失敗 or 登入過期，跳到登入頁面重新登入或註冊
-  if (!session.user.repoName) redirect('/sign-up')
+  if (!session) redirect(signInPath(url)) // 登入失敗 or 登入過期，跳到登入頁面重新登入或註冊
+  if (!session.user.repoName) redirect(signUpPath(url))
   return session
-})
+}

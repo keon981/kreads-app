@@ -19,17 +19,18 @@ import { Spinner } from '@/components/ui/spinner'
 
 import { completeSignUpAction } from './action'
 
-import type { SignUpState } from './action'
+import type { SignUpRes } from './action'
 
 // import { completeSignUpAction } from './action'
 
-const initialState: SignUpState = {
+const initialState: SignUpRes = {
   message: '',
 }
 
 export function SignUpForm({
+  nextPath,
   error,
-}: { error?: string }) {
+}: { nextPath: string, error?: string }) {
   const [state, formAction, isPending] = useActionState(completeSignUpAction, initialState)
   const message = state.message || error
 
@@ -44,6 +45,8 @@ export function SignUpForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* next router */}
+          <input type="hidden" name="next_path" defaultValue={nextPath} />
           {/* invite code */}
           <div className="mt-4 flex flex-col gap-6">
             <Field className="grid gap-2" data-invalid={!!message}>
