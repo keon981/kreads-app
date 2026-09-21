@@ -17,6 +17,9 @@ export const user = pgTable('user', {
   banReason: text('ban_reason'),
   banExpires: timestamp('ban_expires'),
   repoName: text('repo_name'),
+  status: text('status', {
+    enum: ['pending', 'active', 'provisioned'],
+  }).default('pending'),
 })
 
 export const session = pgTable(

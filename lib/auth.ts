@@ -48,6 +48,12 @@ export const auth = betterAuth({
         required: false,
         input: false,
       },
+      status: {
+        type: ['pending', 'active', 'provisioned'],
+        required: false,
+        defaultValue: 'pending',
+        input: false,
+      },
     },
   },
   account: {
