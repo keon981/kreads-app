@@ -6,12 +6,10 @@ import { redirect } from 'next/navigation'
 import { and, eq, isNull } from 'drizzle-orm'
 
 import { db } from '@/db/drizzle'
-import { user } from '@/db/schema/auth-schema'
 import { inviteCode } from '@/db/schema/invite-schema'
-import { auth, getSessionCache, signUpPath } from '@/lib/auth'
+import { auth, getSessionCache } from '@/lib/auth'
+import { signUpPath } from '@/utils/navigation'
 import { isUserActive } from '@/utils/user'
-
-import type { AuthSession } from '@/types/auth'
 
 export interface SignUpRes {
   message?: string
@@ -26,45 +24,41 @@ export async function completeSignUpAction(
 
   // verify
   const session = await getSessionCache()
-  if (!session) redirect('/sign-in') // 登入失敗 or 登入過期，跳到登入頁面重新登入或註冊
   if (isUserActive(session)) redirect(nextPath)
 
   // get form values
-  const inviteCode = formData.get('invite_code') as string
-  const repoName = formData.get('repo_name') as string
-  const repo = repoName.trim()
-  if (!inviteCode) return { message: '請輸入邀請碼' }
+  const code = (formData.get('invite_code') as string).trim()
+  const repo = (formData.get('repo_name') as string).trim()
+  if (!code) return { message: '請輸入邀請碼' }
   if (!repo) return { message: '請輸入倉庫名稱' }
 
   // verifyInviteCode
-  const message = await verifyInviteCode(session, inviteCode)
+  const message = await verifyInviteCode(code)
 
   if (message) return message
 
   // 取得 github 授權
-  const { url } = await auth.api.linkSocialAccount({
+  const { url } = await auth.api.signInSocial({
     body: {
       provider: 'github',
+      requestSignUp: true,
       scopes: ['public_repo'],
-      callbackURL: `/api/sign-up?${new URLSearchParams({ repo, next: nextPath })}`,
+      callbackURL: `/api/sign-up?${new URLSearchParams({ repo, next_path: nextPath, invite_code: code })}`,
       errorCallbackURL: signUpPath(nextPath),
     },
     headers: await headers(),
   })
+  if (!url) return { message: '無法取得 GitHub 授權網址，請再試一次' }
 
   redirect(url)
 }
 
-async function verifyInviteCode(session: AuthSession, code: string) {
-  const redeemed = await db
-    .update(inviteCode)
-    .set({ redeemedBy: session.user.id, redeemedAt: new Date() })
+// 查詢邀請碼存在與否或者是否已被使用過
+async function verifyInviteCode(code: string) {
+  const [invite] = await db
+    .select({ id: inviteCode.id })
+    .from(inviteCode)
     .where(and(eq(inviteCode.code, code), isNull(inviteCode.redeemedAt)))
-    .returning({ id: inviteCode.id })
-  if (redeemed.length === 0) return { message: '邀請碼無效' }
-
-  await db
-    .update(user)
-    .set({ status: 'active' })
-    .where(eq(user.id, session.user.id))
+    .limit(1)
+  if (!invite) return { message: '邀請碼無效或已被使用' }
 }

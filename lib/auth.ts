@@ -12,6 +12,7 @@ import process from 'node:process'
 
 import { db } from '@/db/drizzle' // your drizzle instance
 import * as schema from '@/db/schema/auth-schema'
+import { signInPath, signUpPath } from '@/utils/navigation'
 import { isUserActive } from '@/utils/user'
 
 export const auth = betterAuth({
@@ -30,6 +31,7 @@ export const auth = betterAuth({
     github: {
       clientId: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      disableImplicitSignUp: true, // 停用自動創建新用戶
     },
   },
   baseURL: {
@@ -49,15 +51,10 @@ export const auth = betterAuth({
         required: false,
         input: false,
       },
-      status: {
-        type: ['pending', 'active', 'provisioned'],
-        required: false,
-        defaultValue: 'pending',
-        input: false,
-      },
     },
   },
   account: {
+    updateAccountOnSignIn: false,
     accountLinking: {
       trustedProviders: ['github'],
     },
@@ -83,24 +80,14 @@ export const getListUserAccounts = cache(async () => {
   return accounts
 })
 
-export function signInPath(next?: string) {
-  if (!next) return '/sign-in'
-
-  return `/sign-in?${new URLSearchParams({ next })}`
-}
-
-export function signUpPath(next?: string, error?: string) {
-  if (!next) return '/sign-up'
-
-  const params = new URLSearchParams({ next })
-  if (error) params.set('error', error)
-  return `/sign-up?${params}`
-}
-
 export async function verifySession(url = '/') {
   const session = await getSessionCache()
 
   if (!session) redirect(signInPath(url)) // 登入失敗 or 登入過期，跳到登入頁面重新登入或註冊
   if (!isUserActive(session)) redirect(signUpPath(url))
   return session
+}
+
+export async function signOutWithServer() {
+  await auth.api.signOut({ headers: await headers() })
 }

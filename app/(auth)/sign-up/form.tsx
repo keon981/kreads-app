@@ -54,7 +54,7 @@ export function SignUpForm({
           />
           {/* invite code */}
           <div className="mt-4 flex flex-col gap-6">
-            <Field className="grid gap-2" data-invalid={!!message}>
+            <Field className="grid gap-2">
               <FieldLabel className="text-base">邀請碼</FieldLabel>
               <Password id="invite_code" name="invite_code" placeholder="請輸入邀請碼" />
             </Field>
@@ -73,8 +73,8 @@ export function SignUpForm({
                   <RiGitRepositoryLine />
                 </InputGroupAddon>
               </InputGroup>
-              <FieldError errors={message ? [{ message }] : undefined} />
             </Field>
+            <FieldError errors={message ? [{ message }] : undefined} />
           </div>
         </CardContent>
         <CardFooter className="pb-8 flex-col gap-2 bg-transparent border-0">

@@ -9,6 +9,8 @@ import { isUserActive } from '@/utils/user'
 import { SignUpForm } from './form'
 
 const errorMessages: Record<string, string> = {
+  signup_disabled: '',
+  invalid_invite: '邀請碼無效',
   access_denied: 'GitHub 沒有完成授權，請再試一次。',
   no_permission: 'GitHub 授權不足，請重新授權。',
   invalid_name: '倉庫名稱不合法，請換一個。',
@@ -28,7 +30,6 @@ async function Page({
   const { next, error } = await searchParams
   const session = await getSessionCache()
   const nextPath = safeNext(next)
-  if (!session) redirect('/sing-in')
   if (isUserActive(session)) redirect(nextPath)
   const err = getError(error)
 
