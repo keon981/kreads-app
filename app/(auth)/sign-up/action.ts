@@ -3,35 +3,62 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { auth, getSessionCache } from '@/lib/auth'
+import { and, eq, isNull } from 'drizzle-orm'
 
-export interface SignUpState {
+import { db } from '@/db/drizzle'
+import { inviteCode } from '@/db/schema/invite-schema'
+import { auth, getSessionCache } from '@/lib/auth'
+import { signUpPath } from '@/utils/navigation'
+import { isUserActive } from '@/utils/user'
+
+export interface SignUpRes {
   message?: string
 }
 
 export async function completeSignUpAction(
-  _prevState: SignUpState,
+  _prevState: SignUpRes,
   formData: FormData,
-): Promise<SignUpState> {
+): Promise<SignUpRes> {
+  // return path
+  const nextPath = String(formData.get('next_path'))
+
   // verify
   const session = await getSessionCache()
-  if (!session) redirect('/sign-in')
-  if (session.user.repoName) redirect('/')
+  if (isUserActive(session)) redirect(nextPath)
 
-  // get form
-  const repoName = formData.get('repo_name')
-  const repo = String(repoName).trim()
+  // get form values
+  const code = (formData.get('invite_code') as string).trim()
+  const repo = (formData.get('repo_name') as string).trim()
+  if (!code) return { message: '請輸入邀請碼' }
+  if (!repo) return { message: '請輸入倉庫名稱' }
+
+  // verifyInviteCode
+  const message = await verifyInviteCode(code)
+
+  if (message) return message
 
   // 取得 github 授權
-  const { url } = await auth.api.linkSocialAccount({
+  const { url } = await auth.api.signInSocial({
     body: {
       provider: 'github',
+      requestSignUp: true,
       scopes: ['public_repo'],
-      callbackURL: `/api/sign-up?${new URLSearchParams({ repo })}`,
-      errorCallbackURL: '/sign-up',
+      callbackURL: `/api/sign-up?${new URLSearchParams({ repo, next_path: nextPath, invite_code: code })}`,
+      errorCallbackURL: signUpPath(nextPath),
     },
     headers: await headers(),
   })
+  if (!url) return { message: '無法取得 GitHub 授權網址，請再試一次' }
 
   redirect(url)
+}
+
+// 查詢邀請碼存在與否或者是否已被使用過
+async function verifyInviteCode(code: string) {
+  const [invite] = await db
+    .select({ id: inviteCode.id })
+    .from(inviteCode)
+    .where(and(eq(inviteCode.code, code), isNull(inviteCode.redeemedAt)))
+    .limit(1)
+  if (!invite) return { message: '邀請碼無效或已被使用' }
 }

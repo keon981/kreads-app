@@ -8,6 +8,7 @@ import React, { useState } from 'react'
 
 import {
   RiAddLargeLine,
+  RiBookmarkFill,
   RiBookmarkLine,
   RiCommandLine,
   RiHome9Fill,
@@ -38,6 +39,7 @@ import { NewPostFormDialog } from '../form/new-post-dialog'
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false)
   const pathName = usePathname()
+  const isRoute = (url: string) => pathName === url
   const { isAuth, user } = useAuth()
 
   const triggerSignInDialog = () => {
@@ -68,8 +70,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu className="gap-1">
                 {/* Home -> Keon981 Page */}
                 <SidebarMenuItem>
-                  <SidebarMenuButton render={<Link href="/" />} isActive={pathName === '/'}>
-                    {pathName === '/' ? <RiHome9Fill /> : <RiHome9Line />}
+                  <SidebarMenuButton render={<Link href="/" />} isActive={isRoute('/')}>
+                    {isRoute('/') ? <RiHome9Fill /> : <RiHome9Line />}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
@@ -101,19 +103,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                 {/* Bookmark */}
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <RiBookmarkLine />
-                  </SidebarMenuButton>
+                  <SidebarMenuLink
+                    href="/saved"
+                    isActive={isRoute('/saved')}
+                    onClick={triggerSignInDialog}
+                  >
+                    {isRoute('/saved') ? <RiBookmarkFill /> : <RiBookmarkLine />}
+                  </SidebarMenuLink>
                 </SidebarMenuItem>
 
                 {/* Profile */}
                 <SidebarMenuItem>
                   <SidebarMenuLink
                     href="/profile"
-                    isActive={pathName === '/profile'}
+                    isActive={isRoute('/profile')}
                     onClick={triggerSignInDialog}
                   >
-                    {pathName === '/profile' ? <RiUserFill /> : <RiUserLine />}
+                    {isRoute('/profile') ? <RiUserFill /> : <RiUserLine />}
                   </SidebarMenuLink>
                 </SidebarMenuItem>
               </SidebarMenu>

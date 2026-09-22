@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { signOut } from '@/lib/auth-client'
+import { signOutWithClient } from '@/lib/auth-client'
 
 export function AboutCard({ name, id, children, avatarUrl }: {
   name: string
@@ -25,7 +25,7 @@ export function AboutCard({ name, id, children, avatarUrl }: {
 }) {
   const router = useRouter()
   const handleSignOut = async () => {
-    await signOut()
+    await signOutWithClient()
     router.refresh()
   }
 

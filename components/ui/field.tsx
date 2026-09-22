@@ -8,6 +8,8 @@ import { cn } from 'cn'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 
+import { Alert, AlertTitle } from './alert'
+
 import type { VariantProps } from 'class-variance-authority'
 
 function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
@@ -179,10 +181,12 @@ function FieldSeparator({
 function FieldError({
   className,
   children,
+  icon,
   errors,
   ...props
 }: React.ComponentProps<'div'> & {
   errors?: Array<{ message?: string } | undefined>
+  icon?: React.ReactNode
 }) {
   const content = useMemo(() => {
     if (children) {
@@ -211,19 +215,18 @@ function FieldError({
     )
   }, [children, errors])
 
-  if (!content) {
-    return null
-  }
+  if (!content) return null
 
   return (
-    <div
-      role="alert"
+    <Alert
       data-slot="field-error"
-      className={cn('text-sm font-normal text-destructive', className)}
+      className={cn('text-destructive border-destructive/30 bg-destructive/10', className)}
+      variant="destructive"
       {...props}
     >
-      {content}
-    </div>
+      {icon}
+      <AlertTitle>{content}</AlertTitle>
+    </Alert>
   )
 }
 

@@ -12,6 +12,8 @@ import process from 'node:process'
 
 import { db } from '@/db/drizzle' // your drizzle instance
 import * as schema from '@/db/schema/auth-schema'
+import { signInPath, signUpPath } from '@/utils/navigation'
+import { isUserActive } from '@/utils/user'
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -29,6 +31,7 @@ export const auth = betterAuth({
     github: {
       clientId: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      disableImplicitSignUp: true, // 停用自動創建新用戶
     },
   },
   baseURL: {
@@ -51,6 +54,7 @@ export const auth = betterAuth({
     },
   },
   account: {
+    updateAccountOnSignIn: false,
     accountLinking: {
       trustedProviders: ['github'],
     },
@@ -76,10 +80,14 @@ export const getListUserAccounts = cache(async () => {
   return accounts
 })
 
-export const verifySession = cache(async (_url = '/') => {
+export async function verifySession(url = '/') {
   const session = await getSessionCache()
 
-  if (!session) redirect('/sign-in') // 登入失敗 or 登入過期，跳到登入頁面重新登入或註冊
-  if (!session.user.repoName) redirect('/sign-up')
+  if (!session) redirect(signInPath(url)) // 登入失敗 or 登入過期，跳到登入頁面重新登入或註冊
+  if (!isUserActive(session)) redirect(signUpPath(url))
   return session
-})
+}
+
+export async function signOutWithServer() {
+  await auth.api.signOut({ headers: await headers() })
+}

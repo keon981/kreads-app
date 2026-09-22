@@ -16,20 +16,22 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Password } from '@/components/ui/password'
 import { Spinner } from '@/components/ui/spinner'
+import { safeNext } from '@/utils/navigation'
 
 import { completeSignUpAction } from './action'
 
-import type { SignUpState } from './action'
+import type { SignUpRes } from './action'
 
 // import { completeSignUpAction } from './action'
 
-const initialState: SignUpState = {
+const initialState: SignUpRes = {
   message: '',
 }
 
 export function SignUpForm({
+  nextPath,
   error,
-}: { error?: string }) {
+}: { nextPath: string, error?: string }) {
   const [state, formAction, isPending] = useActionState(completeSignUpAction, initialState)
   const message = state.message || error
 
@@ -44,9 +46,15 @@ export function SignUpForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* next router */}
+          <input
+            type="hidden"
+            name="next_path"
+            defaultValue={safeNext(nextPath)}
+          />
           {/* invite code */}
           <div className="mt-4 flex flex-col gap-6">
-            <Field className="grid gap-2" data-invalid={!!message}>
+            <Field className="grid gap-2">
               <FieldLabel className="text-base">邀請碼</FieldLabel>
               <Password id="invite_code" name="invite_code" placeholder="請輸入邀請碼" />
             </Field>
@@ -65,8 +73,8 @@ export function SignUpForm({
                   <RiGitRepositoryLine />
                 </InputGroupAddon>
               </InputGroup>
-              <FieldError errors={message ? [{ message }] : undefined} />
             </Field>
+            <FieldError errors={message ? [{ message }] : undefined} />
           </div>
         </CardContent>
         <CardFooter className="pb-8 flex-col gap-2 bg-transparent border-0">
