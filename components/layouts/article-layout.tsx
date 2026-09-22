@@ -48,10 +48,10 @@ export default function ArticleLayout({
   return (
     <>
       <div className="hidden md:block md:size-px" />
-      <section className="relative w-full md:w-160 md:max-w-160 flex flex-col items-center min-h-dvh md:pb-18 md:bg-card">
+      <section className="relative w-full md:w-160 md:max-w-160 flex flex-col items-center min-h-dvh md:pb-18">
         <AppHeader />
-        <article className="size-full flex flex-col">
-          <div className="grow min-h-0 overflow-hidden rounded-3xl md:border md:border-t-0 border-border">
+        <article className="size-full flex-1 flex flex-col overflow-hidden">
+          <div className="grow min-h-0 overflow-hidden rounded-3xl md:bg-card md:border md:border-t-0 border-border">
             <AboutCard {...aboutCard}>
               {/* bio */}
             </AboutCard>

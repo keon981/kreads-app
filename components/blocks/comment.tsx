@@ -39,11 +39,11 @@ function CommentItem({
         </Avatar>
       </ItemMedia>
       <ItemContent>
-        <ItemTitle className="w-full flex ps-2.5 text-base/tight font-bold">
+        <ItemTitle className="w-full flex ps-2.5 text-[15px]/tight font-bold">
           <h4 className="flex-1">{title}</h4>
           <Button variant="ghost" size="icon-sm"><RiMoreLine /></Button>
         </ItemTitle>
-        <ItemDescription className="mt-1 ps-2.5 text-foreground text-base/tight">
+        <ItemDescription className="mt-1 ps-2.5 text-foreground text-[15px]/tight">
           {children}
         </ItemDescription>
 

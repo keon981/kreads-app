@@ -34,12 +34,6 @@ function NewPostFormDialog({
     <form action={action} className={className}>
       <Dialog {...props}>
         {children}
-        {/* <div>
-
-        <p>有什麼新鮮事？</p>
-        <DialogTrigger render={<Button variant="outline">Share</Button>} />
-
-      </div> */}
         <DialogContent
           showCloseButton={false}
           className="p-0 w-155 sm:max-w-[calc(100%-2rem)]"
@@ -72,7 +66,7 @@ function NewPostFormDialog({
                   placeholder="有什麼新鮮事嗎？"
                   name=""
                   id=""
-                  className="px-0 bg-transparent! border-0 focus-visible:ring-0 focus-visible:border-0 resize-none md:text-base"
+                  className="px-0 bg-transparent! border-0 focus-visible:ring-0 focus-visible:border-0 resize-none text-[15px] md:text-[15px]"
                 />
               </div>
             </section>

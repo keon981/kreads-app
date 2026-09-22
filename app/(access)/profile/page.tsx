@@ -1,66 +1,17 @@
-'use client'
+import { Suspense } from 'react'
 
-import { redirect } from 'next/navigation'
+import { CommentItemSkeleton } from '@/components/blocks/comment'
 
-import { CommentItem, CommentItemGroup, CommentItemSkeleton } from '@/components/blocks/comment'
-import { NewPostFormDialog } from '@/components/form/new-post-dialog'
-import ArticleLayout from '@/components/layouts/article-layout'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { DialogTrigger } from '@/components/ui/dialog'
-import { useAuth } from '@/contexts/auth-provider'
+import { PostList } from './post-list'
+import ProfileView from './profile-view'
 
 function Page() {
-  const { isAuth, user } = useAuth()
-  if (!isAuth) redirect('/')
-
   return (
-    <ArticleLayout
-      name={user?.name ?? ''}
-      id={user?.id}
-      avatarUrl={user?.avatarUrl}
-    >
-      {/* new post */}
-      <div className="px-6 py-4 flex items-center gap-3">
-        <Avatar size="sm">
-          <AvatarImage src={user?.avatarUrl} />
-          <AvatarFallback>
-            {user?.name?.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <NewPostFormDialog
-          name={user?.name}
-          avatarUrl={user?.avatarUrl}
-          className="flex flex-1"
-        >
-          <DialogTrigger className="flex-1 text-start cursor-text">
-            <span className="text-muted-foreground">
-              有什麼新鮮事？
-            </span>
-          </DialogTrigger>
-          <DialogTrigger
-            render={<Button variant="outline" size="lg" />}
-            className="w-16 text-start"
-          >
-            發布
-          </DialogTrigger>
-        </NewPostFormDialog>
-
-      </div>
-
-      {/* comment list */}
-      <CommentItemGroup className="">
-        <CommentItemSkeleton />
-        {Array.from({ length: 20 }, (_, i) => (
-          <CommentItem
-            title={user?.name ?? ''}
-            avatarUrl={user?.avatarUrl}
-            key={i}
-          >{i}
-          </CommentItem>
-        ))}
-      </CommentItemGroup>
-    </ArticleLayout>
+    <ProfileView>
+      <Suspense fallback={<CommentItemSkeleton />}>
+        <PostList />
+      </Suspense>
+    </ProfileView>
   )
 }
 
