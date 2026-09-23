@@ -1,3 +1,7 @@
+'use client'
+
+import { useActionState, useState } from 'react'
+
 import { RiCloseLine } from '@remixicon/react'
 
 import {
@@ -14,37 +18,48 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
+
+import { createPostAction } from './action'
+
+import type { PostFormState } from './type'
 
 function NewPostFormDialog({
   children,
   avatarUrl,
   name,
-  className,
-  action,
   ...props
 }: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
   children: React.ReactNode
   avatarUrl?: string
   name?: string | null
-  className?: string
-  action?: React.FormHTMLAttributes<HTMLFormElement>['action']
 }) {
+  const [open, setOpen] = useState(false)
+  const [state, formAction, isPending] = useActionState(
+    async (prevState: PostFormState, formData: FormData) => {
+      const nextState = await createPostAction(prevState, formData)
+      if (!nextState.message) setOpen(false)
+      return nextState
+    },
+    {},
+  )
+
   return (
-    <form action={action} className={className}>
-      <Dialog {...props}>
-        {children}
-        <DialogContent
-          showCloseButton={false}
-          className="p-0 w-155 sm:max-w-[calc(100%-2rem)]"
-        >
-          <DialogHeader className="flex-row h-14 px-4 justify-between items-center border-b">
-            <DialogClose>
-              <RiCloseLine />
-            </DialogClose>
-            <DialogTitle className="flex-1 text-center">新貼文</DialogTitle>
-            <div className="size-6" />
-          </DialogHeader>
+    <Dialog open={open} onOpenChange={setOpen} {...props}>
+      {children}
+      <DialogContent
+        showCloseButton={false}
+        className="p-0 w-155 sm:max-w-[calc(100%-2rem)]"
+      >
+        <DialogHeader className="flex-row h-14 px-4 justify-between items-center border-b">
+          <DialogClose>
+            <RiCloseLine />
+          </DialogClose>
+          <DialogTitle className="flex-1 text-center">新貼文</DialogTitle>
+          <div className="size-6" />
+        </DialogHeader>
+        <form action={formAction}>
           <article className="flex flex-col px-6">
             <section className="w-full flex gap-x-3">
               {/* 頭像 */}
@@ -59,13 +74,14 @@ function NewPostFormDialog({
                   <div className="w-0.5 h-full bg-accent border" />
                 </div>
               </div>
+
               {/* post */}
               <div className="flex-1">
                 <h4 className="font-bold text-foreground text-base">{name}</h4>
                 <Textarea
                   placeholder="有什麼新鮮事嗎？"
-                  name=""
-                  id=""
+                  defaultValue={state.content}
+                  name="content"
                   className="px-0 bg-transparent! border-0 focus-visible:ring-0 focus-visible:border-0 resize-none text-[15px] md:text-[15px]"
                 />
               </div>
@@ -83,11 +99,16 @@ function NewPostFormDialog({
             </section>
           </article>
           <DialogFooter className="mx-0 mb-0 p-6 pt-1 border-0 bg-transparent">
-            <Button variant="outline">發佈</Button>
+            {state.message
+              && <p className="me-auto text-sm text-destructive">{state.message}</p>}
+            <Button type="submit" variant="outline" disabled={isPending}>
+              {isPending && <Spinner data-icon="inline-start" />}
+              發佈
+            </Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </form>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }
 

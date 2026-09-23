@@ -9,6 +9,7 @@ import { db } from '@/db/drizzle'
 import { inviteCode } from '@/db/schema/invite-schema'
 import { auth, getSessionCache } from '@/lib/auth'
 import { signUpPath } from '@/utils/navigation'
+import { getFormDataValue } from '@/utils/toolkit'
 import { isUserActive } from '@/utils/user'
 
 export interface SignUpRes {
@@ -20,15 +21,15 @@ export async function completeSignUpAction(
   formData: FormData,
 ): Promise<SignUpRes> {
   // return path
-  const nextPath = String(formData.get('next_path'))
+  const nextPath = getFormDataValue(formData, 'next_path')
 
   // verify
   const session = await getSessionCache()
   if (isUserActive(session)) redirect(nextPath)
 
   // get form values
-  const code = (formData.get('invite_code') as string).trim()
-  const repo = (formData.get('repo_name') as string).trim()
+  const code = getFormDataValue(formData, 'invite_code')
+  const repo = getFormDataValue(formData, 'repo_name')
   if (!code) return { message: '請輸入邀請碼' }
   if (!repo) return { message: '請輸入倉庫名稱' }
 

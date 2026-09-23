@@ -4,7 +4,7 @@ import { AppSidebar } from '@/components/layouts/app-sidebar'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AuthProvider } from '@/contexts/auth-provider'
 import { ThemeProvider } from '@/contexts/theme-provider'
-import { getGitHubUser } from '@/lib/github'
+import { fetchGitHubUser } from '@/lib/github'
 import { cn } from '@/lib/utils'
 
 import './globals.css'
@@ -23,7 +23,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const user = await getGitHubUser()
+  const user = await fetchGitHubUser()
   const isAuth = !!user
 
   return (

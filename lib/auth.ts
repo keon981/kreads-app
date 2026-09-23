@@ -71,7 +71,7 @@ export const getSessionCache = cache(async () => {
   return auth.api.getSession({ headers: await headers() })
 })
 
-export const getListUserAccounts = cache(async () => {
+export const fetchListUserAccounts = cache(async () => {
   const session = await getSessionCache()
   if (!session) return null
 

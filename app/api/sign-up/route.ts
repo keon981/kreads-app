@@ -8,7 +8,7 @@ import { db } from '@/db/drizzle'
 import { user } from '@/db/schema/auth-schema'
 import { inviteCode as inviteCodeSchema } from '@/db/schema/invite-schema'
 import { auth, getSessionCache, signOutWithServer } from '@/lib/auth'
-import { findOrCreateRepo, getGitHubToken, isRequestError } from '@/lib/github'
+import { fetchGitHubToken, findOrCreateRepo, isRequestError } from '@/lib/github'
 import { safeNext, signUpPath } from '@/utils/navigation'
 import { isUserActive } from '@/utils/user'
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   if (!inviteCode) return handleAbortSignUp('invalid_invite')
 
   // token
-  const token = await getGitHubToken()
+  const token = await fetchGitHubToken()
   if (!token) return handleAbortSignUp('no_permission')
 
   // create repo

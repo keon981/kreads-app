@@ -33,8 +33,8 @@ import {
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/contexts/auth-provider'
 
+import { NewPostFormDialog } from '../../features/new-post-dialog/new-post-dialog'
 import { SignInDialog } from '../blocks/sign-in'
-import { NewPostFormDialog } from '../form/new-post-dialog'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false)

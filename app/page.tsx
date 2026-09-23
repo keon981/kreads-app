@@ -1,9 +1,9 @@
 import { CommentItem, CommentItemGroup } from '@/components/blocks/comment'
 import ArticleLayout from '@/components/layouts/article-layout'
-import { getGitHubUser } from '@/lib/github'
+import { fetchGitHubUser } from '@/lib/github'
 
 export default async function Page() {
-  const user = await getGitHubUser()
+  const user = await fetchGitHubUser()
 
   return (
     <ArticleLayout

@@ -1,8 +1,8 @@
 import { CommentItem } from '@/components/blocks/comment'
-import { fetchPost } from '@/lib/post'
+import { fetchUserIssues } from '@/lib/repo'
 
 export async function PostList() {
-  const posts = await fetchPost()
+  const posts = await fetchUserIssues()
 
   if (posts.length === 0) {
     return (
@@ -18,13 +18,7 @@ export async function PostList() {
       title={post.author?.login ?? 'ghost'}
       avatarUrl={post.author?.avatarUrl}
     >
-      <strong
-        className="relative rounded border-l-2 border-border md:text-[15px] block"
-      >{post.title}
-      </strong>
-      <span className="block mt-4 ">
-        {post.body}
-      </span>
+      {post.body}
     </CommentItem>
   ))
 }

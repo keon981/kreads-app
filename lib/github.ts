@@ -1,13 +1,15 @@
+// 處理 github 帳戶權限
+
 import { headers } from 'next/headers'
 
 import { cache } from 'react'
 
 import { Octokit } from '@octokit/rest'
 
-import { auth, getListUserAccounts } from '@/lib/auth'
+import { auth, fetchListUserAccounts } from '@/lib/auth'
 
-export async function getGitHubToken() {
-  const accounts = await getListUserAccounts()
+export async function fetchGitHubToken() {
+  const accounts = await fetchListUserAccounts()
   const nextHeaders = await headers()
   if (!accounts || !nextHeaders) return null
 
@@ -22,8 +24,8 @@ export async function getGitHubToken() {
   return accessToken
 }
 
-export const getGitHubUser = cache(async () => {
-  const token = await getGitHubToken()
+export const fetchGitHubUser = cache(async () => {
+  const token = await fetchGitHubToken()
   if (!token) return null
 
   const octokit = new Octokit({ auth: token })
@@ -32,7 +34,7 @@ export const getGitHubUser = cache(async () => {
 })
 
 export async function hasGitHubScope(scope: string) {
-  const accounts = await getListUserAccounts()
+  const accounts = await fetchListUserAccounts()
   if (!accounts) return false
 
   const github = accounts.find(a => a.providerId === 'github')
