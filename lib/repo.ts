@@ -1,12 +1,17 @@
 // 處理 github repo
 
 import { Octokit } from '@octokit/rest'
+import { eq } from 'drizzle-orm'
 import * as z from 'zod'
+
+import { db } from '@/db/drizzle'
+import { user } from '@/db/schema/auth-schema'
 
 import { verifySession } from './auth'
 import { fetchGitHubToken } from './github'
 
 import type { AuthSession } from '@/types/auth'
+import type { ViewerUser } from '@/types/user'
 
 const PostSchema = z.object({
   number: z.number(),
@@ -49,10 +54,10 @@ async function fetchUserRepo() {
   }
 }
 
-async function fetchUserIssues(): Promise<Post[]> {
-  const userRepo = await fetchUserRepo()
-  if (!userRepo) return []
-  const { octokit, owner, repo } = userRepo
+async function fetchIssues(repoName: string): Promise<Post[]> {
+  const [owner, repo] = repoName.split('/')
+  const token = await fetchGitHubToken()
+  const octokit = new Octokit({ auth: token ?? undefined })
 
   const { data } = await octokit.rest.issues.listForRepo({
     owner,
@@ -94,11 +99,43 @@ async function createIssue(content: string) {
   }
 }
 
+function toViewerUser(data: {
+  name: string
+  image?: string | null
+  username?: string | null
+  repoName?: string | null
+}): ViewerUser | null {
+  if (!data.username || !data.repoName) return null
+  return {
+    username: data.username,
+    name: data.name,
+    avatarUrl: data.image ?? undefined,
+    repoName: data.repoName,
+  }
+}
+
+async function fetchViewerUser(username: string) {
+  const [foundUser] = await db
+    .select({
+      name: user.name,
+      image: user.image,
+      username: user.username,
+      repoName: user.repoName,
+    })
+    .from(user)
+    .where(eq(user.username, username))
+    .limit(1)
+
+  return foundUser ? toViewerUser(foundUser) : null
+}
+
 export {
   createIssue,
-  fetchUserIssues,
+  fetchIssues as fetchUserIssues,
   fetchUserRepo,
+  fetchViewerUser,
   PostSchema,
   PostsResultSchema,
+  toViewerUser,
 }
 export type { Post }

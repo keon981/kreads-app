@@ -1,4 +1,10 @@
+import { notFound } from 'next/navigation'
+
 import React from 'react'
+
+import UserView from '@/features/user-viewer/user-view'
+import { getSessionCache } from '@/lib/auth'
+import { fetchViewerUser } from '@/lib/repo'
 
 interface PageProps {
   params: Promise<{ id: string }> // 這裡定義為 Promise 類形
@@ -6,9 +12,17 @@ interface PageProps {
 
 async function Page({ params }: PageProps) {
   const { id } = await params
-  return (
-    <div>ID {id} Page</div>
-  )
+  const username = decodeURIComponent(id)
+  const [viewer, session] = await Promise.all([
+    fetchViewerUser(username),
+    getSessionCache(),
+  ])
+
+  if (!viewer) notFound()
+
+  const isOwner = session?.user.username === viewer.username
+
+  return <UserView user={viewer} isOwner={isOwner} />
 }
 
 export default Page

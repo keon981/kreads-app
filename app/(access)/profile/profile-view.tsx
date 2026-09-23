@@ -26,10 +26,7 @@ export function ProfileView({ children }: { children: React.ReactNode }) {
           </AvatarFallback>
         </Avatar>
         <div className="flex flex-1">
-          <NewPostFormDialog
-            name={user?.name}
-            avatarUrl={user?.avatarUrl}
-          >
+          <NewPostFormDialog>
 
             <DialogTrigger className="flex-1 text-start cursor-text">
               <span className="text-[15px] text-muted-foreground">

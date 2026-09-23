@@ -20,21 +20,16 @@ import {
 } from '@/components/ui/dialog'
 import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
+import { useAuth } from '@/contexts/auth-provider'
 
 import { createPostAction } from './action'
 
 import type { PostFormState } from './type'
 
-function NewPostFormDialog({
-  children,
-  avatarUrl,
-  name,
-  ...props
-}: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
+function NewPostFormDialog({ children, ...props }: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
   children: React.ReactNode
-  avatarUrl?: string
-  name?: string | null
 }) {
+  const { user } = useAuth()
   const [open, setOpen] = useState(false)
   const [state, formAction, isPending] = useActionState(
     async (prevState: PostFormState, formData: FormData) => {
@@ -44,6 +39,9 @@ function NewPostFormDialog({
     },
     {},
   )
+
+  // user
+  const { name, avatarUrl } = user || {}
 
   return (
     <Dialog open={open} onOpenChange={setOpen} {...props}>

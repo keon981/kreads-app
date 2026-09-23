@@ -1,18 +1,15 @@
-import { Suspense } from 'react'
+import { redirect } from 'next/navigation'
 
-import { CommentItemSkeleton } from '@/components/blocks/comment'
+import UserView from '@/features/user-viewer/user-view'
+import { verifySession } from '@/lib/auth'
+import { toViewerUser } from '@/lib/repo'
 
-import { PostList } from './post-list'
-import ProfileView from './profile-view'
+async function Page() {
+  const session = await verifySession('/profile')
+  const viewer = toViewerUser(session.user)
+  if (!viewer) return redirect('/')
 
-function Page() {
-  return (
-    <ProfileView>
-      <Suspense fallback={<CommentItemSkeleton />}>
-        <PostList />
-      </Suspense>
-    </ProfileView>
-  )
+  return <UserView user={viewer} isOwner />
 }
 
 export default Page

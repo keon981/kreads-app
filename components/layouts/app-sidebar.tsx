@@ -40,7 +40,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false)
   const pathName = usePathname()
   const isRoute = (url: string) => pathName === url
-  const { isAuth, user } = useAuth()
+  const { isAuth } = useAuth()
 
   const triggerSignInDialog = () => {
     if (isAuth) return
@@ -84,10 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                 {/* new post  */}
                 <SidebarMenuItem>
-                  <NewPostFormDialog
-                    name={user?.name}
-                    avatarUrl={user?.avatarUrl}
-                  >
+                  <NewPostFormDialog>
                     <DialogTrigger
                       render={<SidebarMenuButton variant="outline" />}
                       onClick={(e) => {

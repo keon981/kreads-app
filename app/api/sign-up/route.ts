@@ -33,10 +33,12 @@ export async function GET(request: NextRequest) {
 
   // create repo
   let fullName: string
+  let username: string
 
   try {
     const repo = await findOrCreateRepo(token, repoName)
     fullName = repo.full_name
+    username = `@${repo.owner.login}`
   } catch (error) {
     const status = isRequestError(error) ? error.status : 0
     const errorCode = getErrorStatus(status)
@@ -54,7 +56,7 @@ export async function GET(request: NextRequest) {
   // database
   await db
     .update(user)
-    .set({ repoName: fullName })
+    .set({ repoName: fullName, username })
     .where(eq(user.id, session.user.id))
 
   // reload session coolie cache

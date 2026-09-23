@@ -1,8 +1,8 @@
 import { CommentItem } from '@/components/blocks/comment'
 import { fetchUserIssues } from '@/lib/repo'
 
-export async function PostList() {
-  const posts = await fetchUserIssues()
+export async function PostList({ repoName }: { repoName: string }) {
+  const posts = await fetchUserIssues(repoName)
 
   if (posts.length === 0) {
     return (
