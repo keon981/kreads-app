@@ -8,7 +8,7 @@ import { db } from '@/db/drizzle'
 import { user } from '@/db/schema/auth-schema'
 import { inviteCode as inviteCodeSchema } from '@/db/schema/invite-schema'
 import { auth, getSessionCache, signOutWithServer } from '@/lib/auth'
-import { fetchGitHubToken, findOrCreateRepo, isRequestError } from '@/lib/github'
+import { fetchGitHubToken, findOrCreateRepo, isRequestError } from '@/server/github'
 import { safeNext, signUpPath } from '@/utils/navigation'
 import { isUserActive } from '@/utils/user'
 

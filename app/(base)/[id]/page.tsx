@@ -4,7 +4,7 @@ import React from 'react'
 
 import UserViewer from '@/features/user-viewer/user-viewer'
 import { getSessionCache } from '@/lib/auth'
-import { fetchViewerUser } from '@/lib/repo'
+import { fetchViewerUser } from '@/server/users'
 
 interface PageProps {
   params: Promise<{ id: string }> // 這裡定義為 Promise 類形

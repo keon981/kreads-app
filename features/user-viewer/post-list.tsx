@@ -1,8 +1,8 @@
 import { PostItem } from '@/components/ui/post'
-import { fetchUserIssues } from '@/lib/repo'
+import { fetchIssues } from '@/server/issues'
 
 export async function PostList({ repoName }: { repoName: string }) {
-  const posts = await fetchUserIssues(repoName)
+  const posts = await fetchIssues(repoName)
 
   if (posts.length === 0) {
     return (

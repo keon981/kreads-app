@@ -4,8 +4,8 @@ import { AppSidebar } from '@/components/layouts/app-sidebar'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AuthProvider } from '@/contexts/auth-provider'
 import { ThemeProvider } from '@/contexts/theme-provider'
-import { fetchGitHubUser } from '@/lib/github'
 import { cn } from '@/lib/utils'
+import { fetchGitHubUser } from '@/server/github'
 
 import './globals.css'
 

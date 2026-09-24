@@ -6,7 +6,11 @@ import { cache } from 'react'
 
 import { Octokit } from '@octokit/rest'
 
-import { auth, fetchListUserAccounts } from '@/lib/auth'
+import { auth, fetchListUserAccounts, verifySession } from '@/lib/auth'
+
+import type { AuthSession } from '@/types/auth'
+
+import 'server-only'
 
 export async function fetchGitHubToken() {
   const accounts = await fetchListUserAccounts()
@@ -67,4 +71,24 @@ export async function findOrCreateRepo(token: string, name: string) {
     auto_init: true,
   })
   return data
+}
+
+function getUserRepo(user: AuthSession['user']) {
+  if (!user.repoName) return null
+  const [owner, repo] = user.repoName.split('/')
+  return [owner, repo]
+}
+
+export async function fetchUserRepo() {
+  const session = await verifySession()
+  const token = await fetchGitHubToken()
+  const userRepo = getUserRepo(session.user)
+  if (!token || !userRepo) return null
+
+  const [owner, repo] = userRepo
+  return {
+    octokit: new Octokit({ auth: token }),
+    owner,
+    repo,
+  }
 }

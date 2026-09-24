@@ -4,7 +4,7 @@ import { refresh } from 'next/cache'
 
 import * as z from 'zod'
 
-import { createIssue } from '@/lib/repo'
+import { createIssue } from '@/server/issues'
 import { getFormDataValue } from '@/utils/toolkit'
 
 import type { PostFormState } from './type'

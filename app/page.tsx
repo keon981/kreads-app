@@ -1,6 +1,6 @@
 import ArticleLayout from '@/components/layouts/article-layout'
 import { PostItem, PostItemGroup } from '@/components/ui/post'
-import { fetchGitHubUser } from '@/lib/github'
+import { fetchGitHubUser } from '@/server/github'
 
 export default async function Page() {
   const user = await fetchGitHubUser()
