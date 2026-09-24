@@ -2,7 +2,7 @@
 
 import { Octokit } from '@octokit/rest'
 
-import { fetchGitHubToken, fetchUserRepo } from './github'
+import { fetchGitHubToken, fetchUserRepo, isRequestError } from './github'
 
 import type { Post } from '@/types/post'
 
@@ -53,7 +53,25 @@ async function createIssue(content: string) {
   }
 }
 
+async function closeIssue(issueNumber: number) {
+  const userRepo = await fetchUserRepo()
+  if (!userRepo) return 401
+  const { octokit, owner, repo } = userRepo
+  try {
+    const res = await octokit.rest.issues.update({
+      owner,
+      repo,
+      issue_number: issueNumber,
+      state: 'closed',
+    })
+    return res.status
+  } catch (err) {
+    return isRequestError(err) ? err.status : 500
+  }
+}
+
 export {
+  closeIssue,
   createIssue,
   fetchIssues,
 }

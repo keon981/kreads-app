@@ -12,14 +12,12 @@ import { signUpPath } from '@/utils/navigation'
 import { getFormDataValue } from '@/utils/toolkit'
 import { isUserActive } from '@/utils/user'
 
-export interface SignUpRes {
-  message?: string
-}
+import type { ActionState } from '@/types/action'
 
 export async function completeSignUpAction(
-  _prevState: SignUpRes,
+  _prevState: ActionState,
   formData: FormData,
-): Promise<SignUpRes> {
+): Promise<ActionState> {
   // return path
   const nextPath = getFormDataValue(formData, 'next_path')
 

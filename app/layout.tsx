@@ -2,6 +2,7 @@ import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
 import { AppSidebar } from '@/components/layouts/app-sidebar'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { Toaster } from '@/components/ui/toast'
 import { AuthProvider } from '@/contexts/auth-provider'
 import { ThemeProvider } from '@/contexts/theme-provider'
 import { cn } from '@/lib/utils'
@@ -48,6 +49,7 @@ export default async function RootLayout({
                 {children}
               </SidebarInset>
             </SidebarProvider>
+            <Toaster />
           </AuthProvider>
         </ThemeProvider>
       </body>

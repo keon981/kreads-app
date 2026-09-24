@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator'
 import { Alert, AlertTitle } from './alert'
 
 import type { VariantProps } from 'class-variance-authority'
+import type { ActionState } from '@/types/action'
 
 function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
   return (
@@ -185,7 +186,7 @@ function FieldError({
   errors,
   ...props
 }: React.ComponentProps<'div'> & {
-  errors?: Array<{ message?: string } | undefined>
+  errors?: Array<ActionState | undefined>
   icon?: React.ReactNode
 }) {
   const content = useMemo(() => {

@@ -1,7 +1,10 @@
-import { PostItem } from '@/components/ui/post'
+import { PostDropdownMenu, PostItem } from '@/components/ui/post'
 import { fetchIssues } from '@/server/issues'
 
-export async function PostList({ repoName }: { repoName: string }) {
+export async function PostList({ repoName, isOwner }: {
+  repoName: string
+  isOwner: boolean
+}) {
   const posts = await fetchIssues(repoName)
 
   if (posts.length === 0) {
@@ -17,6 +20,9 @@ export async function PostList({ repoName }: { repoName: string }) {
       key={post.title}
       title={post.author?.login ?? 'ghost'}
       avatarUrl={post.author?.avatarUrl}
+      menu={(
+        <PostDropdownMenu issueNumber={post.number} isOwner={isOwner} />
+      )}
     >
       {post.body}
     </PostItem>

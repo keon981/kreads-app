@@ -20,11 +20,9 @@ import { safeNext } from '@/utils/navigation'
 
 import { completeSignUpAction } from './action'
 
-import type { SignUpRes } from './action'
+import type { ActionState } from '@/types/action'
 
-// import { completeSignUpAction } from './action'
-
-const initialState: SignUpRes = {
+const initialState: ActionState = {
   message: '',
 }
 

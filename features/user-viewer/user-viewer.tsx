@@ -25,7 +25,7 @@ export default function UserViewer({
       {/* post list */}
       <PostItemGroup className="">
         <Suspense fallback={<PostItemSkeleton />}>
-          <PostList repoName={user.repoName} />
+          <PostList isOwner={isOwner} repoName={user.repoName} />
         </Suspense>
       </PostItemGroup>
     </ArticleLayout>
