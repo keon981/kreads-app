@@ -20,7 +20,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
-function CommentItem({
+function PostItem({
   title,
   children,
   avatarUrl,
@@ -64,7 +64,7 @@ function CommentItem({
   )
 }
 
-function CommentItemSkeleton() {
+function PostItemSkeleton() {
   return (
     <Item className="rounded-none border-0 border-t p-3" variant="outline">
       <ItemMedia>
@@ -95,7 +95,7 @@ function CommentItemSkeleton() {
   )
 }
 
-function CommentItemGroup({ className, ...props }: React.ComponentProps<typeof ItemGroup>) {
+function PostItemGroup({ className, ...props }: React.ComponentProps<typeof ItemGroup>) {
   return (
     <ItemGroup
       data-slot="item-group"
@@ -106,7 +106,7 @@ function CommentItemGroup({ className, ...props }: React.ComponentProps<typeof I
 }
 
 export {
-  CommentItem,
-  CommentItemGroup,
-  CommentItemSkeleton,
+  PostItem,
+  PostItemGroup,
+  PostItemSkeleton,
 }

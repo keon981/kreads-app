@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 
 import React from 'react'
 
-import UserView from '@/features/user-viewer/user-view'
+import UserViewer from '@/features/user-viewer/user-viewer'
 import { getSessionCache } from '@/lib/auth'
 import { fetchViewerUser } from '@/lib/repo'
 
@@ -22,7 +22,7 @@ async function Page({ params }: PageProps) {
 
   const isOwner = session?.user.username === viewer.username
 
-  return <UserView user={viewer} isOwner={isOwner} />
+  return <UserViewer user={viewer} isOwner={isOwner} />
 }
 
 export default Page

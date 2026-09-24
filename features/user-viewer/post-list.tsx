@@ -1,4 +1,4 @@
-import { CommentItem } from '@/components/blocks/comment'
+import { PostItem } from '@/components/ui/post'
 import { fetchUserIssues } from '@/lib/repo'
 
 export async function PostList({ repoName }: { repoName: string }) {
@@ -13,12 +13,12 @@ export async function PostList({ repoName }: { repoName: string }) {
   }
 
   return posts.map(post => (
-    <CommentItem
-      key={post.number}
+    <PostItem
+      key={post.title}
       title={post.author?.login ?? 'ghost'}
       avatarUrl={post.author?.avatarUrl}
     >
       {post.body}
-    </CommentItem>
+    </PostItem>
   ))
 }

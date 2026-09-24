@@ -1,5 +1,5 @@
-import { CommentItem, CommentItemGroup } from '@/components/blocks/comment'
 import ArticleLayout from '@/components/layouts/article-layout'
+import { PostItem, PostItemGroup } from '@/components/ui/post'
 import { fetchGitHubUser } from '@/lib/github'
 
 export default async function Page() {
@@ -11,11 +11,11 @@ export default async function Page() {
       id={user?.login}
       avatarUrl={user?.avatar_url}
     >
-      <CommentItemGroup className="">
+      <PostItemGroup className="">
         {Array.from({ length: 20 }, (_, i) => (
-          <CommentItem key={i}>{i}</CommentItem>
+          <PostItem key={i}>{i}</PostItem>
         ))}
-      </CommentItemGroup>
+      </PostItemGroup>
     </ArticleLayout>
   )
 }

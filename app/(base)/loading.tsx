@@ -1,15 +1,15 @@
-import { CommentItemGroup, CommentItemSkeleton } from '@/components/blocks/comment'
+import { PostItemGroup, PostItemSkeleton } from '@/components/ui/post'
 import ArticleLayout from '@/components/layouts/article-layout'
 
 export default function Loading() {
   // Or a custom loading skeleton component
   return (
     <ArticleLayout>
-      <CommentItemGroup className="">
+      <PostItemGroup className="">
         {Array.from({ length: 20 }, (_, i) => (
-          <CommentItemSkeleton key={i} />
+          <PostItemSkeleton key={i} />
         ))}
-      </CommentItemGroup>
+      </PostItemGroup>
     </ArticleLayout>
   )
 }
