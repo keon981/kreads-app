@@ -8,12 +8,12 @@ import { betterAuth } from 'better-auth/minimal'
 import { nextCookies } from 'better-auth/next-js'
 import { admin } from 'better-auth/plugins'
 
-import process from 'node:process'
-
 import { db } from '@/db/drizzle' // your drizzle instance
 import * as schema from '@/db/schema/auth-schema'
 import { signInPath, signUpPath } from '@/utils/navigation'
 import { isUserActive } from '@/utils/user'
+
+import { env } from './env'
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -29,8 +29,8 @@ export const auth = betterAuth({
   ],
   socialProviders: {
     github: {
-      clientId: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      clientId: env.GITHUB_CLIENT_ID as string,
+      clientSecret: env.GITHUB_CLIENT_SECRET as string,
       disableImplicitSignUp: true, // 停用自動創建新用戶
     },
   },
@@ -40,8 +40,8 @@ export const auth = betterAuth({
       '127.0.0.1:*',
       '*.vercel.app',
     ],
-    fallback: process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    fallback: env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${env.VERCEL_PROJECT_PRODUCTION_URL}`
       : 'http://localhost:3000',
   },
   user: {

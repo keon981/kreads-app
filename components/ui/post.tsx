@@ -29,11 +29,11 @@ import {
   ItemTitle,
 } from '@/components/ui/item'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useAuth } from '@/contexts/auth-provider'
 import { cn } from '@/lib/utils'
 
+import { useSignInDialog } from '../blocks/sign-in'
 import { toast } from './toast'
-
-import type { ActionState } from '@/types/action'
 
 function PostItem({
   title,
@@ -45,6 +45,19 @@ function PostItem({
   avatarFallback?: string
   menu?: React.ReactNode
 } & React.ComponentProps<typeof Item>) {
+  const trigger = useSignInDialog(s => s.trigger)
+  const { isAuth } = useAuth()
+
+  const handleTriggerSignInDialog = () => {
+    if (isAuth) return true
+    trigger()
+    return false
+  }
+
+  const handleClickHeart = async () => {
+    if (!handleTriggerSignInDialog()) return
+  }
+
   return (
     <Item className="rounded-none border-0 border-t p-3" variant="outline">
       <ItemMedia>

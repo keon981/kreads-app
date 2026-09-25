@@ -1,8 +1,10 @@
 'use client'
 
+import type { SetStateAction } from 'react'
 import React from 'react'
 
 import { RiArrowRightSLine, RiGithubFill } from '@remixicon/react'
+import { create } from 'zustand'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -55,14 +57,36 @@ export function SignInButton({ children, ...props }: React.ComponentProps<typeof
   )
 }
 
+interface SignInDialogState {
+  open: boolean
+  trigger: () => void
+  dismiss: () => void
+  setOpen: (action: SetStateAction<boolean>) => void
+  toggle: () => void
+}
+
+export const useSignInDialog = create<SignInDialogState>()(set => ({
+  open: false,
+  trigger: () => set({ open: true }),
+  dismiss: () => set(() => ({ open: false })),
+  setOpen: action =>
+    set(state => ({
+      open: typeof action === 'function' ? action(state.open) : action,
+    })),
+  toggle: () => set(state => ({ open: !state.open })),
+}))
+
 export function SignInDialog({
   children,
   ...props
 }: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
   children?: React.ReactNode
 }) {
+  const open = useSignInDialog(s => s.open)
+  const setOpen = useSignInDialog(s => s.setOpen)
+
   return (
-    <Dialog {...props}>
+    <Dialog open={open} onOpenChange={setOpen} {...props}>
       {children}
       <DialogContent showCloseButton={false} className="w-md sm:max-w-md px-14 py-12 gap-8">
         <DialogHeader className="text-center">

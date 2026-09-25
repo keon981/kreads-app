@@ -1,10 +1,8 @@
 // 處理貼文（GitHub Issues）
 
-import { Octokit } from '@octokit/rest'
-
 import { isRequestError } from '@/utils/status'
 
-import { fetchGitHubToken, fetchUserRepo } from './github'
+import { createUserOctokit, fetchGitHubToken, fetchUserRepo } from './github'
 
 import type { Post } from '@/types/post'
 
@@ -13,7 +11,7 @@ import 'server-only'
 async function fetchIssues(repoName: string): Promise<Post[]> {
   const [owner, repo] = repoName.split('/')
   const token = await fetchGitHubToken()
-  const octokit = new Octokit({ auth: token ?? undefined })
+  const octokit = createUserOctokit(token ?? undefined)
 
   const { data } = await octokit.rest.issues.listForRepo({
     owner,

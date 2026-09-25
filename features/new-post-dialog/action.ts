@@ -29,6 +29,7 @@ export async function createPostAction(
   const success = await createIssue(result.data.content)
   if (!success) return { message: '發文失敗，請再試一次', content }
 
+  // TODO: useOptimistic
   refresh()
   return {}
 }

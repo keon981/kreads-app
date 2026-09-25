@@ -19,6 +19,7 @@ export async function deletePostAction(
   const status = await closeIssue(result.data)
   if (status !== 200) return { status, message: '刪除失敗，請再試一次' }
 
+  // TODO: useOptimistic
   refresh()
   return { status, message: '刪除成功' }
 }

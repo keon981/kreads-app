@@ -4,7 +4,7 @@ import type { Url } from 'next/dist/shared/lib/router/router'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import React, { useState } from 'react'
+import React from 'react'
 
 import {
   RiAddLargeLine,
@@ -19,6 +19,7 @@ import {
   RiUserLine,
 } from '@remixicon/react'
 
+import { useSignInDialog } from '@/components/blocks/sign-in'
 import { DialogTrigger } from '@/components/ui/dialog'
 import {
   Sidebar,
@@ -32,19 +33,19 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/contexts/auth-provider'
-
-import { NewPostFormDialog } from '../../features/new-post-dialog/new-post-dialog'
-import { SignInDialog } from '../blocks/sign-in'
+import { NewPostFormDialog } from '@/features/new-post-dialog/new-post-dialog'
+import { env } from '@/lib/env'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false)
+  const trigger = useSignInDialog(s => s.trigger)
   const pathName = usePathname()
   const isRoute = (url: string) => pathName === url
+  const isHome = ['/', env.HOME_USERNAME].includes(pathName)
   const { isAuth } = useAuth()
 
-  const triggerSignInDialog = () => {
+  const handleTriggerSignInDialog = () => {
     if (isAuth) return
-    setIsSignInDialogOpen(b => !b)
+    trigger()
   }
 
   return (
@@ -70,8 +71,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu className="gap-1">
                 {/* Home -> Keon981 Page */}
                 <SidebarMenuItem>
-                  <SidebarMenuButton render={<Link href="/" />} isActive={isRoute('/')}>
-                    {isRoute('/') ? <RiHome9Fill /> : <RiHome9Line />}
+                  <SidebarMenuButton render={<Link href="/" />} isActive={isHome}>
+                    {isHome ? <RiHome9Fill /> : <RiHome9Line />}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
@@ -90,7 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       onClick={(e) => {
                         if (isAuth) return
                         e.preventBaseUIHandler()
-                        triggerSignInDialog()
+                        handleTriggerSignInDialog()
                       }}
                     >
                       <RiAddLargeLine />
@@ -103,7 +104,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuLink
                     href="/saved"
                     isActive={isRoute('/saved')}
-                    onClick={triggerSignInDialog}
+                    onClick={handleTriggerSignInDialog}
                   >
                     {isRoute('/saved') ? <RiBookmarkFill /> : <RiBookmarkLine />}
                   </SidebarMenuLink>
@@ -114,7 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuLink
                     href="/profile"
                     isActive={isRoute('/profile')}
-                    onClick={triggerSignInDialog}
+                    onClick={handleTriggerSignInDialog}
                   >
                     {isRoute('/profile') ? <RiUserFill /> : <RiUserLine />}
                   </SidebarMenuLink>
@@ -126,17 +127,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarFooter>
           <SidebarMenuButton
             variant="native"
-            onClick={triggerSignInDialog}
+            onClick={handleTriggerSignInDialog}
             className="hover:text-foreground"
           >
             <RiListSettingsFill />
           </SidebarMenuButton>
         </SidebarFooter>
       </Sidebar>
-      <SignInDialog
-        open={isSignInDialogOpen}
-        onOpenChange={setIsSignInDialogOpen}
-      />
     </Sidebar>
   )
 }

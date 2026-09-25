@@ -16,7 +16,7 @@ import 'server-only'
 
 const SIGN_OUT_PATH = '/api/sign-out'
 
-export function createUserOctokit(token: string): Octokit {
+export function createUserOctokit(token?: string): Octokit {
   const octokit = new Octokit({ auth: token })
 
   // Octokit 發出的任何請求失敗時都會執行，自動處理 401 Error
@@ -61,7 +61,7 @@ export async function hasGitHubScope(scope: string) {
 }
 
 export async function findOrCreateRepo(token: string, name: string) {
-  const octokit = new Octokit({ auth: token })
+  const octokit = createUserOctokit(token)
   const { data: me } = await octokit.rest.users.getAuthenticated()
 
   try {
