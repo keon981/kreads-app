@@ -1,16 +1,31 @@
 // 處理 github 帳戶權限
 
 import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
 
 import { cache } from 'react'
 
 import { Octokit } from '@octokit/rest'
 
 import { auth, fetchListUserAccounts, verifySession } from '@/lib/auth'
+import { isRequestError, isUnauthorizedError } from '@/utils/status'
 
 import type { AuthSession } from '@/types/auth'
 
 import 'server-only'
+
+const SIGN_OUT_PATH = '/api/sign-out'
+
+export function createUserOctokit(token: string): Octokit {
+  const octokit = new Octokit({ auth: token })
+
+  // Octokit 發出的任何請求失敗時都會執行，自動處理 401 Error
+  octokit.hook.error('request', (error) => {
+    if (isUnauthorizedError(error)) redirect(SIGN_OUT_PATH)
+    throw error
+  })
+  return octokit
+}
 
 export async function fetchGitHubToken() {
   const accounts = await fetchListUserAccounts()
@@ -32,7 +47,7 @@ export const fetchGitHubUser = cache(async () => {
   const token = await fetchGitHubToken()
   if (!token) return null
 
-  const octokit = new Octokit({ auth: token })
+  const octokit = createUserOctokit(token)
   const { data } = await octokit.rest.users.getAuthenticated()
   return data
 })
@@ -43,12 +58,6 @@ export async function hasGitHubScope(scope: string) {
 
   const github = accounts.find(a => a.providerId === 'github')
   return github?.scopes.includes(scope) ?? false
-}
-
-export function isRequestError(
-  error: unknown,
-): error is Error & { status: number } {
-  return error instanceof Error && 'status' in error
 }
 
 export async function findOrCreateRepo(token: string, name: string) {
@@ -87,7 +96,7 @@ export async function fetchUserRepo() {
 
   const [owner, repo] = userRepo
   return {
-    octokit: new Octokit({ auth: token }),
+    octokit: createUserOctokit(token),
     owner,
     repo,
   }

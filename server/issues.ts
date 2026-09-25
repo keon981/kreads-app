@@ -2,7 +2,9 @@
 
 import { Octokit } from '@octokit/rest'
 
-import { fetchGitHubToken, fetchUserRepo, isRequestError } from './github'
+import { isRequestError } from '@/utils/status'
+
+import { fetchGitHubToken, fetchUserRepo } from './github'
 
 import type { Post } from '@/types/post'
 
@@ -48,7 +50,8 @@ async function createIssue(content: string) {
       body: content,
     })
     return true
-  } catch {
+  } catch (error) {
+    if (!isRequestError(error)) throw error
     return false
   }
 }
@@ -65,8 +68,9 @@ async function closeIssue(issueNumber: number) {
       state: 'closed',
     })
     return res.status
-  } catch (err) {
-    return isRequestError(err) ? err.status : 500
+  } catch (error) {
+    if (!isRequestError(error)) throw error
+    return error.status
   }
 }
 

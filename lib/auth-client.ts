@@ -25,6 +25,7 @@ export function signInWithGitHub() {
   const next = safeNext(url.searchParams.get('next') ?? url.pathname + url.search)
   return authClient.signIn.social({
     provider: 'github',
+    scopes: ['public_repo'],
     callbackURL: '/',
     errorCallbackURL: signUpPath(next),
   })

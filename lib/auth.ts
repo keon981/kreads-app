@@ -60,7 +60,6 @@ export const auth = betterAuth({
     },
   },
   account: {
-    updateAccountOnSignIn: false,
     accountLinking: {
       trustedProviders: ['github'],
     },

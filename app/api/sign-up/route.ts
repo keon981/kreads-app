@@ -8,8 +8,9 @@ import { db } from '@/db/drizzle'
 import { user } from '@/db/schema/auth-schema'
 import { inviteCode as inviteCodeSchema } from '@/db/schema/invite-schema'
 import { auth, getSessionCache, signOutWithServer } from '@/lib/auth'
-import { fetchGitHubToken, findOrCreateRepo, isRequestError } from '@/server/github'
+import { fetchGitHubToken, findOrCreateRepo } from '@/server/github'
 import { safeNext, signUpPath } from '@/utils/navigation'
+import { isRequestError } from '@/utils/status'
 import { isUserActive } from '@/utils/user'
 
 export async function GET(request: NextRequest) {
