@@ -1,5 +1,3 @@
-// 處理 user 表
-
 import { eq } from 'drizzle-orm'
 
 import { db } from '@/db/drizzle'

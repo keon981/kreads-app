@@ -1,10 +1,10 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useOptimistic, useState, useTransition } from 'react'
 
-import { RiBookmarkLine, RiChat1Line, RiDeleteBin7Line, RiHeartLine, RiLink, RiMoreLine, RiShareForwardLine } from '@remixicon/react'
+import { RiChat1Line, RiHeartFill, RiHeartLine, RiShareForwardLine } from '@remixicon/react'
 
-import { deletePostAction } from '@/actions/post-action'
+import { useSignInDialog } from '@/components/blocks/sign-in'
 import {
   Avatar,
   AvatarFallback,
@@ -12,14 +12,6 @@ import {
 } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   Item,
   ItemContent,
@@ -29,33 +21,78 @@ import {
   ItemTitle,
 } from '@/components/ui/item'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from '@/components/ui/toast'
 import { useAuth } from '@/contexts/auth-provider'
 import { cn } from '@/lib/utils'
 
-import { useSignInDialog } from '../blocks/sign-in'
-import { toast } from './toast'
+import { toggleLikeAction } from './action'
+
+interface LikeState {
+  isLiked: boolean
+  likeCount: number
+}
+
+function applyLike(current: LikeState, isLiked: boolean): LikeState {
+  if (current.isLiked === isLiked) return current
+  return { isLiked, likeCount: current.likeCount + (isLiked ? 1 : -1) }
+}
 
 function PostItem({
   title,
   children,
   avatarUrl,
   menu,
+  like,
+  repoName = '',
 }: {
   avatarUrl?: string
   avatarFallback?: string
   menu?: React.ReactNode
+  repoName?: string
+  like?: {
+    issueNumber: number
+    likeCount: number
+    isLiked: boolean
+  }
 } & React.ComponentProps<typeof Item>) {
   const trigger = useSignInDialog(s => s.trigger)
-  const { isAuth } = useAuth()
+  const { isAuth, user } = useAuth()
+  const [likeState, setLikeState] = useState<LikeState>({
+    isLiked: like?.isLiked ?? false,
+    likeCount: like?.likeCount ?? 0,
+  })
+  const [optimisticLike, setOptimisticLike] = useOptimistic(likeState, applyLike)
+  const [, startLikeTransition] = useTransition()
 
-  const handleTriggerSignInDialog = () => {
+  const triggerSignInDialog = () => {
     if (isAuth) return true
     trigger()
     return false
   }
 
-  const handleClickHeart = async () => {
-    if (!handleTriggerSignInDialog()) return
+  const handleClickHeart = () => {
+    if (!triggerSignInDialog() || !like) return
+    const nextIsLiked = !optimisticLike.isLiked
+
+    startLikeTransition(async () => {
+      setOptimisticLike(nextIsLiked)
+      const res = await toggleLikeAction({
+        issueNumber: like.issueNumber,
+        isLiked: nextIsLiked,
+        repoName,
+        viewer: user?.id ?? '',
+      })
+      const resIsLiked = res.isLiked
+
+      if (resIsLiked === undefined) {
+        toast.add({ type: 'error', description: res.message })
+        return
+      }
+
+      startLikeTransition(() => {
+        setLikeState(current => applyLike(current, resIsLiked))
+      })
+    })
   }
 
   return (
@@ -82,8 +119,10 @@ function PostItem({
 
         {/* footer button group */}
         <ButtonGroup className="px-0">
-          <Button variant="ghost" size="icon-lg">
-            <RiHeartLine />
+          <Button variant="ghost" size="icon-lg" onClick={handleClickHeart}>
+            {optimisticLike.isLiked
+              ? <RiHeartFill className="size-5 text-destructive" />
+              : <RiHeartLine className="size-5" />}
           </Button>
           <Button variant="ghost" size="icon-lg">
             <RiChat1Line />
@@ -94,67 +133,6 @@ function PostItem({
         </ButtonGroup>
       </ItemContent>
     </Item>
-  )
-}
-
-function PostDropdownMenu({
-  issueNumber,
-  isOwner = false,
-}: {
-  issueNumber: number
-  isOwner?: boolean
-}) {
-  const [, startTransition] = useTransition()
-  const handleCopyLink = () => { }
-  const handleBookmark = () => { }
-  const handleDelete = () => {
-    startTransition(async () => {
-      const res = await deletePostAction(issueNumber)
-      toast.add({
-        type: res.status === 200 ? 'success' : 'error',
-        description: res.message,
-      })
-    })
-  }
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={(
-        <Button variant="ghost" size="icon-sm">
-          <RiMoreLine />
-        </Button>
-      )}
-      />
-      <DropdownMenuContent className="w-54" align="start">
-        <DropdownMenuGroup>
-          <DropdownMenuItem className="px-3 py-2.5 text-[15px] font-semibold" onClick={handleCopyLink}>
-            複製連結
-            <span className="ml-auto">
-              <RiLink />
-            </span>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="px-3 py-2.5 text-[15px] font-semibold" onClick={handleBookmark}>
-            儲存
-            <span className="ml-auto">
-              <RiBookmarkLine />
-            </span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        {isOwner && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem className="px-3 py-2.5 text-[15px] font-semibold" variant="destructive" onClick={handleDelete}>
-                刪除
-                <span className="ml-auto">
-                  <RiDeleteBin7Line />
-                </span>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
   )
 }
 
@@ -200,7 +178,6 @@ function PostItemGroup({ className, ...props }: React.ComponentProps<typeof Item
 }
 
 export {
-  PostDropdownMenu,
   PostItem,
   PostItemGroup,
   PostItemSkeleton,

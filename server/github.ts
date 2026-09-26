@@ -7,10 +7,8 @@ import { cache } from 'react'
 
 import { Octokit } from '@octokit/rest'
 
-import { auth, fetchListUserAccounts, verifySession } from '@/lib/auth'
+import { auth, fetchListUserAccounts } from '@/lib/auth'
 import { isRequestError, isUnauthorizedError } from '@/utils/status'
-
-import type { AuthSession } from '@/types/auth'
 
 import 'server-only'
 
@@ -82,22 +80,21 @@ export async function findOrCreateRepo(token: string, name: string) {
   return data
 }
 
-function getUserRepo(user: AuthSession['user']) {
-  if (!user.repoName) return null
-  const [owner, repo] = user.repoName.split('/')
-  return [owner, repo]
+export interface UserRepo {
+  octokit: Octokit
+  owner: string
+  repo: string
 }
 
-export async function fetchUserRepo() {
-  const session = await verifySession()
+export async function fetchUserRepo(repoName?: string | null): Promise<UserRepo & { error: boolean }> {
   const token = await fetchGitHubToken()
-  const userRepo = getUserRepo(session.user)
-  if (!token || !userRepo) return null
 
-  const [owner, repo] = userRepo
+  const [owner, repo] = repoName?.split('/') ?? ['', '']
+
   return {
-    octokit: createUserOctokit(token),
+    octokit: createUserOctokit(token ?? undefined),
     owner,
     repo,
+    error: !token,
   }
 }

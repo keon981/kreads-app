@@ -34,14 +34,15 @@ import {
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/contexts/auth-provider'
 import { NewPostFormDialog } from '@/features/new-post-dialog/new-post-dialog'
-import { env } from '@/lib/env'
+import { env, homeList } from '@/lib/env'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const trigger = useSignInDialog(s => s.trigger)
   const pathName = usePathname()
-  const isRoute = (url: string) => pathName === url
-  const isHome = ['/', env.HOME_USERNAME].includes(pathName)
   const { isAuth } = useAuth()
+
+  const getIsRoute = (url: string) => pathName === url
+  const isHome = homeList.includes(pathName)
 
   const handleTriggerSignInDialog = () => {
     if (isAuth) return
@@ -103,10 +104,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem>
                   <SidebarMenuLink
                     href="/saved"
-                    isActive={isRoute('/saved')}
+                    isActive={getIsRoute('/saved')}
                     onClick={handleTriggerSignInDialog}
                   >
-                    {isRoute('/saved') ? <RiBookmarkFill /> : <RiBookmarkLine />}
+                    {getIsRoute('/saved') ? <RiBookmarkFill /> : <RiBookmarkLine />}
                   </SidebarMenuLink>
                 </SidebarMenuItem>
 
@@ -114,10 +115,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem>
                   <SidebarMenuLink
                     href="/profile"
-                    isActive={isRoute('/profile')}
+                    isActive={getIsRoute('/profile')}
                     onClick={handleTriggerSignInDialog}
                   >
-                    {isRoute('/profile') ? <RiUserFill /> : <RiUserLine />}
+                    {getIsRoute('/profile') ? <RiUserFill /> : <RiUserLine />}
                   </SidebarMenuLink>
                 </SidebarMenuItem>
               </SidebarMenu>

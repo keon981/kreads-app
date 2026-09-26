@@ -1,7 +1,5 @@
 import { notFound } from 'next/navigation'
 
-import React from 'react'
-
 import UserViewer from '@/features/user-viewer/user-viewer'
 import { getSessionCache } from '@/lib/auth'
 import { fetchViewerUser } from '@/server/users'

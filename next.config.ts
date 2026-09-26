@@ -1,10 +1,8 @@
 import type { NextConfig } from 'next'
 
-import process from 'node:process'
-
 const nextConfig: NextConfig = {
   async redirects() {
-    const username = process.env.HOME_USERNAME
+    const username = process.env.NEXT_PUBLIC_HOME_USERNAME
     if (!username) return []
 
     return [

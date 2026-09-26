@@ -1,5 +1,7 @@
-import { PostDropdownMenu, PostItem } from '@/components/ui/post'
 import { fetchIssues } from '@/server/issues'
+
+import { PostItem, PostItemGroup, PostItemSkeleton } from './post'
+import { PostDropdownMenu } from './post-dropdown-menu'
 
 export async function PostList({ repoName, isOwner }: {
   repoName: string
@@ -15,16 +17,36 @@ export async function PostList({ repoName, isOwner }: {
     )
   }
 
-  return posts.map(post => (
-    <PostItem
-      key={post.title}
-      title={post.author?.login ?? 'ghost'}
-      avatarUrl={post.author?.avatarUrl}
-      menu={(
-        <PostDropdownMenu issueNumber={post.number} isOwner={isOwner} />
-      )}
-    >
-      {post.body}
-    </PostItem>
-  ))
+  return (
+    <PostItemGroup className="">
+      {posts.map(post => (
+        <PostItem
+          key={post.title}
+          title={post.author?.login ?? 'ghost'}
+          avatarUrl={post.author?.avatarUrl}
+          repoName={repoName}
+          menu={(
+            <PostDropdownMenu issueNumber={post.number} isOwner={isOwner} />
+          )}
+          like={{
+            issueNumber: post.number,
+            likeCount: post.likeCount,
+            isLiked: post.isLiked,
+          }}
+        >
+          {post.body}
+        </PostItem>
+      ))}
+    </PostItemGroup>
+  )
+}
+
+export async function PostListSkeleton({ length = 10 }: { length?: number }) {
+  return (
+    <PostItemGroup className="">
+      {Array.from({ length }, (_, i) => (
+        <PostItemSkeleton key={i} />
+      ))}
+    </PostItemGroup>
+  )
 }

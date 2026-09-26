@@ -1,11 +1,10 @@
 import { Suspense } from 'react'
 
 import ArticleLayout from '@/components/layouts/article-layout'
-import { PostItemSkeleton } from '@/components/ui/post'
 import { PostList } from '@/features/user-viewer/post-list'
 
-import { PostItemGroup } from '../../components/ui/post'
 import CreateNewPost from './create-new-post'
+import { PostItemGroup, PostItemSkeleton } from './post'
 
 import type { ViewerUser } from '@/types/user'
 

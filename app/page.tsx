@@ -1,5 +1,5 @@
 import ArticleLayout from '@/components/layouts/article-layout'
-import { PostItem, PostItemGroup } from '@/components/ui/post'
+import { PostItem, PostItemGroup } from '@/features/user-viewer/post'
 import { fetchGitHubUser } from '@/server/github'
 
 export default async function Page() {
