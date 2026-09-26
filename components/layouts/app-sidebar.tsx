@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/contexts/auth-provider'
 import { NewPostFormDialog } from '@/features/new-post-dialog/new-post-dialog'
-import { env, homeList } from '@/lib/env'
+import { homeList } from '@/lib/env'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const trigger = useSignInDialog(s => s.trigger)

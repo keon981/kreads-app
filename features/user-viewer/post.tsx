@@ -1,7 +1,5 @@
 'use client'
 
-import { useOptimistic, useState, useTransition } from 'react'
-
 import { RiChat1Line, RiHeartFill, RiHeartLine, RiShareForwardLine } from '@remixicon/react'
 
 import { useSignInDialog } from '@/components/blocks/sign-in'
@@ -23,19 +21,10 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/toast'
 import { useAuth } from '@/contexts/auth-provider'
+import { useDebouncedMutation } from '@/hooks/use-debounced-mutation'
 import { cn } from '@/lib/utils'
 
 import { toggleLikeAction } from './action'
-
-interface LikeState {
-  isLiked: boolean
-  likeCount: number
-}
-
-function applyLike(current: LikeState, isLiked: boolean): LikeState {
-  if (current.isLiked === isLiked) return current
-  return { isLiked, likeCount: current.likeCount + (isLiked ? 1 : -1) }
-}
 
 function PostItem({
   title,
@@ -57,12 +46,36 @@ function PostItem({
 } & React.ComponentProps<typeof Item>) {
   const trigger = useSignInDialog(s => s.trigger)
   const { isAuth, user } = useAuth()
-  const [likeState, setLikeState] = useState<LikeState>({
-    isLiked: like?.isLiked ?? false,
-    likeCount: like?.likeCount ?? 0,
+
+  // var
+  const serverIsLiked = like?.isLiked ?? false
+  const serverLikeCount = like?.likeCount ?? 0
+  const issueNumber = like?.issueNumber
+  const viewer = user?.id ?? ''
+
+  // hook
+  const { data: isLiked, mutate: setIsLiked } = useDebouncedMutation({
+    data: serverIsLiked,
+    mutationFn: async (nextIsLiked) => {
+      if (issueNumber === undefined) return
+
+      const res = await toggleLikeAction({
+        issueNumber,
+        isLiked: nextIsLiked,
+        repoName,
+        viewer,
+      })
+
+      if (res.isLiked === undefined) throw new Error(res.message)
+    },
+    onError: (error) => {
+      toast.add({ type: 'error', description: error.message })
+    },
   })
-  const [optimisticLike, setOptimisticLike] = useOptimistic(likeState, applyLike)
-  const [, startLikeTransition] = useTransition()
+
+  const likeCount = serverLikeCount + Number(isLiked) - Number(serverIsLiked)
+
+  // handler
 
   const triggerSignInDialog = () => {
     if (isAuth) return true
@@ -72,27 +85,7 @@ function PostItem({
 
   const handleClickHeart = () => {
     if (!triggerSignInDialog() || !like) return
-    const nextIsLiked = !optimisticLike.isLiked
-
-    startLikeTransition(async () => {
-      setOptimisticLike(nextIsLiked)
-      const res = await toggleLikeAction({
-        issueNumber: like.issueNumber,
-        isLiked: nextIsLiked,
-        repoName,
-        viewer: user?.id ?? '',
-      })
-      const resIsLiked = res.isLiked
-
-      if (resIsLiked === undefined) {
-        toast.add({ type: 'error', description: res.message })
-        return
-      }
-
-      startLikeTransition(() => {
-        setLikeState(current => applyLike(current, resIsLiked))
-      })
-    })
+    setIsLiked(prev => !prev)
   }
 
   return (
@@ -118,21 +111,37 @@ function PostItem({
         </ItemDescription>
 
         {/* footer button group */}
-        <ButtonGroup className="px-0">
-          <Button variant="ghost" size="icon-lg" onClick={handleClickHeart}>
-            {optimisticLike.isLiked
+        <ButtonGroup className="px-0 gap-0.5!">
+          <PostFooterButton
+            size="lg"
+            onClick={handleClickHeart}
+          >
+            {isLiked
               ? <RiHeartFill className="size-5 text-destructive" />
               : <RiHeartLine className="size-5" />}
-          </Button>
-          <Button variant="ghost" size="icon-lg">
+            {likeCount}
+          </PostFooterButton>
+          <PostFooterButton>
             <RiChat1Line />
-          </Button>
-          <Button variant="ghost" size="icon-lg">
+          </PostFooterButton>
+          <PostFooterButton>
             <RiShareForwardLine />
-          </Button>
+          </PostFooterButton>
         </ButtonGroup>
       </ItemContent>
     </Item>
+  )
+}
+
+function PostFooterButton({ ...props }: React.ComponentProps<typeof Button>) {
+  return (
+    <ButtonGroup>
+      <Button
+        variant="ghost"
+        size="icon-lg"
+        {...props}
+      />
+    </ButtonGroup>
   )
 }
 
