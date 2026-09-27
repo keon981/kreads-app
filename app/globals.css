@@ -117,6 +117,19 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@theme {
+    --text-xs: 0.75rem;
+    --text-xs--line-height: 1.4;
+    --text-sm: 0.8125rem;
+    --text-sm--line-height: 1.4;
+    --text-base: 0.9375rem;
+    --text-base--line-height: 1.4;
+    --text-lg: 1rem;
+    --text-lg--line-height: 1.25;
+    --text-xl--line-height: 1.25;
+    --text-2xl--line-height: 1.25;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

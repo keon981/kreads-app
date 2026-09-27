@@ -1,14 +1,14 @@
 import { Suspense } from 'react'
 
 import ArticleLayout from '@/components/layouts/article-layout'
-import { PostList } from '@/features/user-viewer/post-list'
+import { PostItemGroup, PostItemSkeleton } from '@/features/posts/post'
+import { PostList, PostListSkeleton } from '@/features/posts/post-list'
 
-import CreateNewPost from './create-new-post'
-import { PostItemGroup, PostItemSkeleton } from './post'
+import CreateNewPostItem from './create-new-post'
 
 import type { ViewerUser } from '@/types/user'
 
-export default function UserViewer({
+export function UserViewer({
   user,
   isOwner,
 }: { user: ViewerUser, isOwner: boolean }) {
@@ -19,7 +19,7 @@ export default function UserViewer({
       avatarUrl={user?.avatarUrl}
     >
       {/* new post */}
-      {isOwner && <CreateNewPost />}
+      {isOwner && <CreateNewPostItem />}
 
       {/* post list */}
       <PostItemGroup className="">
@@ -30,3 +30,17 @@ export default function UserViewer({
     </ArticleLayout>
   )
 };
+
+export function UserViewerSkeleton({
+  user,
+}: { user?: ViewerUser }) {
+  return (
+    <ArticleLayout
+      name={user?.name ?? ''}
+      id={user?.username}
+      avatarUrl={user?.avatarUrl}
+    >
+      <PostListSkeleton />
+    </ArticleLayout>
+  )
+}

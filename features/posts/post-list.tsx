@@ -3,7 +3,7 @@ import { fetchIssues } from '@/server/issues'
 import { PostItem, PostItemGroup, PostItemSkeleton } from './post'
 import { PostDropdownMenu } from './post-dropdown-menu'
 
-export async function PostList({ repoName, isOwner }: {
+async function PostList({ repoName, isOwner }: {
   repoName: string
   isOwner: boolean
 }) {
@@ -41,7 +41,7 @@ export async function PostList({ repoName, isOwner }: {
   )
 }
 
-export async function PostListSkeleton({ length = 10 }: { length?: number }) {
+async function PostListSkeleton({ length = 10 }: { length?: number }) {
   return (
     <PostItemGroup className="">
       {Array.from({ length }, (_, i) => (
@@ -50,3 +50,5 @@ export async function PostListSkeleton({ length = 10 }: { length?: number }) {
     </PostItemGroup>
   )
 }
+
+export { PostList, PostListSkeleton }

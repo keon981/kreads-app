@@ -45,15 +45,15 @@ function PostDropdownMenu({
         </Button>
       )}
       />
-      <DropdownMenuContent className="w-54" align="start">
+      <DropdownMenuContent align="start">
         <DropdownMenuGroup>
-          <DropdownMenuItem className="px-3 py-2.5 text-[15px] font-semibold" onClick={handleCopyLink}>
+          <DropdownMenuItem onClick={handleCopyLink}>
             複製連結
             <span className="ml-auto">
               <RiLink />
             </span>
           </DropdownMenuItem>
-          <DropdownMenuItem className="px-3 py-2.5 text-[15px] font-semibold" onClick={handleBookmark}>
+          <DropdownMenuItem onClick={handleBookmark}>
             儲存
             <span className="ml-auto">
               <RiBookmarkLine />
@@ -64,7 +64,7 @@ function PostDropdownMenu({
           <>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="px-3 py-2.5 text-[15px] font-semibold" variant="destructive" onClick={handleDelete}>
+              <DropdownMenuItem variant="destructive" onClick={handleDelete}>
                 刪除
                 <span className="ml-auto">
                   <RiDeleteBin7Line />

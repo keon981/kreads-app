@@ -1,12 +1,12 @@
 import { redirect } from 'next/navigation'
 
-import UserViewer from '@/features/user-viewer/user-viewer'
+import { UserViewer } from '@/features/user-viewer/user-viewer'
 import { verifySession } from '@/lib/auth'
-import { toViewerUser } from '@/utils/user'
+import { getViewerUser } from '@/utils/user'
 
 async function Page() {
   const session = await verifySession('/profile')
-  const viewer = toViewerUser(session.user)
+  const viewer = getViewerUser(session.user)
   if (!viewer) return redirect('/')
 
   return <UserViewer user={viewer} isOwner />

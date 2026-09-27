@@ -1,11 +1,5 @@
-import ArticleLayout from '@/components/layouts/article-layout'
-import { PostListSkeleton } from '@/features/user-viewer/post-list'
+import { UserViewerSkeleton } from '@/features/user-viewer/user-viewer'
 
 export default function Loading() {
-  // Or a custom loading skeleton component
-  return (
-    <ArticleLayout>
-      <PostListSkeleton />
-    </ArticleLayout>
-  )
+  return <UserViewerSkeleton />
 }

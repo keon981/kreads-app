@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm'
 
 import { db } from '@/db/drizzle'
 import { user } from '@/db/schema/auth-schema'
-import { toViewerUser } from '@/utils/user'
+import { getViewerUser } from '@/utils/user'
 
 import 'server-only'
 
@@ -18,7 +18,7 @@ async function fetchViewerUser(username: string) {
     .where(eq(user.username, username))
     .limit(1)
 
-  return foundUser ? toViewerUser(foundUser) : null
+  return foundUser ? getViewerUser(foundUser) : null
 }
 
 export {

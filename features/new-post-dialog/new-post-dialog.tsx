@@ -80,7 +80,7 @@ function NewPostFormDialog({ children, ...props }: Omit<React.ComponentProps<typ
                   placeholder="有什麼新鮮事嗎？"
                   defaultValue={state.content}
                   name="content"
-                  className="px-0 bg-transparent! border-0 focus-visible:ring-0 focus-visible:border-0 resize-none text-[15px] md:text-[15px]"
+                  className="px-0 bg-transparent! border-0 focus-visible:ring-0 focus-visible:border-0 resize-none md:text-base"
                 />
               </div>
             </section>

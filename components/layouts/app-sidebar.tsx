@@ -11,16 +11,29 @@ import {
   RiBookmarkFill,
   RiBookmarkLine,
   RiCommandLine,
+  RiComputerLine,
   RiHome9Fill,
   RiHome9Line,
   RiListSettingsFill,
+  RiMoonLine,
   RiSearchLine,
+  RiSunLine,
   RiUserFill,
   RiUserLine,
 } from '@remixicon/react'
+import { useTheme } from 'next-themes'
 
 import { useSignInDialog } from '@/components/blocks/sign-in'
 import { DialogTrigger } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   Sidebar,
   SidebarContent,
@@ -55,7 +68,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       className="overflow-hidden *:data-[sidebar=sidebar]:flex-row"
       {...props}
     >
-      <Sidebar collapsible="none">
+      <Sidebar collapsible="icon">
         <SidebarHeader>
           <SidebarMenu>
             {/* Logo */}
@@ -126,13 +139,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
-          <SidebarMenuButton
-            variant="native"
-            onClick={handleTriggerSignInDialog}
-            className="hover:text-foreground"
-          >
-            <RiListSettingsFill />
-          </SidebarMenuButton>
+          <SidebarSettingsMenu />
         </SidebarFooter>
       </Sidebar>
     </Sidebar>
@@ -149,4 +156,45 @@ function SidebarMenuLink({
   }
 
   return <SidebarMenuButton render={<Link href={href} />} {...props} />
+}
+
+function SidebarSettingsMenu() {
+  const { theme, setTheme } = useTheme()
+
+  return (
+    <SidebarMenuItem>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={(
+            <SidebarMenuButton
+              variant="native"
+              className="hover:text-foreground"
+            />
+          )}
+        >
+          <RiListSettingsFill />
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent side="right" align="end">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>外觀</DropdownMenuLabel>
+            <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+              <DropdownMenuRadioItem value="light">
+                <RiSunLine />
+                Light
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="dark">
+                <RiMoonLine />
+                Dark
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="system">
+                <RiComputerLine />
+                System
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </SidebarMenuItem>
+  )
 }

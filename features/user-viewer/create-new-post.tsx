@@ -6,7 +6,7 @@ import { DialogTrigger } from '@/components/ui/dialog'
 import { useAuth } from '@/contexts/auth-provider'
 import { NewPostFormDialog } from '@/features/new-post-dialog/new-post-dialog'
 
-function CreateNewPost() {
+function CreateNewPostItem() {
   const { user } = useAuth()
   const { name = '', avatarUrl = '' } = user || {}
 
@@ -21,7 +21,7 @@ function CreateNewPost() {
       <div className="flex flex-1">
         <NewPostFormDialog>
           <DialogTrigger className="flex-1 text-start cursor-text">
-            <span className="text-[15px] text-muted-foreground">
+            <span className="text-base text-muted-foreground">
               有什麼新鮮事？
             </span>
           </DialogTrigger>
@@ -38,4 +38,4 @@ function CreateNewPost() {
   )
 }
 
-export default CreateNewPost
+export default CreateNewPostItem

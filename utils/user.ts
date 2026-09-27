@@ -5,7 +5,7 @@ export function isUserActive(session: AuthSession | null) {
   return !!session?.user.repoName
 }
 
-export function toViewerUser(data: {
+export function getViewerUser(data: {
   name: string
   image?: string | null
   username?: string | null

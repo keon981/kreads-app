@@ -14,7 +14,7 @@ import 'server-only'
 
 const SIGN_OUT_PATH = '/api/sign-out'
 
-export function createUserOctokit(token?: string): Octokit {
+export function createOctokit(token?: string): Octokit {
   const octokit = new Octokit({ auth: token })
 
   // Octokit 發出的任何請求失敗時都會執行，自動處理 401 Error
@@ -25,7 +25,7 @@ export function createUserOctokit(token?: string): Octokit {
   return octokit
 }
 
-export async function fetchGitHubToken() {
+export async function fetchAccessToken() {
   const accounts = await fetchListUserAccounts()
   const nextHeaders = await headers()
   if (!accounts || !nextHeaders) return null
@@ -41,11 +41,13 @@ export async function fetchGitHubToken() {
   return accessToken
 }
 
+export const fetchAccessTokenCache = cache(fetchAccessToken)
+
 export const fetchGitHubUser = cache(async () => {
-  const token = await fetchGitHubToken()
+  const token = await fetchAccessTokenCache()
   if (!token) return null
 
-  const octokit = createUserOctokit(token)
+  const octokit = createOctokit(token)
   const { data } = await octokit.rest.users.getAuthenticated()
   return data
 })
@@ -59,7 +61,7 @@ export async function hasGitHubScope(scope: string) {
 }
 
 export async function findOrCreateRepo(token: string, name: string) {
-  const octokit = createUserOctokit(token)
+  const octokit = createOctokit(token)
   const { data: me } = await octokit.rest.users.getAuthenticated()
 
   try {
@@ -87,12 +89,12 @@ export interface UserRepo {
 }
 
 export async function fetchUserRepo(repoName?: string | null): Promise<UserRepo & { error: boolean }> {
-  const token = await fetchGitHubToken()
+  const token = await fetchAccessTokenCache()
 
   const [owner, repo] = repoName?.split('/') ?? ['', '']
 
   return {
-    octokit: createUserOctokit(token ?? undefined),
+    octokit: createOctokit(token ?? undefined),
     owner,
     repo,
     error: !token,

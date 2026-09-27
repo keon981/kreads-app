@@ -17,12 +17,14 @@ import {
 } from '@/components/ui/card'
 import { signOutWithClient } from '@/lib/auth-client'
 
-export function AboutCard({ name, id, children, avatarUrl }: {
+interface Props {
+  children?: React.ReactNode
   name: string
   id: string
-  children?: React.ReactNode
   avatarUrl?: string
-}) {
+}
+
+export function AboutCard({ name, id, children, avatarUrl }: Props) {
   const router = useRouter()
   const handleSignOut = async () => {
     await signOutWithClient()

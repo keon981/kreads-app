@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 
-import UserViewer from '@/features/user-viewer/user-viewer'
+import { UserViewer } from '@/features/user-viewer/user-viewer'
 import { getSessionCache } from '@/lib/auth'
 import { fetchViewerUser } from '@/server/users'
 

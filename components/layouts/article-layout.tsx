@@ -60,6 +60,8 @@ export default function ArticleLayout({
           </div>
         </article>
       </section>
+
+      {/* 登入 card */}
       {!isAuth && (
         <div className="fixed top-6 right-4 z-20 lg:relative lg:top-0 lg:right-0 lg:mt-18 w-fit">
           <SignInButton className="lg:hidden p-4 rounded-full">
