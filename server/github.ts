@@ -10,6 +10,8 @@ import { Octokit } from '@octokit/rest'
 import { auth, fetchListUserAccounts } from '@/lib/auth'
 import { isRequestError, isUnauthorizedError } from '@/utils/status'
 
+import type { UserRepo } from '@/types/user'
+
 import 'server-only'
 
 const SIGN_OUT_PATH = '/api/sign-out'
@@ -80,12 +82,6 @@ export async function findOrCreateRepo(token: string, name: string) {
     auto_init: true,
   })
   return data
-}
-
-export interface UserRepo {
-  octokit: Octokit
-  owner: string
-  repo: string
 }
 
 export async function fetchUserRepo(repoName?: string | null): Promise<UserRepo & { error: boolean }> {

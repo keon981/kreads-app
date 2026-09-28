@@ -151,11 +151,14 @@ function SidebarMenuLink({
   ...props
 }: React.ComponentProps<typeof SidebarMenuButton> & { href: Url }) {
   const { isAuth } = useAuth()
-  if (!isAuth) {
-    return <SidebarMenuButton {...props} />
-  }
+  if (!isAuth) return <SidebarMenuButton {...props} />
 
-  return <SidebarMenuButton render={<Link href={href} />} {...props} />
+  return (
+    <SidebarMenuButton
+      render={<Link href={href} />}
+      {...props}
+    />
+  )
 }
 
 function SidebarSettingsMenu() {

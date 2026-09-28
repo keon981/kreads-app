@@ -531,9 +531,7 @@ function SidebarMenuButton({
     },
   })
 
-  if (!tooltip) {
-    return comp
-  }
+  if (!tooltip) return comp
 
   if (typeof tooltip === 'string') {
     tooltip = {

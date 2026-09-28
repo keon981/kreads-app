@@ -8,7 +8,7 @@ export const env = createEnv({
     GITHUB_CLIENT_SECRET: z.string(),
   },
   client: {
-    NEXT_PUBLIC_HOME_USERNAME: z.string().startsWith('@'),
+    NEXT_PUBLIC_HOME_USERNAME: z.string(),
     NEXT_PUBLIC_APP_TITLE: z.string(),
   },
   extends: [vercel(), neonVercel()],

@@ -1,3 +1,5 @@
+'use client'
+
 import { useRouter } from 'next/navigation'
 
 import {
@@ -26,7 +28,10 @@ interface Props {
 
 export function AboutCard({ name, id, children, avatarUrl }: Props) {
   const router = useRouter()
-  const handleSignOut = async () => {
+
+  // handler
+  const handleShare = async () => {
+    // 先測試登出
     await signOutWithClient()
     router.refresh()
   }
@@ -50,7 +55,7 @@ export function AboutCard({ name, id, children, avatarUrl }: Props) {
       </CardHeader>
       <CardContent>{children}</CardContent>
       <CardFooter className="bg-transparent border-transparent rounded-none">
-        <Button type="submit" variant="outline" className="w-full" onClick={handleSignOut}>
+        <Button type="submit" variant="outline" className="w-full" onClick={handleShare}>
           Share
         </Button>
       </CardFooter>

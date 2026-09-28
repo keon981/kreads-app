@@ -12,7 +12,7 @@ import { env } from '@/lib/env'
 import { cn } from '@/lib/utils'
 import { fetchGitHubUser } from '@/server/github'
 
-import './globals.css'
+import '@/styles/globals.css'
 
 const oxaniumHeading = Oxanium({ subsets: ['latin'], variable: '--font-heading' })
 

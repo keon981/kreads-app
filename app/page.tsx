@@ -1,21 +1,14 @@
 import ArticleLayout from '@/components/layouts/article-layout'
-import { PostItem, PostItemGroup } from '@/features/posts/post'
-import { fetchGitHubUser } from '@/server/github'
+import { IssueItem, IssueItemGroup } from '@/components/ui/issue'
 
 export default async function Page() {
-  const user = await fetchGitHubUser()
-
   return (
-    <ArticleLayout
-      name={user?.name ?? ''}
-      id={user?.login}
-      avatarUrl={user?.avatar_url}
-    >
-      <PostItemGroup className="">
+    <ArticleLayout>
+      <IssueItemGroup>
         {Array.from({ length: 20 }, (_, i) => (
-          <PostItem key={i}>{i}</PostItem>
+          <IssueItem key={i}>{i}</IssueItem>
         ))}
-      </PostItemGroup>
+      </IssueItemGroup>
     </ArticleLayout>
   )
 }

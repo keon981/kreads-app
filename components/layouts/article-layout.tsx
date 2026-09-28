@@ -1,12 +1,11 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import { RiGithubFill } from '@remixicon/react'
 
 import { useAuth } from '@/contexts/auth-provider'
 
-import { AboutCard } from '../blocks/about-card'
 import { SignInButton, SignInCard } from '../blocks/sign-in'
 
 function AppHeader() {
@@ -30,20 +29,12 @@ function AppHeader() {
   )
 }
 
-interface Props extends Partial<React.ComponentProps<typeof AboutCard>> { }
-
 export default function ArticleLayout({
   children,
-  name = '',
-  id = '',
-  avatarUrl,
-}: Props) {
+}: {
+  children: React.ReactNode
+}) {
   const { isAuth } = useAuth()
-  const aboutCard = useMemo(() => ({
-    name,
-    id,
-    avatarUrl,
-  }), [name, id, avatarUrl])
 
   return (
     <>
@@ -52,9 +43,6 @@ export default function ArticleLayout({
         <AppHeader />
         <article className="size-full flex-1 flex flex-col overflow-hidden">
           <div className="grow min-h-0 overflow-hidden rounded-3xl md:bg-card md:border md:border-t-0 border-border">
-            <AboutCard {...aboutCard}>
-              {/* bio */}
-            </AboutCard>
             {/* main post */}
             {children}
           </div>

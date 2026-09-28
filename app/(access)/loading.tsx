@@ -1,5 +1,5 @@
-import { UserViewerSkeleton } from '@/features/user-viewer/user-viewer'
+import { UserPostsViewSkeleton } from '@/views/issue-view'
 
 export default function Loading() {
-  return <UserViewerSkeleton />
+  return <UserPostsViewSkeleton />
 }

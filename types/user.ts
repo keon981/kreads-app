@@ -1,3 +1,5 @@
+import type { Octokit } from '@octokit/rest'
+
 interface ViewerUser {
   username: string
   name: string
@@ -5,6 +7,12 @@ interface ViewerUser {
   repoName: string
 }
 
+interface UserRepo {
+  octokit: Octokit
+  owner: string
+  repo: string
+}
 export type {
+  UserRepo,
   ViewerUser,
 }

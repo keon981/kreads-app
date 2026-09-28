@@ -1,3 +1,5 @@
+import type { Issue } from '@/types/issue'
+
 export function safeNext(next: string | null | undefined, fallback = '/') {
   if (!next || !next.startsWith('/') || next.startsWith('//')) return fallback
 
@@ -17,3 +19,5 @@ export function signUpPath(next?: string, error?: string) {
   if (error) params.set('error', error)
   return `/sign-up?${params}`
 }
+
+export const chatHref = (issue: Issue) => `@${issue.author?.login}/post/${issue.number}`

@@ -1,14 +1,10 @@
 import { notFound } from 'next/navigation'
 
-import { UserViewer } from '@/features/user-viewer/user-viewer'
 import { getSessionCache } from '@/lib/auth'
 import { fetchViewerUser } from '@/server/users'
+import { UserPostsView } from '@/views/issue-view'
 
-interface PageProps {
-  params: Promise<{ id: string }> // 這裡定義為 Promise 類形
-}
-
-async function Page({ params }: PageProps) {
+async function Page({ params }: PageProps<'/[id]'>) {
   const { id } = await params
   const username = decodeURIComponent(id)
   const [viewer, session] = await Promise.all([
@@ -20,7 +16,7 @@ async function Page({ params }: PageProps) {
 
   const isOwner = session?.user.username === viewer.username
 
-  return <UserViewer user={viewer} isOwner={isOwner} />
+  return <UserPostsView user={viewer} isOwner={isOwner} />
 }
 
 export default Page

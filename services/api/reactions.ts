@@ -1,5 +1,5 @@
-import type { UserRepo } from '@/server/github'
 import type { IssueReaction } from '@/types/issue'
+import type { UserRepo } from '@/types/user'
 
 const LIKE_REACTION = 'heart'
 const REACTIONS_PER_PAGE = 100

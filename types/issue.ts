@@ -14,6 +14,9 @@ interface GraphqlIssue {
     content: string
     viewerHasReacted: boolean
   }[] | null
+  comments: {
+    totalCount: number
+  }
 }
 
 interface Issue {
@@ -27,6 +30,17 @@ interface Issue {
   } | null
   likeCount: number
   isLiked: boolean
+  commentCount: number
+}
+
+interface IssueComment {
+  id: number
+  body: string
+  createdAt: string
+  author: {
+    login: string
+    avatarUrl: string
+  } | null
 }
 
 interface IssueTarget {
@@ -42,6 +56,7 @@ interface IssueReaction {
 export type {
   GraphqlIssue,
   Issue,
+  IssueComment,
   IssueReaction,
   IssueTarget,
 }
