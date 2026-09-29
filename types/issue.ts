@@ -1,3 +1,5 @@
+import type { ActionState, IssueFormAction } from '@/types/action'
+
 interface GraphqlIssue {
   number: number
   title: string
@@ -43,6 +45,13 @@ interface IssueComment {
   } | null
 }
 
+// page 綁定好 server action 後傳給 view
+interface IssueCommentWithActions extends IssueComment {
+  isOwner: boolean
+  onEdit: IssueFormAction
+  onDelete: () => Promise<ActionState>
+}
+
 interface IssueTarget {
   repoName: string
   issueNumber: number
@@ -57,6 +66,7 @@ export type {
   GraphqlIssue,
   Issue,
   IssueComment,
+  IssueCommentWithActions,
   IssueReaction,
   IssueTarget,
 }

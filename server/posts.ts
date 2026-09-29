@@ -2,18 +2,54 @@
 
 import { refresh } from 'next/cache'
 
-import { closeIssue } from '@/services/api/issues'
+import * as z from 'zod'
+
+import { closeIssue, createIssue } from '@/services/api/issues'
 import { createIssueLiked, deleteIssueLiked, fetchIssueLikes } from '@/services/api/reactions'
 import { catchParseWithUserRepoError, parseWithUserRepo } from '@/services/user-repo'
 import { HTTP_STATUS } from '@/utils/http-status'
+import { getFormDataValue } from '@/utils/toolkit'
 
-import { IssueNumberSchema, LikePostSchema } from './schema'
+import type { ActionState, IssueFormState } from '@/types/action'
 
-import type { ActionState } from '@/types/action'
-import type { ToggleLikeState } from './schema'
+const IssueNumberSchema = z.int().positive()
+
+const PostFormSchema = z.object({
+  content: z.string().trim().min(1, '請輸入內容'),
+})
+
+const LikePostSchema = z.object({
+  repoName: z.string().min(1),
+  issueNumber: z.int().positive(),
+  isLiked: z.boolean(),
+  viewer: z.string(),
+})
+
+type ToggleLikeState = z.infer<typeof LikePostSchema>
 
 interface LikeActionState extends ActionState {
   isLiked?: boolean
+}
+
+export async function createPostAction(
+  _prev: IssueFormState,
+  formData: FormData,
+): Promise<IssueFormState> {
+  const content = getFormDataValue(formData, 'content')
+  const result = PostFormSchema.safeParse({ content })
+  if (!result.success) {
+    return {
+      message: result.error.issues[0].message,
+      content,
+    }
+  }
+
+  const success = await createIssue(result.data.content)
+  if (!success) return { message: '發文失敗，請再試一次', content }
+
+  // TODO: useOptimistic
+  refresh()
+  return {}
 }
 
 export async function deletePostAction(

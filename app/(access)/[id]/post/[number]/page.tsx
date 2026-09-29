@@ -1,20 +1,13 @@
 import { notFound } from 'next/navigation'
 
-import { IssueDropdownMenu, IssueItemLikedButton } from '@/components/blocks/issue-item'
-import {
-  IssueItem,
-  IssueItemArticle,
-  IssueItemContent,
-  IssueItemFooter,
-  IssueItemGroup,
-  IssueItemMedia,
-  IssueItemTitle,
-} from '@/components/ui/issue'
-import { CommentList } from '@/features/comments/comment'
-import { fetchUserRepo } from '@/server/github'
+import { getSessionCache } from '@/lib/auth'
+import { createCommentAction, deleteCommentAction, updateCommentAction } from '@/server/comments'
+import { fetchGitHubUser, fetchUserRepo } from '@/server/github'
+import { deletePostAction } from '@/server/posts'
 import { fetchViewerUser } from '@/server/users'
 import { fetchIssueComments } from '@/services/api/comments'
 import { fetchIssue } from '@/services/api/issues'
+import { IssueDetailView } from '@/views/issue-view'
 
 async function Page({
   params,
@@ -26,44 +19,31 @@ async function Page({
   const user = await fetchViewerUser(decodeURIComponent(id))
   if (!user) notFound()
 
-  const userRepo = await fetchUserRepo(user.repoName)
+  const { repoName } = user
+  const userRepo = await fetchUserRepo(repoName)
   const issue = await fetchIssue(userRepo, issueNumber)
   if (!issue) notFound()
 
-  const comments = await fetchIssueComments(userRepo, issueNumber)
+  const [comments, viewer, session] = await Promise.all([
+    fetchIssueComments(userRepo, issueNumber),
+    fetchGitHubUser(),
+    getSessionCache(),
+  ])
 
   return (
-    <IssueItemGroup>
-      <IssueItem key={issue.title}>
-        <IssueItemMedia src={issue.author?.avatarUrl} fallback={issue.author?.login} />
-        <IssueItemContent>
-          <IssueItemTitle>
-            <h4 className="flex-1">{issue.author?.login}</h4>
-            <IssueDropdownMenu issueNumber={issue.number} />
-          </IssueItemTitle>
-          <IssueItemArticle>
-            {issue.body}
-          </IssueItemArticle>
-          {/* footer */}
-          <IssueItemFooter>
-            <IssueItemLikedButton
-              repoName={user.repoName}
-              like={{
-                issueNumber,
-                likeCount: issue.likeCount,
-                isLiked: issue.isLiked,
-              }}
-            />
-          </IssueItemFooter>
-        </IssueItemContent>
-      </IssueItem>
-      <CommentList
-        repoName={user.repoName}
-        issueNumber={issueNumber}
-        initialComments={comments}
-      // onCommentCountChange={() => { }}
-      />
-    </IssueItemGroup>
+    <IssueDetailView
+      repoName={repoName}
+      issue={issue}
+      isOwner={session?.user.username === user.username}
+      onDelete={deletePostAction.bind(null, issueNumber)}
+      onCreateComment={viewer ? createCommentAction.bind(null, repoName, issueNumber) : undefined}
+      comments={comments.map(comment => ({
+        ...comment,
+        isOwner: !!viewer && viewer.login === comment.author?.login,
+        onEdit: updateCommentAction.bind(null, repoName, comment.id),
+        onDelete: deleteCommentAction.bind(null, repoName, comment.id),
+      }))}
+    />
   )
 }
 

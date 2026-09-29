@@ -5,6 +5,7 @@ import React from 'react'
 import { RiGithubFill } from '@remixicon/react'
 
 import { useAuth } from '@/contexts/auth-provider'
+import { cn } from '@/lib/utils'
 
 import { SignInButton, SignInCard } from '../blocks/sign-in'
 
@@ -31,15 +32,17 @@ function AppHeader() {
 
 export default function ArticleLayout({
   children,
+  className,
 }: {
   children: React.ReactNode
+  className?: string
 }) {
   const { isAuth } = useAuth()
 
   return (
     <>
       <div className="hidden md:block md:size-px" />
-      <section className="relative w-full md:w-160 md:max-w-160 flex flex-col items-center min-h-dvh md:pb-18">
+      <section className={cn('relative w-full md:w-160 md:max-w-160 flex flex-col items-center min-h-dvh md:pb-18', className)}>
         <AppHeader />
         <article className="size-full flex-1 flex flex-col overflow-hidden">
           <div className="grow min-h-0 overflow-hidden rounded-3xl md:bg-card md:border md:border-t-0 border-border">

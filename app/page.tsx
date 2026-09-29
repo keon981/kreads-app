@@ -1,5 +1,5 @@
 import ArticleLayout from '@/components/layouts/article-layout'
-import { IssueItem, IssueItemGroup } from '@/components/ui/issue'
+import { IssueItem, IssueItemGroup } from '@/components/ui/issue-item'
 
 export default async function Page() {
   return (

@@ -23,6 +23,7 @@ import {
 } from '@remixicon/react'
 import { useTheme } from 'next-themes'
 
+import { IssueFormDialog } from '@/components/blocks/issue'
 import { useSignInDialog } from '@/components/blocks/sign-in'
 import { DialogTrigger } from '@/components/ui/dialog'
 import {
@@ -46,8 +47,8 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/contexts/auth-provider'
-import { NewPostFormDialog } from '@/features/new-post-dialog/new-post-dialog'
 import { homeList } from '@/lib/env'
+import { createPostAction } from '@/server/posts'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const trigger = useSignInDialog(s => s.trigger)
@@ -99,7 +100,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                 {/* new post  */}
                 <SidebarMenuItem>
-                  <NewPostFormDialog>
+                  <IssueFormDialog
+                    action={createPostAction}
+                    title="新貼文"
+                    placeholder="有什麼新鮮事？"
+                  >
                     <DialogTrigger
                       render={<SidebarMenuButton variant="outline" />}
                       onClick={(e) => {
@@ -110,7 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     >
                       <RiAddLargeLine />
                     </DialogTrigger>
-                  </NewPostFormDialog>
+                  </IssueFormDialog>
                 </SidebarMenuItem>
 
                 {/* Bookmark */}
