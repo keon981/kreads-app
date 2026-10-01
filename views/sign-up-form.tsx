@@ -3,6 +3,7 @@ import { useActionState } from 'react'
 
 import { RiGitRepositoryLine } from '@remixicon/react'
 
+import { completeSignUpAction } from '@/app/(blank)/(auth)/sign-up/action'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -17,8 +18,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Password } from '@/components/ui/password'
 import { Spinner } from '@/components/ui/spinner'
 import { safeNext } from '@/utils/navigation'
-
-import { completeSignUpAction } from './action'
 
 import type { ActionState } from '@/types/action'
 

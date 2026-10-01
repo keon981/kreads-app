@@ -1,4 +1,23 @@
-import type { GraphqlIssue } from '@/types/issue'
+interface GraphqlIssue {
+  number: number
+  title: string
+  body: string
+  createdAt: string
+  author: {
+    login: string
+    avatarUrl: string
+  } | null
+  reactions: {
+    totalCount: number
+  }
+  reactionGroups: {
+    content: string
+    viewerHasReacted: boolean
+  }[] | null
+  comments: {
+    totalCount: number
+  }
+}
 
 interface GraphqlIssuesResponse {
   repository: {
@@ -57,5 +76,5 @@ const ISSUE_QUERY = `
   ${ISSUE_FIELDS}
 `
 
-export type { GraphqlIssueResponse, GraphqlIssuesResponse }
+export type { GraphqlIssue, GraphqlIssueResponse, GraphqlIssuesResponse }
 export { ISSUE_QUERY, ISSUES_QUERY }

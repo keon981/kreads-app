@@ -26,7 +26,7 @@ export function signInWithGitHub() {
   return authClient.signIn.social({
     provider: 'github',
     scopes: ['public_repo'],
-    callbackURL: '/',
+    callbackURL: next,
     errorCallbackURL: signUpPath(next),
   })
 }

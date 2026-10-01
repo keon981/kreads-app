@@ -1,3 +1,5 @@
+import { authConfig } from '@/configs/nav-config'
+
 import type { Issue } from '@/types/issue'
 
 export function safeNext(next: string | null | undefined, fallback = '/') {
@@ -7,17 +9,17 @@ export function safeNext(next: string | null | undefined, fallback = '/') {
 }
 
 export function signInPath(next?: string) {
-  if (!next) return '/sign-in'
+  if (!next) return authConfig.signInUrl
 
-  return `/sign-in?${new URLSearchParams({ next })}`
+  return `${authConfig.signInUrl}?${new URLSearchParams({ next })}`
 }
 
 export function signUpPath(next?: string, error?: string) {
-  if (!next) return '/sign-up'
+  if (!next) return authConfig.signUpUrl
 
   const params = new URLSearchParams({ next })
   if (error) params.set('error', error)
-  return `/sign-up?${params}`
+  return `${authConfig.signUpUrl}?${params}`
 }
 
 export const chatHref = (issue: Issue) => `@${issue.author?.login}/post/${issue.number}`

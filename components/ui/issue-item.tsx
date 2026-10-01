@@ -1,6 +1,5 @@
 'use client'
 
-import { useSignInDialog } from '@/components/blocks/sign-in'
 import {
   Avatar,
   AvatarFallback,
@@ -19,6 +18,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/contexts/auth-provider'
 import { cn } from '@/lib/utils'
+import { useSignInDialog } from '@/store/sign-in-dialog'
 
 function IssueItem({
   children,

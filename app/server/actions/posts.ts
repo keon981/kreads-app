@@ -4,10 +4,11 @@ import { refresh } from 'next/cache'
 
 import * as z from 'zod'
 
+import { HTTP_STATUS } from '@/constants'
+import { getSessionCache } from '@/lib/auth'
 import { closeIssue, createIssue } from '@/services/api/issues'
 import { createIssueLiked, deleteIssueLiked, fetchIssueLikes } from '@/services/api/reactions'
-import { catchParseWithUserRepoError, parseWithUserRepo } from '@/services/user-repo'
-import { HTTP_STATUS } from '@/utils/http-status'
+import { catchParseWithUserRepoError, fetchUserRepo, parseWithUserRepo } from '@/services/user-repo'
 import { getFormDataValue } from '@/utils/toolkit'
 
 import type { ActionState, IssueFormState } from '@/types/action'
@@ -44,12 +45,18 @@ export async function createPostAction(
     }
   }
 
-  const success = await createIssue(result.data.content)
-  if (!success) return { message: '發文失敗，請再試一次', content }
+  const session = await getSessionCache()
+  const userRepo = await fetchUserRepo(session?.user.repoName)
+  if (userRepo.error) return { message: '發文失敗，請再試一次', content }
 
-  // TODO: useOptimistic
-  refresh()
-  return {}
+  try {
+    await createIssue(userRepo, result.data.content)
+    // TODO: useOptimistic
+    refresh()
+    return {}
+  } catch (err) {
+    return { ...catchParseWithUserRepoError(err, '發文失敗，請再試一次'), content }
+  }
 }
 
 export async function deletePostAction(
@@ -58,12 +65,18 @@ export async function deletePostAction(
   const result = IssueNumberSchema.safeParse(issueNumber)
   if (!result.success) return { status: HTTP_STATUS.BAD_REQUEST, message: result.error.issues[0].message }
 
-  const status = await closeIssue(result.data)
-  if (status !== 200) return { status, message: '刪除失敗，請再試一次' }
+  const session = await getSessionCache()
+  const userRepo = await fetchUserRepo(session?.user.repoName)
+  if (userRepo.error) return { status: HTTP_STATUS.UNAUTHORIZED, message: '刪除失敗，請再試一次' }
 
-  // TODO: useOptimistic
-  refresh()
-  return { status, message: '刪除成功' }
+  try {
+    const status = await closeIssue(userRepo, result.data)
+    // TODO: useOptimistic
+    refresh()
+    return { status, message: '刪除成功' }
+  } catch (err) {
+    return catchParseWithUserRepoError(err, '刪除失敗，請再試一次')
+  }
 }
 
 export async function toggleLikeAction(state: ToggleLikeState): Promise<LikeActionState> {

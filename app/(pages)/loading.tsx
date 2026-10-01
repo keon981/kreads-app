@@ -1,4 +1,4 @@
-import { UserPostsViewSkeleton } from '@/views/issue-view'
+import { UserPostsViewSkeleton } from '@/views/user-posts-view'
 
 export default function Loading() {
   return <UserPostsViewSkeleton />

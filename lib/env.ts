@@ -20,5 +20,3 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_TITLE: process.env.NEXT_PUBLIC_APP_TITLE,
   },
 })
-
-export const homeList = ['/', `/${env.NEXT_PUBLIC_HOME_USERNAME}`]

@@ -23,8 +23,8 @@ import {
 } from '@remixicon/react'
 import { useTheme } from 'next-themes'
 
+import { createPostAction } from '@/app/server/actions/posts'
 import { IssueFormDialog } from '@/components/blocks/issue'
-import { useSignInDialog } from '@/components/blocks/sign-in'
 import { DialogTrigger } from '@/components/ui/dialog'
 import {
   DropdownMenu,
@@ -46,9 +46,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { homeList } from '@/configs/nav-config'
 import { useAuth } from '@/contexts/auth-provider'
-import { homeList } from '@/lib/env'
-import { createPostAction } from '@/server/posts'
+import { useSignInDialog } from '@/store/sign-in-dialog'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const trigger = useSignInDialog(s => s.trigger)

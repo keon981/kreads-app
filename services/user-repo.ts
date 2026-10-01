@@ -1,8 +1,9 @@
 import * as z from 'zod'
 
-import { fetchUserRepo } from '@/server/github'
-import { HTTP_STATUS } from '@/utils/http-status'
-import { isRequestError } from '@/utils/status'
+import { HTTP_STATUS } from '@/constants'
+import { fetchAccessTokenCache } from '@/lib/auth'
+import { createOctokit } from '@/lib/octokit'
+import { isRequestError } from '@/utils/toolkit'
 
 import type { ActionState } from '@/types/action'
 import type { UserRepo } from '@/types/user'
@@ -10,6 +11,19 @@ import type { UserRepo } from '@/types/user'
 import 'server-only'
 
 const UNAUTHORIZED_MESSAGE = '請先登入'
+
+export async function fetchUserRepo(repoName?: string | null): Promise<UserRepo & { error: boolean }> {
+  const token = await fetchAccessTokenCache()
+
+  const [owner, repo] = repoName?.split('/') ?? ['', '']
+
+  return {
+    octokit: createOctokit(token ?? undefined),
+    owner,
+    repo,
+    error: !token,
+  }
+}
 
 // 驗證 input 並取得使用者 repo，失敗時 throw，交由 catchParseWithUserRepoError 處理
 export async function parseWithUserRepo<S extends z.ZodType<{ repoName: string }>>(

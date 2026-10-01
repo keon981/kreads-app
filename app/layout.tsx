@@ -3,14 +3,11 @@ import type { Metadata } from 'next'
 import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
 import { SignInDialog } from '@/components/blocks/sign-in'
-import { AppSidebar } from '@/components/layouts/app-sidebar'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/toast'
-import { AuthProvider } from '@/contexts/auth-provider'
-import { ThemeProvider } from '@/contexts/theme-provider'
 import { env } from '@/lib/env'
 import { cn } from '@/lib/utils'
-import { fetchGitHubUser } from '@/server/github'
+import { fetchGitHubUser } from '@/services/api/users'
 
 import '@/styles/globals.css'
 
@@ -42,27 +39,20 @@ export default async function RootLayout({
       className={cn('antialiased', fontMono.variable, 'font-sans', spaceGrotesk.variable, oxaniumHeading.variable)}
     >
       <body>
-        <ThemeProvider>
-          <AuthProvider
-            isAuth={!!isAuth}
-            user={{
-              id: `@${user?.login}`,
-              name: user?.name,
-              avatarUrl: user?.avatar_url,
-            }}
-          >
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset className="flex-row items-start justify-center gap-4">
-                {children}
-              </SidebarInset>
-            </SidebarProvider>
+        <Providers
+          isAuth={!!isAuth}
+          user={{
+            id: `@${user?.login}`,
+            name: user?.name,
+            avatarUrl: user?.avatar_url,
+          }}
+        >
+          {children}
 
-            {/* alert */}
-            <Toaster />
-            <SignInDialog />
-          </AuthProvider>
-        </ThemeProvider>
+          {/* alert */}
+          <Toaster />
+          <SignInDialog />
+        </Providers>
       </body>
     </html>
   )

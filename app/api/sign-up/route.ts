@@ -7,10 +7,10 @@ import { and, eq, isNull } from 'drizzle-orm'
 import { db } from '@/db/drizzle'
 import { user } from '@/db/schema/auth-schema'
 import { inviteCode as inviteCodeSchema } from '@/db/schema/invite-schema'
-import { auth, getSessionCache, signOutWithServer } from '@/lib/auth'
-import { fetchAccessTokenCache, findOrCreateRepo } from '@/server/github'
+import { auth, fetchAccessTokenCache, getSessionCache, signOutWithServer } from '@/lib/auth'
+import { findOrCreateRepo } from '@/services/api/users'
 import { safeNext, signUpPath } from '@/utils/navigation'
-import { isRequestError } from '@/utils/status'
+import { isRequestError } from '@/utils/toolkit'
 import { isUserActive } from '@/utils/user'
 
 export async function GET(request: NextRequest) {

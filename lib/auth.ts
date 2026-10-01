@@ -1,5 +1,4 @@
 import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
 
 import { cache } from 'react'
 
@@ -10,10 +9,11 @@ import { admin } from 'better-auth/plugins'
 
 import { db } from '@/db/drizzle' // your drizzle instance
 import * as schema from '@/db/schema/auth-schema'
-import { signInPath, signUpPath } from '@/utils/navigation'
 import { isUserActive } from '@/utils/user'
 
 import { env } from './env'
+
+import type { VerifiedSession } from '@/types/auth'
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -85,13 +85,32 @@ export const fetchListUserAccounts = cache(async () => {
   return accounts
 })
 
-export async function verifySession(url = '/') {
-  const session = await getSessionCache()
+export async function fetchAccessToken() {
+  const accounts = await fetchListUserAccounts()
+  const nextHeaders = await headers()
+  if (!accounts || !nextHeaders) return null
 
-  if (!session) redirect(signInPath(url)) // 登入失敗 or 登入過期，跳到登入頁面重新登入或註冊
-  if (!isUserActive(session)) redirect(signUpPath(url))
-  return session
+  const github = accounts.find(a => a.providerId === 'github')
+  if (!github) return null
+
+  const { accessToken } = await auth.api.getAccessToken({
+    body: { accountId: github.id },
+    headers: nextHeaders,
+  })
+
+  return accessToken
 }
+
+export const fetchAccessTokenCache = cache(fetchAccessToken)
+
+// Only reports the status; AuthGuard and GuestOnlyRoute decide where to redirect,
+// so the current path can be kept (layouts and pages render in parallel).
+export const verifySession = cache(async (): Promise<VerifiedSession> => {
+  const session = await getSessionCache()
+  if (!session) return { status: 'signed-out', session: null }
+
+  return { status: isUserActive(session) ? 'active' : 'unregistered', session }
+})
 
 export async function signOutWithServer() {
   await auth.api.signOut({ headers: await headers() })

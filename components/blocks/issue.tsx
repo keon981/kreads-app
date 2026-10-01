@@ -4,6 +4,7 @@ import { useActionState, useState, useTransition } from 'react'
 
 import { RiBookmarkLine, RiCloseLine, RiDeleteBin7Line, RiEditLine, RiHeartFill, RiHeartLine, RiLink, RiMoreLine } from '@remixicon/react'
 
+import { toggleLikeAction } from '@/app/server/actions/posts'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -32,10 +33,9 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/toast'
+import { HTTP_STATUS } from '@/constants'
 import { useAuth } from '@/contexts/auth-provider'
 import { useDebouncedMutation } from '@/hooks/use-debounced-mutation'
-import { toggleLikeAction } from '@/server/posts'
-import { HTTP_STATUS } from '@/utils/http-status'
 
 import type { ActionState, IssueFormAction, IssueFormState } from '@/types/action'
 
