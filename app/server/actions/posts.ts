@@ -4,7 +4,7 @@ import { refresh } from 'next/cache'
 
 import * as z from 'zod'
 
-import { HTTP_STATUS } from '@/constants'
+import { HTTP_STATUS } from '@/configs/constants'
 import { getSessionCache } from '@/lib/auth'
 import { closeIssue, createIssue } from '@/services/api/issues'
 import { createIssueLiked, deleteIssueLiked, fetchIssueLikes } from '@/services/api/reactions'

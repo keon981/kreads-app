@@ -33,7 +33,7 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/toast'
-import { HTTP_STATUS } from '@/constants'
+import { HTTP_STATUS } from '@/configs/constants'
 import { useAuth } from '@/contexts/auth-provider'
 import { useDebouncedMutation } from '@/hooks/use-debounced-mutation'
 

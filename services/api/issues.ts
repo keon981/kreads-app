@@ -1,4 +1,4 @@
-import { HTTP_STATUS } from '@/constants'
+import { HTTP_STATUS } from '@/configs/constants'
 import { isEqualWithCase, isGraphqlNotFoundError, isRequestError } from '@/utils/toolkit'
 
 import { ISSUE_QUERY, ISSUES_QUERY } from '../graphql/issues'

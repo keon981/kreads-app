@@ -1,6 +1,6 @@
 import * as z from 'zod'
 
-import { HTTP_STATUS } from '@/constants'
+import { HTTP_STATUS } from '@/configs/constants'
 import { fetchAccessTokenCache } from '@/lib/auth'
 import { createOctokit } from '@/lib/octokit'
 import { isRequestError } from '@/utils/toolkit'

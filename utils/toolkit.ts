@@ -1,4 +1,4 @@
-import { HTTP_STATUS } from '@/constants'
+import { HTTP_STATUS } from '@/configs/constants'
 
 export function getFormDataValue(formData: FormData, key: string) {
   const formDataValue = formData.get(key) ?? ''
