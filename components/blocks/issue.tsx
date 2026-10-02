@@ -40,6 +40,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/toast'
 import { HTTP_STATUS } from '@/configs/constants'
 import { useAuth } from '@/contexts/auth-provider'
+import { useAuthGuard } from '@/hooks/use-auth-guard'
 import { useDebouncedMutation } from '@/hooks/use-debounced-mutation'
 import { useDialog } from '@/hooks/use-dialog'
 import { formatDateTime } from '@/lib/utils'
@@ -312,8 +313,10 @@ function IssueLikedButton({ repoName = '', like }: {
     setIsLiked(prev => !prev)
   }
 
+  const onAuthGuardClick = useAuthGuard(handleClickHeart)
+
   return (
-    <IssueItemButton size="lg" onClick={handleClickHeart}>
+    <IssueItemButton size="lg" onClick={onAuthGuardClick}>
       {isLiked
         ? <RiHeartFill className="size-5 text-destructive" />
         : <RiHeartLine className="size-5" />}
@@ -376,6 +379,7 @@ function PostItem({
   href,
   updateAction,
   onDelete,
+  onSubmit,
   ...props
 }: {
   post: Issue
@@ -384,14 +388,22 @@ function PostItem({
   href?: string
   updateAction?: IssueFormAction
   onDelete?: IssueDeleteAction
-} & React.ComponentProps<typeof IssueItem>) {
+  onSubmit?: IssueFormAction
+} & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>) {
+  // dialog
   const { dialogProps, trigger: triggerFormDialog } = useDialog()
   const {
     dialogProps: deleteDialogProps,
     trigger: triggerDeleteDialog,
     dismiss: dismissDeleteDialog,
   } = useDialog()
+  const { dialogProps: chatDialogProps, trigger: triggerChatDialog } = useDialog()
+
+  // transition
   const [isPending, startTransition] = useTransition()
+
+  // auth
+  const onAuthGuardClick = useAuthGuard(triggerChatDialog)
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -423,6 +435,7 @@ function PostItem({
           {post.body}
         </IssueItemArticle>
         <IssueItemFooter>
+          {/* liked */}
           <IssueLikedButton
             repoName={repoName}
             like={{
@@ -431,14 +444,38 @@ function PostItem({
               isLiked: post.isLiked,
             }}
           />
-          <IssueItemButton
-            size="lg"
-            nativeButton={false}
-            render={<Link href={href ?? ''} />}
-          >
-            <RiChat1Line />
-            {post.commentCount > 0 && post.commentCount}
-          </IssueItemButton>
+
+          {/* chat */}
+          {onSubmit
+            ? (
+              <IssueFormDialog
+                onSubmit={onSubmit}
+                title="新貼文"
+                placeholder="有什麼新鮮事？"
+                dialogProps={chatDialogProps}
+                defaultValues={{ repoName, issueNumber: post.number }}
+              >
+                <DialogTrigger
+                  render={<IssueItemButton size="lg" />}
+                  onClick={onAuthGuardClick}
+                >
+                  <RiChat1Line />
+                  {post.commentCount > 0 && post.commentCount}
+                </DialogTrigger>
+              </IssueFormDialog>
+            )
+            : (
+              <IssueItemButton
+                size="lg"
+                nativeButton={false}
+                render={<Link href={href ?? ''} />}
+              >
+                <RiChat1Line />
+                {post.commentCount > 0 && post.commentCount}
+              </IssueItemButton>
+            )}
+
+          {/* share */}
           <IssueItemButton>
             <RiShareForwardLine />
           </IssueItemButton>
@@ -478,6 +515,7 @@ function CommentItem({
     dismiss: dismissDeleteDialog,
   } = useDialog()
   const [isPending, startTransition] = useTransition()
+
   const authorName = comment.author?.login ?? 'ghost'
 
   const handleDelete = () => {
@@ -510,7 +548,13 @@ function CommentItem({
           {comment.body}
         </IssueItemArticle>
         <IssueItemFooter>
+          {/* liked */}
           <IssueLikedButton repoName={repoName} />
+
+          {/* share */}
+          <IssueItemButton>
+            <RiShareForwardLine />
+          </IssueItemButton>
         </IssueItemFooter>
       </IssueItemContent>
       <DeleteAlertDialog {...deleteDialogProps} onConfirm={handleDelete} />

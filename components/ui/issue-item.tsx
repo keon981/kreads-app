@@ -77,25 +77,12 @@ function IssueItemFooter({ ...props }: React.ComponentProps<typeof ButtonGroup>)
   return <ButtonGroup className="px-0 gap-0.5!" {...props} />
 }
 
-function IssueItemButton({ onClick, ...props }: React.ComponentProps<typeof Button>) {
-  const { isAuth } = useAuth()
-  const openSignInDialog = useSignInDialog(s => s.trigger)
-
-  const handleClick: React.ComponentProps<typeof Button>['onClick'] = (e) => {
-    if (!isAuth) {
-      e.preventDefault()
-      openSignInDialog()
-      return
-    }
-    onClick?.(e)
-  }
-
+function IssueItemButton({ ...props }: React.ComponentProps<typeof Button>) {
   return (
     <ButtonGroup>
       <Button
         variant="ghost"
         size="icon-lg"
-        onClick={handleClick}
         {...props}
       />
     </ButtonGroup>

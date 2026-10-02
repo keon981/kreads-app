@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import { fetchViewerUser } from '@/app/server/db/users'
-import { UserPostsView } from '@/views/user-posts-view'
+import { UserPostsView } from '@/views/posts-view'
 
 async function Page({ params }: PageProps<'/[id]'>) {
   const { id } = await params

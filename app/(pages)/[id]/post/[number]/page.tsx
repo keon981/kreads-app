@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import { fetchViewerUser } from '@/app/server/db/users'
-import { IssueDetailView } from '@/views/issue-detail-view'
+import { IssueDetailView } from '@/views/comments-view'
 
 async function Page({
   params,
