@@ -1,8 +1,10 @@
 'use client'
 
+import Link from 'next/link'
+
 import { useActionState, useState, useTransition } from 'react'
 
-import { RiBookmarkLine, RiCloseLine, RiDeleteBin7Line, RiEditLine, RiHeartFill, RiHeartLine, RiLink, RiMoreLine } from '@remixicon/react'
+import { RiBookmarkLine, RiChat1Line, RiCloseLine, RiDeleteBin7Line, RiEditLine, RiHeartFill, RiHeartLine, RiLink, RiMoreLine, RiShareForwardLine } from '@remixicon/react'
 
 import { toggleLikeAction } from '@/app/server/actions/posts'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -26,9 +28,12 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   IssueItem,
+  IssueItemArticle,
   IssueItemButton,
   IssueItemContent,
+  IssueItemFooter,
   IssueItemMedia,
+  IssueItemTitle,
 } from '@/components/ui/issue-item'
 import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
@@ -36,210 +41,234 @@ import { toast } from '@/components/ui/toast'
 import { HTTP_STATUS } from '@/configs/constants'
 import { useAuth } from '@/contexts/auth-provider'
 import { useDebouncedMutation } from '@/hooks/use-debounced-mutation'
+import { useDialog } from '@/hooks/use-dialog'
+import { formatDateTime } from '@/lib/utils'
 
-import type { ActionState, IssueFormAction, IssueFormState } from '@/types/action'
+import { CancelAlertDialog, DeleteAlertDialog } from './confirm-dialog'
+
+import type { UseDialogReturn } from '@/hooks/use-dialog'
+import type { ActionState, IssueDeleteAction, IssueFormAction, IssueFormState } from '@/types/action'
+import type { Issue, IssueComment } from '@/types/issue'
 
 type IssueItemButtonProps = React.ComponentProps<typeof IssueItemButton>
 type DropdownMenuItemOnClick = React.ComponentProps<typeof DropdownMenuItem>['onClick']
 
 interface IssueFormDialogProps {
-  action: IssueFormAction
+  onSubmit?: IssueFormAction
   title: string
   placeholder?: string
-  defaultValue?: string
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
+  // 表單欄位的預設值
+  defaultValues?: {
+    content?: string
+    repoName?: string
+    issueNumber?: number
+    commentId?: number
+  }
+  // 有傳 open 時為受控模式
+  dialogProps?: Partial<UseDialogReturn['dialogProps']>
   children?: React.ReactNode
 }
 
-// 新增、編輯共用；有傳 open 時為受控模式
 function IssueFormDialog({
-  action,
+  onSubmit,
   title,
   placeholder,
-  defaultValue,
-  open: openProp,
-  onOpenChange,
+  defaultValues,
+  dialogProps,
   children,
 }: IssueFormDialogProps) {
+  // auth
   const { user } = useAuth()
-  const [innerOpen, setInnerOpen] = useState(false)
-  const open = openProp ?? innerOpen
+  const { name, avatarUrl } = user || {}
 
-  const setOpen = (nextOpen: boolean) => {
-    setInnerOpen(nextOpen)
-    onOpenChange?.(nextOpen)
-  }
+  // dialog
+  const { dialogProps: innerDialogProps } = useDialog()
+  const { dialogProps: alertDialogProps, trigger: triggerAlert, dismiss: dismissAlert } = useDialog()
+  const { open, onOpenChange } = dialogProps ?? innerDialogProps
 
+  // 輸入中的草稿，null 表示未修改，沿用最新的 defaultValues
+  const initialContent = defaultValues?.content ?? ''
+  const [draft, setDraft] = useState<string | null>(null)
+  const content = draft ?? initialContent
+  const isDirty = draft !== null && draft !== initialContent
+
+  // form
   const [state, formAction, isPending] = useActionState(
     async (prevState: IssueFormState, formData: FormData) => {
-      const nextState = await action(prevState, formData)
-      if (!nextState.message) setOpen(false)
+      const nextState = await onSubmit?.(prevState, formData) ?? prevState
+      if (!nextState.message) {
+        setDraft(null)
+        onOpenChange?.(false)
+      }
       return nextState
     },
     {},
   )
 
-  // user
-  const { name, avatarUrl } = user || {}
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && isDirty) {
+      triggerAlert()
+      return
+    }
+    onOpenChange?.(nextOpen)
+  }
+
+  const handleDiscard = () => {
+    setDraft(null)
+    dismissAlert()
+    onOpenChange?.(false)
+  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {children}
-      <DialogContent
-        showCloseButton={false}
-        className="p-0 w-155 sm:max-w-[calc(100%-2rem)]"
-      >
-        <DialogHeader className="flex-row h-14 px-4 justify-between items-center border-b">
-          <DialogClose>
-            <RiCloseLine />
-          </DialogClose>
-          <DialogTitle className="flex-1 text-center">{title}</DialogTitle>
-          <div className="size-6" />
-        </DialogHeader>
-        <form action={formAction}>
-          <article className="flex flex-col px-6">
-            <section className="w-full flex gap-x-3">
-              {/* 頭像 */}
-              <div className="flex flex-col">
-                <Avatar>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        {children}
+        <DialogContent
+          showCloseButton={false}
+          className="p-0 w-155 sm:max-w-[calc(100%-2rem)]"
+        >
+          <DialogHeader className="flex-row h-14 px-4 justify-between items-center border-b">
+            <DialogClose>
+              <RiCloseLine />
+            </DialogClose>
+            <DialogTitle className="flex-1 text-center">{title}</DialogTitle>
+            <div className="size-6" />
+          </DialogHeader>
+          <form action={formAction}>
+            <input type="hidden" name="repoName" value={defaultValues?.repoName} />
+            <input type="hidden" name="issueNumber" value={defaultValues?.issueNumber} />
+            <input type="hidden" name="commentId" value={defaultValues?.commentId} />
+            <article className="flex flex-col px-6">
+              <section className="w-full flex gap-x-3">
+                {/* 頭像 */}
+                <div className="flex flex-col">
+                  <Avatar>
+                    <AvatarImage src={avatarUrl} />
+                    <AvatarFallback>
+                      {name?.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="mt-3 flex-1 flex justify-center">
+                    <div className="w-0.5 h-full bg-accent border" />
+                  </div>
+                </div>
+
+                {/* post */}
+                <div className="flex-1">
+                  <h4 className="font-bold text-foreground text-base">{name}</h4>
+                  <Textarea
+                    placeholder={placeholder}
+                    value={content}
+                    onChange={e => setDraft(e.target.value)}
+                    name="content"
+                    className="px-0 bg-transparent! border-0 focus-visible:ring-0 focus-visible:border-0 resize-none md:text-base"
+                  />
+                </div>
+              </section>
+              <section className="mt-2.5 ps-2 flex items-center gap-x-5 opacity-40">
+                <Avatar size="xs">
                   <AvatarImage src={avatarUrl} />
                   <AvatarFallback>
                     {name?.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="mt-3 flex-1 flex justify-center">
-                  <div className="w-0.5 h-full bg-accent border" />
-                </div>
-              </div>
+                <p className="text-muted-foreground/50 cursor-not-allowed text-base">
+                  新增到串文
+                </p>
+              </section>
+            </article>
+            <DialogFooter className="mx-0 mb-0 p-6 pt-1 border-0 bg-transparent">
+              {state.message
+                && <p className="me-auto text-sm text-destructive">{state.message}</p>}
+              <Button type="submit" variant="outline" disabled={isPending}>
+                {isPending && <Spinner data-icon="inline-start" />}
+                發佈
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-              {/* post */}
-              <div className="flex-1">
-                <h4 className="font-bold text-foreground text-base">{name}</h4>
-                <Textarea
-                  placeholder={placeholder}
-                  defaultValue={state.content ?? defaultValue}
-                  name="content"
-                  className="px-0 bg-transparent! border-0 focus-visible:ring-0 focus-visible:border-0 resize-none md:text-base"
-                />
-              </div>
-            </section>
-            <section className="mt-2.5 ps-2 flex items-center gap-x-5 opacity-40">
-              <Avatar size="xs">
-                <AvatarImage src={avatarUrl} />
-                <AvatarFallback>
-                  {name?.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <p className="text-muted-foreground/50 cursor-not-allowed text-base">
-                新增到串文
-              </p>
-            </section>
-          </article>
-          <DialogFooter className="mx-0 mb-0 p-6 pt-1 border-0 bg-transparent">
-            {state.message
-              && <p className="me-auto text-sm text-destructive">{state.message}</p>}
-            <Button type="submit" variant="outline" disabled={isPending}>
-              {isPending && <Spinner data-icon="inline-start" />}
-              發佈
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+      {/* close form to open alert dialog */}
+      <CancelAlertDialog {...alertDialogProps} onConfirm={handleDiscard} />
+    </>
   )
 }
 
 function IssueDropdownMenu({
   isOwner = false,
-  edit,
+  loading = false,
+  onEdit,
   onCopyLink,
   onBookmark,
   onDelete,
 }: {
   isOwner?: boolean
-  edit?: Pick<IssueFormDialogProps, 'action' | 'title' | 'defaultValue'>
+  loading?: boolean
+  onEdit?: DropdownMenuItemOnClick
   onCopyLink?: DropdownMenuItemOnClick
   onBookmark?: DropdownMenuItemOnClick
-  // 由 server 傳入 bound action，呼叫時不能帶 click event（無法序列化）
-  onDelete?: () => Promise<ActionState>
+  onDelete?: DropdownMenuItemOnClick
 }) {
-  const [isEditOpen, setIsEditOpen] = useState(false)
-  const [, startTransition] = useTransition()
-
-  const handleDelete = () => {
-    if (!onDelete) return
-    startTransition(async () => {
-      const res = await onDelete()
-      toast.add({
-        type: res.status && res.status < HTTP_STATUS.BAD_REQUEST ? 'success' : 'error',
-        description: res.message,
-      })
-    })
+  if (loading) {
+    return (
+      <Button variant="ghost" size="icon-sm" disabled>
+        <Spinner />
+      </Button>
+    )
   }
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger render={(
-          <Button variant="ghost" size="icon-sm">
-            <RiMoreLine />
-          </Button>
-        )}
-        />
-        <DropdownMenuContent align="start">
-          {isOwner && edit && (
-            <>
-              <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
-                  編輯
-                  <span className="ml-auto">
-                    <RiEditLine />
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-            </>
-          )}
-          <DropdownMenuGroup>
-            <DropdownMenuItem onClick={onCopyLink}>
-              複製連結
-              <span className="ml-auto">
-                <RiLink />
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onBookmark}>
-              儲存
-              <span className="ml-auto">
-                <RiBookmarkLine />
-              </span>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          {isOwner && onDelete && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem variant="destructive" onClick={handleDelete}>
-                  刪除
-                  <span className="ml-auto">
-                    <RiDeleteBin7Line />
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* dialog 放在 menu 外，menu 關閉時不會被卸載 */}
-      {isOwner && edit && (
-        <IssueFormDialog
-          {...edit}
-          open={isEditOpen}
-          onOpenChange={setIsEditOpen}
-        />
+    <DropdownMenu>
+      <DropdownMenuTrigger render={(
+        <Button variant="ghost" size="icon-sm">
+          <RiMoreLine />
+        </Button>
       )}
-    </>
+      />
+      <DropdownMenuContent align="start">
+        {isOwner && (
+          <>
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={onEdit}>
+                編輯
+                <span className="ml-auto">
+                  <RiEditLine />
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={onCopyLink}>
+            複製連結
+            <span className="ml-auto">
+              <RiLink />
+            </span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onBookmark}>
+            儲存
+            <span className="ml-auto">
+              <RiBookmarkLine />
+            </span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        {isOwner && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem variant="destructive" onClick={onDelete}>
+                刪除
+                <span className="ml-auto">
+                  <RiDeleteBin7Line />
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -293,23 +322,28 @@ function IssueLikedButton({ repoName = '', like }: {
   )
 }
 
-// 貼文、留言共用的輸入入口
-function IssueComposer({
-  action,
+function IssueComposerItem({
+  onSubmit,
   title,
   placeholder,
+  defaultValues,
   ...props
-}: Pick<IssueFormDialogProps, 'action' | 'title' | 'placeholder'>
-  & React.ComponentProps<typeof IssueItem>) {
+}: Pick<IssueFormDialogProps, 'onSubmit' | 'title' | 'placeholder' | 'defaultValues'>
+  & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>) {
   const { user } = useAuth()
   const { name, avatarUrl } = user || {}
 
   return (
-    <IssueItem {...props}>
+    <IssueItem className="last:border-b" {...props}>
       <IssueItemMedia src={avatarUrl} fallback={name ?? undefined} />
       <IssueItemContent>
         <div className="flex items-center gap-3">
-          <IssueFormDialog action={action} title={title} placeholder={placeholder}>
+          <IssueFormDialog
+            onSubmit={onSubmit}
+            title={title}
+            placeholder={placeholder}
+            defaultValues={defaultValues}
+          >
             <DialogTrigger className="flex-1 text-start cursor-text">
               <span className="text-base text-muted-foreground">
                 {placeholder}
@@ -328,9 +362,176 @@ function IssueComposer({
   )
 }
 
+function toastActionState(res: ActionState) {
+  toast.add({
+    type: res.status && res.status < HTTP_STATUS.BAD_REQUEST ? 'success' : 'error',
+    description: res.message,
+  })
+}
+
+function PostItem({
+  post,
+  repoName,
+  isOwner = false,
+  href,
+  updateAction,
+  onDelete,
+  ...props
+}: {
+  post: Issue
+  repoName: string
+  isOwner?: boolean
+  href?: string
+  updateAction?: IssueFormAction
+  onDelete?: IssueDeleteAction
+} & React.ComponentProps<typeof IssueItem>) {
+  const { dialogProps, trigger: triggerFormDialog } = useDialog()
+  const {
+    dialogProps: deleteDialogProps,
+    trigger: triggerDeleteDialog,
+    dismiss: dismissDeleteDialog,
+  } = useDialog()
+  const [isPending, startTransition] = useTransition()
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      const res = await onDelete?.({ repoName, issueNumber: post.number })
+      if (res) toastActionState(res)
+    })
+    dismissDeleteDialog()
+  }
+
+  return (
+    <IssueItem {...props}>
+      <IssueItemMedia src={post.author?.avatarUrl} fallback={post.author?.login} />
+      <IssueItemContent>
+        <IssueItemTitle>
+          <div className="flex flex-1 gap-1.5">
+            <h4 className="font-bold">{post.author?.login}</h4>
+            <time className="text-muted-foreground font-normal" dateTime={post.createdAt}>
+              {formatDateTime(post.createdAt)}
+            </time>
+          </div>
+          <IssueDropdownMenu
+            isOwner={isOwner}
+            loading={isPending}
+            onEdit={triggerFormDialog}
+            onDelete={triggerDeleteDialog}
+          />
+        </IssueItemTitle>
+        <IssueItemArticle>
+          {post.body}
+        </IssueItemArticle>
+        <IssueItemFooter>
+          <IssueLikedButton
+            repoName={repoName}
+            like={{
+              issueNumber: post.number,
+              likeCount: post.likeCount,
+              isLiked: post.isLiked,
+            }}
+          />
+          <IssueItemButton
+            size="lg"
+            nativeButton={false}
+            render={<Link href={href ?? ''} />}
+          >
+            <RiChat1Line />
+            {post.commentCount > 0 && post.commentCount}
+          </IssueItemButton>
+          <IssueItemButton>
+            <RiShareForwardLine />
+          </IssueItemButton>
+        </IssueItemFooter>
+      </IssueItemContent>
+      <DeleteAlertDialog {...deleteDialogProps} onConfirm={handleDelete} />
+      {isOwner && (
+        <IssueFormDialog
+          onSubmit={updateAction}
+          title="編輯貼文"
+          defaultValues={{ content: post.body, repoName, issueNumber: post.number }}
+          dialogProps={dialogProps}
+        />
+      )}
+    </IssueItem>
+  )
+}
+
+function CommentItem({
+  comment,
+  repoName,
+  isOwner = false,
+  updateAction,
+  onDelete,
+  ...props
+}: {
+  comment: IssueComment
+  repoName: string
+  isOwner?: boolean
+  updateAction?: IssueFormAction
+  onDelete?: IssueDeleteAction
+} & React.ComponentProps<typeof IssueItem>) {
+  const { dialogProps, trigger: triggerFormDialog } = useDialog()
+  const {
+    dialogProps: deleteDialogProps,
+    trigger: triggerDeleteDialog,
+    dismiss: dismissDeleteDialog,
+  } = useDialog()
+  const [isPending, startTransition] = useTransition()
+  const authorName = comment.author?.login ?? 'ghost'
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      const res = await onDelete?.({ repoName, commentId: comment.id })
+      if (res) toastActionState(res)
+    })
+    dismissDeleteDialog()
+  }
+
+  return (
+    <IssueItem {...props}>
+      <IssueItemMedia src={comment.author?.avatarUrl} fallback={authorName} />
+      <IssueItemContent>
+        <IssueItemTitle>
+          <div className="flex flex-1 gap-1.5">
+            <h4 className="font-bold">{authorName}</h4>
+            <time className="text-muted-foreground font-normal" dateTime={comment.createdAt}>
+              {formatDateTime(comment.createdAt)}
+            </time>
+          </div>
+          <IssueDropdownMenu
+            isOwner={isOwner}
+            loading={isPending}
+            onEdit={triggerFormDialog}
+            onDelete={triggerDeleteDialog}
+          />
+        </IssueItemTitle>
+        <IssueItemArticle>
+          {comment.body}
+        </IssueItemArticle>
+        <IssueItemFooter>
+          <IssueLikedButton repoName={repoName} />
+        </IssueItemFooter>
+      </IssueItemContent>
+      <DeleteAlertDialog {...deleteDialogProps} onConfirm={handleDelete} />
+
+      {isOwner && (
+        <IssueFormDialog
+          onSubmit={updateAction}
+          title="編輯貼文"
+          defaultValues={{ content: comment.body, repoName, commentId: comment.id }}
+          dialogProps={dialogProps}
+        />
+      )}
+    </IssueItem>
+  )
+}
+
 export {
-  IssueComposer,
+  CommentItem,
+  IssueComposerItem,
   IssueDropdownMenu,
   IssueFormDialog,
   IssueLikedButton,
+  PostItem,
 }

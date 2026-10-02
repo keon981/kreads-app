@@ -6,17 +6,26 @@ import * as z from 'zod'
 
 import { HTTP_STATUS } from '@/configs/constants'
 import { getSessionCache } from '@/lib/auth'
-import { closeIssue, createIssue } from '@/services/api/issues'
+import { closeIssue, createIssue, updateIssue } from '@/services/api/issues'
 import { createIssueLiked, deleteIssueLiked, fetchIssueLikes } from '@/services/api/reactions'
 import { catchParseWithUserRepoError, fetchUserRepo, parseWithUserRepo } from '@/services/user-repo'
 import { getFormDataValue } from '@/utils/toolkit'
 
-import type { ActionState, IssueFormState } from '@/types/action'
-
-const IssueNumberSchema = z.int().positive()
+import type { ActionState, IssueFormState, IssueTarget } from '@/types/action'
 
 const PostFormSchema = z.object({
   content: z.string().trim().min(1, '請輸入內容'),
+})
+
+// repoName、issueNumber 由表單的 hidden input 帶入，issueNumber 是字串，用 coerce 轉型
+const UpdatePostSchema = PostFormSchema.extend({
+  repoName: z.string().min(1),
+  issueNumber: z.coerce.number().int().positive(),
+})
+
+const DeletePostSchema = z.object({
+  repoName: z.string().min(1),
+  issueNumber: z.int().positive(),
 })
 
 const LikePostSchema = z.object({
@@ -59,18 +68,29 @@ export async function createPostAction(
   }
 }
 
-export async function deletePostAction(
-  issueNumber: number,
-): Promise<ActionState> {
-  const result = IssueNumberSchema.safeParse(issueNumber)
-  if (!result.success) return { status: HTTP_STATUS.BAD_REQUEST, message: result.error.issues[0].message }
-
-  const session = await getSessionCache()
-  const userRepo = await fetchUserRepo(session?.user.repoName)
-  if (userRepo.error) return { status: HTTP_STATUS.UNAUTHORIZED, message: '刪除失敗，請再試一次' }
-
+export async function updatePostAction(
+  _prev: IssueFormState,
+  formData: FormData,
+): Promise<IssueFormState> {
+  const content = getFormDataValue(formData, 'content')
   try {
-    const status = await closeIssue(userRepo, result.data)
+    const { data, userRepo } = await parseWithUserRepo(UpdatePostSchema, {
+      repoName: getFormDataValue(formData, 'repoName'),
+      issueNumber: getFormDataValue(formData, 'issueNumber'),
+      content,
+    })
+    await updateIssue(userRepo, data.issueNumber, data.content)
+    refresh()
+    return {}
+  } catch (err) {
+    return { ...catchParseWithUserRepoError(err, '編輯失敗，請再試一次'), content }
+  }
+}
+
+export async function deletePostAction(target: IssueTarget): Promise<ActionState> {
+  try {
+    const { data, userRepo } = await parseWithUserRepo(DeletePostSchema, target)
+    const status = await closeIssue(userRepo, data.issueNumber)
     // TODO: useOptimistic
     refresh()
     return { status, message: '刪除成功' }

@@ -8,3 +8,11 @@ export interface IssueFormState extends ActionState {
 }
 
 export type IssueFormAction = (prev: IssueFormState, formData: FormData) => Promise<IssueFormState>
+
+export interface IssueTarget {
+  repoName?: string
+  issueNumber?: number
+  commentId?: number
+}
+
+export type IssueDeleteAction = (target: IssueTarget) => Promise<ActionState>

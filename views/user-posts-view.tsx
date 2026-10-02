@@ -1,25 +1,13 @@
-import Link from 'next/link'
-
 import { Suspense } from 'react'
 
-import { RiChat1Line, RiShareForwardLine } from '@remixicon/react'
-
-import { createPostAction, deletePostAction } from '@/app/server/actions/posts'
-import { IssueComposer, IssueDropdownMenu, IssueLikedButton } from '@/components/blocks/issue'
+import { createPostAction, deletePostAction, updatePostAction } from '@/app/server/actions/posts'
+import { IssueComposerItem, PostItem } from '@/components/blocks/issue'
 import ArticleLayout from '@/components/layout/article-layout'
 import {
-  IssueItem,
-  IssueItemArticle,
-  IssueItemButton,
-  IssueItemContent,
-  IssueItemFooter,
   IssueItemGroup,
-  IssueItemMedia,
   IssueItemSkeleton,
-  IssueItemTitle,
 } from '@/components/ui/issue-item'
 import { getSessionCache } from '@/lib/auth'
-import { formatDateTime } from '@/lib/utils'
 import { fetchIssues } from '@/services/api/issues'
 import { fetchUserRepo } from '@/services/user-repo'
 import { chatHref } from '@/utils/navigation'
@@ -51,51 +39,16 @@ async function UserPostList({ repoName, isOwner }: {
   return (
     <IssueItemGroup className="">
       {posts.map(post => (
-        <IssueItem key={post.title}>
-          <IssueItemMedia src={post.author?.avatarUrl} fallback={post.author?.login} />
-          <IssueItemContent>
-            <IssueItemTitle>
-              <div className="flex flex-1 gap-1.5">
-
-                <h4 className="font-bold">{post.author?.login}</h4>
-                <time className="text-muted-foreground font-normal" dateTime={post.createdAt}>
-                  {formatDateTime(post.createdAt)}
-                </time>
-              </div>
-              <IssueDropdownMenu
-                isOwner={isOwner}
-                onDelete={deletePostAction.bind(null, post.number)}
-              />
-            </IssueItemTitle>
-            <IssueItemArticle>
-              {post.body}
-            </IssueItemArticle>
-            {/* footer */}
-            <IssueItemFooter>
-              <IssueLikedButton
-                repoName={repoName}
-                like={{
-                  issueNumber: post.number,
-                  likeCount: post.likeCount,
-                  isLiked: post.isLiked,
-                }}
-              />
-              <IssueItemButton
-                nativeButton={false}
-                render={<Link href={chatHref(post)} />}
-              >
-                <RiChat1Line />
-              </IssueItemButton>
-              <IssueItemButton>
-                <RiShareForwardLine />
-              </IssueItemButton>
-            </IssueItemFooter>
-
-          </IssueItemContent>
-
-        </IssueItem>
-      ),
-      )}
+        <PostItem
+          key={post.number}
+          post={post}
+          repoName={repoName}
+          isOwner={isOwner}
+          href={chatHref(post)}
+          updateAction={updatePostAction}
+          onDelete={deletePostAction}
+        />
+      ))}
     </IssueItemGroup>
   )
 }
@@ -113,8 +66,8 @@ export async function UserPostsView({ user }: UserPostsViewProps): Promise<React
       />
       {/* new post */}
       {isOwner && (
-        <IssueComposer
-          action={createPostAction}
+        <IssueComposerItem
+          onSubmit={createPostAction}
           title="新貼文"
           placeholder="有什麼新鮮事？"
         />

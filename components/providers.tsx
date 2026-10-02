@@ -1,5 +1,5 @@
-import { ThemeProvider } from '@/components/theme-provider'
 import { AuthProvider } from '@/contexts/auth-provider'
+import { ThemeProvider } from '@/contexts/theme-provider'
 
 export function Providers({
   children,

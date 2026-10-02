@@ -22,13 +22,18 @@ import { useSignInDialog } from '@/store/sign-in-dialog'
 
 function IssueItem({
   children,
+  className,
   ...props
 }: {
   avatarUrl?: string
   avatarFallback?: string
 } & React.ComponentProps<typeof Item>) {
   return (
-    <Item className="rounded-none border-0 border-t p-3" variant="outline" {...props}>
+    <Item
+      {...props}
+      className={cn('rounded-none border-0 border-b last:border-b-0 p-3', className)}
+      variant="outline"
+    >
       {children}
     </Item>
   )
@@ -60,7 +65,12 @@ function IssueItemTitle({ children, ...props }: React.ComponentProps<typeof Item
 }
 
 function IssueItemArticle({ ...props }: React.ComponentProps<typeof ItemDescription>) {
-  return <ItemDescription className="mt-1 ps-2.5 text-foreground text-base/tight" {...props} />
+  return (
+    <ItemDescription
+      className="mt-1 ps-2.5 line-clamp-none whitespace-pre-wrap wrap-break-word text-foreground text-base/tight"
+      {...props}
+    />
+  )
 }
 
 function IssueItemFooter({ ...props }: React.ComponentProps<typeof ButtonGroup>) {

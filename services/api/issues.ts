@@ -168,9 +168,24 @@ async function closeIssue(
   return status
 }
 
+async function updateIssue(
+  { octokit, owner, repo }: UserRepo,
+  issueNumber: number,
+  content: string,
+): Promise<number> {
+  const { status } = await octokit.rest.issues.update({
+    owner,
+    repo,
+    issue_number: issueNumber,
+    body: content,
+  })
+  return status
+}
+
 export {
   closeIssue,
   createIssue,
   fetchIssue,
   fetchIssues,
+  updateIssue,
 }

@@ -8,37 +8,40 @@ import { createIssueComment, deleteIssueComment, updateIssueComment } from '@/se
 import { catchParseWithUserRepoError, parseWithUserRepo } from '@/services/user-repo'
 import { getFormDataValue } from '@/utils/toolkit'
 
-import type { ActionState, IssueFormState } from '@/types/action'
+import type { ActionState, IssueFormState, IssueTarget } from '@/types/action'
 
 const ContentSchema = z.string().trim().min(1, '請輸入內容')
 
+const IdSchema = z.coerce.number().int().positive()
+
 const CreateCommentSchema = z.object({
   repoName: z.string().min(1),
-  issueNumber: z.int().positive(),
+  issueNumber: IdSchema,
   content: ContentSchema,
 })
 
 const UpdateCommentSchema = z.object({
   repoName: z.string().min(1),
-  commentId: z.int().positive(),
+  commentId: IdSchema,
   content: ContentSchema,
 })
 
 const DeleteCommentSchema = z.object({
   repoName: z.string().min(1),
-  commentId: z.int().positive(),
+  commentId: IdSchema,
 })
 
-// repoName、issueNumber 由 page 以 bind 帶入
 export async function createCommentAction(
-  repoName: string,
-  issueNumber: number,
   _prev: IssueFormState,
   formData: FormData,
 ): Promise<IssueFormState> {
   const content = getFormDataValue(formData, 'content')
   try {
-    const { data, userRepo } = await parseWithUserRepo(CreateCommentSchema, { repoName, issueNumber, content })
+    const { data, userRepo } = await parseWithUserRepo(CreateCommentSchema, {
+      repoName: getFormDataValue(formData, 'repoName'),
+      issueNumber: getFormDataValue(formData, 'issueNumber'),
+      content,
+    })
     await createIssueComment(userRepo, data.issueNumber, data.content)
     refresh()
     return {}
@@ -47,16 +50,17 @@ export async function createCommentAction(
   }
 }
 
-// repoName、commentId 由 page 以 bind 帶入
 export async function updateCommentAction(
-  repoName: string,
-  commentId: number,
   _prev: IssueFormState,
   formData: FormData,
 ): Promise<IssueFormState> {
   const content = getFormDataValue(formData, 'content')
   try {
-    const { data, userRepo } = await parseWithUserRepo(UpdateCommentSchema, { repoName, commentId, content })
+    const { data, userRepo } = await parseWithUserRepo(UpdateCommentSchema, {
+      repoName: getFormDataValue(formData, 'repoName'),
+      commentId: getFormDataValue(formData, 'commentId'),
+      content,
+    })
     await updateIssueComment(userRepo, data.commentId, data.content)
     refresh()
     return {}
@@ -65,13 +69,9 @@ export async function updateCommentAction(
   }
 }
 
-// repoName、commentId 由 page 以 bind 帶入
-export async function deleteCommentAction(
-  repoName: string,
-  commentId: number,
-): Promise<ActionState> {
+export async function deleteCommentAction(target: IssueTarget): Promise<ActionState> {
   try {
-    const { data, userRepo } = await parseWithUserRepo(DeleteCommentSchema, { repoName, commentId })
+    const { data, userRepo } = await parseWithUserRepo(DeleteCommentSchema, target)
     const status = await deleteIssueComment(userRepo, data.commentId)
     refresh()
     return { status, message: '刪除成功' }

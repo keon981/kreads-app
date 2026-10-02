@@ -56,12 +56,7 @@ export function SignInButton({ children, ...props }: React.ComponentProps<typeof
   )
 }
 
-export function SignInDialog({
-  children,
-  ...props
-}: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
-  children?: React.ReactNode
-}) {
+export function SignInDialog({ children, ...props }: WithNodeChildren<typeof Dialog>) {
   const open = useSignInDialog(s => s.open)
   const setOpen = useSignInDialog(s => s.setOpen)
 

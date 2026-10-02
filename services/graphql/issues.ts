@@ -61,7 +61,7 @@ const ISSUES_QUERY = `
       }
     }
   }
-  ${ISSUE_FIELDS} # 加這行
+  ${ISSUE_FIELDS}
 `
 // issue only
 const ISSUE_QUERY = `

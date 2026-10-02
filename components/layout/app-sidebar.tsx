@@ -24,8 +24,8 @@ import {
 import { useTheme } from 'next-themes'
 
 import { createPostAction } from '@/app/server/actions/posts'
+import { AuthDialogTrigger } from '@/components/auth/auth-dialog-trigger'
 import { IssueFormDialog } from '@/components/blocks/issue'
-import { DialogTrigger } from '@/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,20 +48,14 @@ import {
 } from '@/components/ui/sidebar'
 import { homeList } from '@/configs/nav-config'
 import { useAuth } from '@/contexts/auth-provider'
-import { useSignInDialog } from '@/store/sign-in-dialog'
+import { useAuthGuard } from '@/hooks/use-auth-guard'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const trigger = useSignInDialog(s => s.trigger)
   const pathName = usePathname()
-  const { isAuth } = useAuth()
+  const onAuthGuardClick = useAuthGuard()
 
   const getIsRoute = (url: string) => pathName === url
   const isHome = homeList.includes(pathName)
-
-  const handleTriggerSignInDialog = () => {
-    if (isAuth) return
-    trigger()
-  }
 
   return (
     <Sidebar
@@ -101,20 +95,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {/* new post  */}
                 <SidebarMenuItem>
                   <IssueFormDialog
-                    action={createPostAction}
+                    onSubmit={createPostAction}
                     title="新貼文"
                     placeholder="有什麼新鮮事？"
                   >
-                    <DialogTrigger
-                      render={<SidebarMenuButton variant="outline" />}
-                      onClick={(e) => {
-                        if (isAuth) return
-                        e.preventBaseUIHandler()
-                        handleTriggerSignInDialog()
-                      }}
-                    >
+                    <AuthDialogTrigger render={<SidebarMenuButton variant="outline" />}>
                       <RiAddLargeLine />
-                    </DialogTrigger>
+                    </AuthDialogTrigger>
                   </IssueFormDialog>
                 </SidebarMenuItem>
 
@@ -123,7 +110,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuLink
                     href="/saved"
                     isActive={getIsRoute('/saved')}
-                    onClick={handleTriggerSignInDialog}
+                    onClick={onAuthGuardClick}
                   >
                     {getIsRoute('/saved') ? <RiBookmarkFill /> : <RiBookmarkLine />}
                   </SidebarMenuLink>
@@ -134,7 +121,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuLink
                     href="/profile"
                     isActive={getIsRoute('/profile')}
-                    onClick={handleTriggerSignInDialog}
+                    onClick={onAuthGuardClick}
                   >
                     {getIsRoute('/profile') ? <RiUserFill /> : <RiUserLine />}
                   </SidebarMenuLink>
