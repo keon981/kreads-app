@@ -60,34 +60,45 @@ function toIssueFromGraphql(issue: GraphqlIssue): Issue {
 //  issue list
 async function fetchIssuesWithRest(
   { octokit, owner, repo }: UserRepo,
-): Promise<Issue[]> {
-  const { data } = await octokit.rest.issues.listForRepo({
-    owner,
-    repo,
-    creator: owner,
-    state: 'open',
-    sort: 'created',
-    direction: 'desc',
-    per_page: ISSUES_PER_PAGE,
-  })
+): Promise<Issue[] | null> {
+  try {
+    const { data } = await octokit.rest.issues.listForRepo({
+      owner,
+      repo,
+      creator: owner,
+      state: 'open',
+      sort: 'created',
+      direction: 'desc',
+      per_page: ISSUES_PER_PAGE,
+    })
 
-  return data
-    .filter(issue => !issue.pull_request) // 過濾 PR
-    .map(toIssueFromRest)
+    return data
+      .filter(issue => !issue.pull_request) // 過濾 PR
+      .map(toIssueFromRest)
+  } catch (err) {
+    // 404: user repo 改為 private or 刪除
+    if (isRequestError(err) && err.status === HTTP_STATUS.NOT_FOUND) return null
+    throw err
+  }
 }
 
 async function fetchIssuesWithGraphql({ octokit, owner, repo }: UserRepo,
-): Promise<Issue[]> {
-  const { repository } = await octokit.graphql<GraphqlIssuesResponse>(ISSUES_QUERY, {
-    owner,
-    repo,
-    first: ISSUES_PER_PAGE,
-  })
+): Promise<Issue[] | null> {
+  try {
+    const { repository } = await octokit.graphql<GraphqlIssuesResponse>(ISSUES_QUERY, {
+      owner,
+      repo,
+      first: ISSUES_PER_PAGE,
+    })
 
-  return repository.issues.nodes.map(toIssueFromGraphql)
+    return repository.issues.nodes.map(toIssueFromGraphql)
+  } catch (err) {
+    if (isGraphqlNotFoundError(err)) return null
+    throw err
+  }
 }
 
-async function fetchIssues(userRepo: UserRepo & { error: boolean }): Promise<Issue[]> {
+async function fetchIssues(userRepo: UserRepo & { error: boolean }): Promise<Issue[] | null> {
   return userRepo.error
     ? fetchIssuesWithRest(userRepo)
     : fetchIssuesWithGraphql(userRepo)
@@ -109,7 +120,9 @@ async function fetchIssueWithRest(
 
     return toIssueFromRest(issue)
   } catch (err) {
-    if (isRequestError(err) && err.status === HTTP_STATUS.NOT_FOUND) return null
+    const nonoRepo = [HTTP_STATUS.NOT_FOUND, HTTP_STATUS.GONE]
+    const isUnavailable = isRequestError(err) && nonoRepo.includes(err.status)
+    if (isUnavailable) return null
     throw err
   }
 }

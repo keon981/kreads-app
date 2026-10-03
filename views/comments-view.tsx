@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
 import { createCommentAction, deleteCommentAction, updateCommentAction } from '@/app/(pages)/[id]/post/[number]/action'
-import { createPostAction, deletePostAction, updatePostAction } from '@/app/server/actions/posts'
+import { deletePostAction, updatePostAction } from '@/app/server/actions/posts'
 import { CommentItem, IssueComposerItem, PostItem } from '@/components/blocks/issue'
 import ArticleLayout from '@/components/layout/article-layout'
 import {
@@ -70,7 +70,7 @@ export async function IssueDetailView({ user, issueNumber }: IssueDetailViewProp
           isOwner={isOwner}
           updateAction={updatePostAction}
           onDelete={deletePostAction}
-          onSubmit={createPostAction}
+          onSubmit={createCommentAction}
         />
 
         {/* comment composer */}

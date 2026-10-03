@@ -28,10 +28,10 @@ async function UserPostList({ repoName, isOwner }: {
   const userRepo = await fetchUserRepo(repoName)
   const posts = await fetchIssues(userRepo)
 
-  if (posts.length === 0) {
+  if (!posts?.length) {
     return (
       <p className="px-6 py-10 border-t text-sm text-center text-muted-foreground">
-        尚無任何貼文。
+        {posts ? '尚無任何貼文。' : '此個人檔案不公開。'}
       </p>
     )
   }
