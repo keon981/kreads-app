@@ -7,7 +7,7 @@ import { betterAuth } from 'better-auth/minimal'
 import { nextCookies } from 'better-auth/next-js'
 import { admin } from 'better-auth/plugins'
 
-import { SECONDS } from '@/configs/constants'
+import { GITHUB_TOKEN_HEADER, SECONDS } from '@/configs/constants'
 import { db } from '@/db/drizzle' // your drizzle instance
 import * as schema from '@/db/schema/auth-schema'
 import { isUserActive } from '@/utils/user'
@@ -68,6 +68,7 @@ export const auth = betterAuth({
     accountLinking: {
       trustedProviders: ['github'],
     },
+    storeAccountCookie: true,
   },
   session: {
     cookieCache: {
@@ -75,10 +76,22 @@ export const auth = betterAuth({
       maxAge: SECONDS.hour, // Cache duration in seconds (1 hour)
     },
   },
+  advanced: {
+    cookies: {
+      account_data: { attributes: { maxAge: SECONDS.week } },
+    },
+  },
 })
 
 export const getSessionCache = cache(async () => {
   return auth.api.getSession({ headers: await headers() })
+})
+
+export const fetchAccessTokenCache = cache(async (): Promise<string | null> => {
+  const session = await getSessionCache()
+  if (!session) return null
+
+  return (await headers()).get(GITHUB_TOKEN_HEADER)
 })
 
 export const verifySession = cache(async (): Promise<VerifiedSession> => {

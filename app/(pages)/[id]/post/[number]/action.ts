@@ -4,7 +4,7 @@ import { refresh } from 'next/cache'
 
 import * as z from 'zod'
 
-import { fetchAccessTokenCache } from '@/app/server/db/accounts'
+import { fetchAccessTokenCache } from '@/lib/auth'
 import { createIssueComment, deleteIssueComment, updateIssueComment } from '@/services/api/comments'
 import { catchParseWithUserRepoError, parseWithUserRepo } from '@/services/user-repo'
 import { getFormDataValue } from '@/utils/toolkit'

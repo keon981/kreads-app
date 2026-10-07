@@ -4,9 +4,8 @@ import { refresh } from 'next/cache'
 
 import * as z from 'zod'
 
-import { fetchAccessTokenCache } from '@/app/server/db/accounts'
 import { HttpStatusCode } from '@/configs/constants'
-import { getSessionCache } from '@/lib/auth'
+import { fetchAccessTokenCache, getSessionCache } from '@/lib/auth'
 import { closeIssue, createIssue, updateIssue } from '@/services/api/issues'
 import { createIssueLiked, deleteIssueLiked, fetchIssueLikes } from '@/services/api/reactions'
 import { catchParseWithUserRepoError, fetchUserRepo, parseWithUserRepo } from '@/services/user-repo'

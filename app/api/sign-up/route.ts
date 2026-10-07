@@ -5,13 +5,13 @@ import type { NextRequest } from 'next/server'
 
 import { and, eq, isNull } from 'drizzle-orm'
 
-import { fetchAccessTokenCache } from '@/app/server/db/accounts'
 import { viewerUserTag } from '@/app/server/db/users'
 import { db } from '@/db/drizzle'
 import { user } from '@/db/schema/auth-schema'
 import { inviteCode as inviteCodeSchema } from '@/db/schema/invite-schema'
 import {
   auth,
+  fetchAccessTokenCache,
   getSessionCache,
   signOutWithServer,
 } from '@/lib/auth'

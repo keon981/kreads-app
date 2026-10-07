@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 
 import { createPostAction, deletePostAction, updatePostAction } from '@/app/server/actions/posts'
-import { fetchAccessTokenCache } from '@/app/server/db/accounts'
 import { IssueComposerItem, PostItem } from '@/components/blocks/issue'
 import { AboutUser } from '@/components/blocks/user'
 import ArticleLayout from '@/components/layout/article-layout'
@@ -9,7 +8,7 @@ import {
   IssueItemGroup,
   IssueItemSkeleton,
 } from '@/components/ui/issue-item'
-import { getSessionCache } from '@/lib/auth'
+import { fetchAccessTokenCache, getSessionCache } from '@/lib/auth'
 import { fetchIssues } from '@/services/api/issues'
 import { fetchUserRepo } from '@/services/user-repo'
 import { chatHref } from '@/utils/navigation'

@@ -4,14 +4,13 @@ import { Suspense } from 'react'
 
 import { createCommentAction, deleteCommentAction, updateCommentAction } from '@/app/(pages)/[id]/post/[number]/action'
 import { deletePostAction, updatePostAction } from '@/app/server/actions/posts'
-import { fetchAccessTokenCache } from '@/app/server/db/accounts'
 import { CommentItem, IssueComposerItem, PostItem } from '@/components/blocks/issue'
 import ArticleLayout from '@/components/layout/article-layout'
 import {
   IssueItemGroup,
   IssueItemSkeleton,
 } from '@/components/ui/issue-item'
-import { verifySession } from '@/lib/auth'
+import { fetchAccessTokenCache, verifySession } from '@/lib/auth'
 import { fetchIssueComments } from '@/services/api/comments'
 import { fetchIssue } from '@/services/api/issues'
 import { fetchUserRepo } from '@/services/user-repo'

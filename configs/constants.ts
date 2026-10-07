@@ -31,6 +31,11 @@ const SIDEBAR_CONFIG = {
 
 const SIGN_OUT_PATH = '/api/sign-out'
 const UNAUTHORIZED_MESSAGE = '請先登入'
+const PRIVATE_PATHS: readonly string[] = ['/profile', '/saved']
+
+const GITHUB_TOKEN_HEADER = 'x-github-token'
+const ACCOUNT_COOKIE_SALT = 'better-auth-account'
+const TOKEN_EXPIRY_BUFFER_MS = 60 * 1000
 
 const PAGE_SIZE = {
   issues: 20,
@@ -40,12 +45,16 @@ const PAGE_SIZE = {
 const LIKE_REACTION = 'heart'
 
 export {
+  ACCOUNT_COOKIE_SALT,
+  GITHUB_TOKEN_HEADER,
   HttpStatusCode,
   LIKE_REACTION,
   MOBILE_BREAKPOINT,
   PAGE_SIZE,
+  PRIVATE_PATHS,
   SECONDS,
   SIDEBAR_CONFIG,
   SIGN_OUT_PATH,
+  TOKEN_EXPIRY_BUFFER_MS,
   UNAUTHORIZED_MESSAGE,
 }
