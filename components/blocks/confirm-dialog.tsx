@@ -42,7 +42,7 @@ function DeleteAlertDialog({
                 <Button
                   variant="ghost"
                   {...cancelProps}
-                  className={cn('flex-1 h-full hover:bg-transparent dark:hover:bg-transparent', cancelProps?.className)}
+                  className={cn('flex-1 h-full', cancelProps?.className)}
                 >取消
                 </Button>
               )}
@@ -52,7 +52,7 @@ function DeleteAlertDialog({
               variant="ghost"
               {...confirmProps}
               onClick={onConfirm}
-              className={cn('flex-1 h-full text-destructive hover:bg-transparent dark:hover:bg-transparent hover:text-destructive', confirmProps?.className)}
+              className={cn('flex-1 h-full text-destructive hover:text-destructive', confirmProps?.className)}
             >刪除
             </Button>
           </ButtonGroup>
@@ -83,7 +83,7 @@ function CancelAlertDialog({
                 <Button
                   variant="ghost"
                   {...cancelProps}
-                  className={cn('flex-1 h-full hover:bg-transparent dark:hover:bg-transparent', cancelProps?.className)}
+                  className={cn('flex-1 h-full', cancelProps?.className)}
                 >取消
                 </Button>
               )}
@@ -93,7 +93,7 @@ function CancelAlertDialog({
               variant="ghost"
               {...confirmProps}
               onClick={onConfirm}
-              className={cn('flex-1 h-full text-destructive hover:bg-transparent dark:hover:bg-transparent hover:text-destructive', confirmProps?.className)}
+              className={cn('flex-1 h-full text-destructive hover:text-destructive', confirmProps?.className)}
             >捨棄
             </Button>
           </ButtonGroup>

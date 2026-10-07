@@ -1,13 +1,20 @@
+import { revalidateTag } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import type { NextRequest } from 'next/server'
 
 import { and, eq, isNull } from 'drizzle-orm'
 
+import { fetchAccessTokenCache } from '@/app/server/db/accounts'
+import { viewerUserTag } from '@/app/server/db/users'
 import { db } from '@/db/drizzle'
 import { user } from '@/db/schema/auth-schema'
 import { inviteCode as inviteCodeSchema } from '@/db/schema/invite-schema'
-import { auth, fetchAccessTokenCache, getSessionCache, signOutWithServer } from '@/lib/auth'
+import {
+  auth,
+  getSessionCache,
+  signOutWithServer,
+} from '@/lib/auth'
 import { findOrCreateRepo } from '@/services/api/users'
 import { safeNext, signUpPath } from '@/utils/navigation'
 import { isRequestError } from '@/utils/toolkit'
@@ -24,6 +31,7 @@ export async function GET(request: NextRequest) {
   if (isUserActive(session)) redirect(nextPath) // 帳戶已經註冊
 
   const handleAbortSignUp = (m: string) => abortSignUp(session.user.id, nextPath, m)
+
   // 表單尚未填寫
   if (!repoName) return handleAbortSignUp('invalid_name')
   if (!inviteCode) return handleAbortSignUp('invalid_invite')
@@ -59,6 +67,9 @@ export async function GET(request: NextRequest) {
     .update(user)
     .set({ repoName: fullName, username })
     .where(eq(user.id, session.user.id))
+
+  // A cached "not found" for this username would hide the new profile
+  revalidateTag(viewerUserTag(username), { expire: 0 })
 
   // reload session coolie cache
   await auth.api.getSession({

@@ -1,7 +1,9 @@
 import { Suspense } from 'react'
 
 import { createPostAction, deletePostAction, updatePostAction } from '@/app/server/actions/posts'
+import { fetchAccessTokenCache } from '@/app/server/db/accounts'
 import { IssueComposerItem, PostItem } from '@/components/blocks/issue'
+import { AboutUser } from '@/components/blocks/user'
 import ArticleLayout from '@/components/layout/article-layout'
 import {
   IssueItemGroup,
@@ -11,8 +13,6 @@ import { getSessionCache } from '@/lib/auth'
 import { fetchIssues } from '@/services/api/issues'
 import { fetchUserRepo } from '@/services/user-repo'
 import { chatHref } from '@/utils/navigation'
-
-import { AboutCard } from './about-card'
 
 import type { ViewerUser } from '@/types/user'
 
@@ -25,7 +25,8 @@ async function UserPostList({ repoName, isOwner }: {
   repoName: string
   isOwner: boolean
 }) {
-  const userRepo = await fetchUserRepo(repoName)
+  const token = await fetchAccessTokenCache()
+  const userRepo = fetchUserRepo(token, repoName)
   const posts = await fetchIssues(userRepo)
 
   if (!posts?.length) {
@@ -59,7 +60,7 @@ export async function UserPostsView({ user }: UserPostsViewProps): Promise<React
 
   return (
     <ArticleLayout>
-      <AboutCard
+      <AboutUser
         name={user?.name ?? ''}
         id={user?.username}
         avatarUrl={user?.avatarUrl}
@@ -89,7 +90,7 @@ export function UserPostsViewSkeleton({
 }: { user?: ViewerUser, length?: number }) {
   return (
     <ArticleLayout>
-      <AboutCard
+      <AboutUser
         name={user?.name ?? ''}
         id={user?.username ?? ''}
         avatarUrl={user?.avatarUrl}

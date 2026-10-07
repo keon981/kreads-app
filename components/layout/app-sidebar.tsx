@@ -50,13 +50,7 @@ import { homeList } from '@/configs/nav-config'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const pathName = usePathname()
-  const onAuthGuardClick = useAuthGuard()
-
-  const getIsRoute = (url: string) => pathName === url
-  const isHome = homeList.includes(pathName)
-
+function AppSidebarContainer({ children, ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
       collapsible="icon"
@@ -78,54 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroup>
             <SidebarGroupContent className="px-1.5 md:px-0">
               <SidebarMenu className="gap-1">
-                {/* Home -> Keon981 Page */}
-                <SidebarMenuItem>
-                  <SidebarMenuButton render={<Link href="/" />} isActive={isHome}>
-                    {isHome ? <RiHome9Fill /> : <RiHome9Line />}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-
-                {/* Search */}
-                <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <RiSearchLine />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-
-                {/* new post  */}
-                <SidebarMenuItem>
-                  <IssueFormDialog
-                    onSubmit={createPostAction}
-                    title="新貼文"
-                    placeholder="有什麼新鮮事？"
-                  >
-                    <AuthDialogTrigger render={<SidebarMenuButton variant="outline" />}>
-                      <RiAddLargeLine />
-                    </AuthDialogTrigger>
-                  </IssueFormDialog>
-                </SidebarMenuItem>
-
-                {/* Bookmark */}
-                <SidebarMenuItem>
-                  <SidebarMenuLink
-                    href="/saved"
-                    isActive={getIsRoute('/saved')}
-                    onClick={onAuthGuardClick}
-                  >
-                    {getIsRoute('/saved') ? <RiBookmarkFill /> : <RiBookmarkLine />}
-                  </SidebarMenuLink>
-                </SidebarMenuItem>
-
-                {/* Profile */}
-                <SidebarMenuItem>
-                  <SidebarMenuLink
-                    href="/profile"
-                    isActive={getIsRoute('/profile')}
-                    onClick={onAuthGuardClick}
-                  >
-                    {getIsRoute('/profile') ? <RiUserFill /> : <RiUserLine />}
-                  </SidebarMenuLink>
-                </SidebarMenuItem>
+                {children}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -135,6 +82,89 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarFooter>
       </Sidebar>
     </Sidebar>
+  )
+}
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathName = usePathname()
+  const onAuthGuardClick = useAuthGuard()
+
+  const getIsRoute = (url: string) => pathName === url
+  const isHome = homeList.includes(pathName)
+
+  return (
+    <AppSidebarContainer {...props}>
+      {/* Home -> Keon981 Page */}
+      <SidebarMenuItem>
+        <SidebarMenuButton render={<Link href="/" />} isActive={isHome}>
+          {isHome ? <RiHome9Fill /> : <RiHome9Line />}
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      {/* Search */}
+      <SidebarMenuItem>
+        <SidebarMenuButton>
+          <RiSearchLine />
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      {/* new post  */}
+      <SidebarMenuItem>
+        <IssueFormDialog
+          onSubmit={createPostAction}
+          title="新貼文"
+          placeholder="有什麼新鮮事？"
+        >
+          <AuthDialogTrigger render={<SidebarMenuButton variant="outline" />}>
+            <RiAddLargeLine />
+          </AuthDialogTrigger>
+        </IssueFormDialog>
+      </SidebarMenuItem>
+
+      {/* Bookmark */}
+      <SidebarMenuItem>
+        <SidebarMenuLink
+          href="/saved"
+          isActive={getIsRoute('/saved')}
+          onClick={onAuthGuardClick}
+        >
+          {getIsRoute('/saved') ? <RiBookmarkFill /> : <RiBookmarkLine />}
+        </SidebarMenuLink>
+      </SidebarMenuItem>
+
+      {/* Profile */}
+      <SidebarMenuItem>
+        <SidebarMenuLink
+          href="/profile"
+          isActive={getIsRoute('/profile')}
+          onClick={onAuthGuardClick}
+        >
+          {getIsRoute('/profile') ? <RiUserFill /> : <RiUserLine />}
+        </SidebarMenuLink>
+      </SidebarMenuItem>
+    </AppSidebarContainer>
+  )
+}
+
+const skeletonItems = [
+  { id: 'home', Icon: RiHome9Line },
+  { id: 'search', Icon: RiSearchLine },
+  { id: 'new-post', Icon: RiAddLargeLine },
+  { id: 'saved', Icon: RiBookmarkFill },
+  { id: 'profile', Icon: RiUserFill },
+]
+
+export function AppSidebarSkeleton() {
+  return (
+    <AppSidebarContainer>
+      {skeletonItems.map(({ id, Icon }) => (
+        <SidebarMenuItem key={id}>
+          <SidebarMenuButton>
+            <Icon />
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
+    </AppSidebarContainer>
   )
 }
 

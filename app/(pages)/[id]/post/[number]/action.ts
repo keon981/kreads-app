@@ -4,6 +4,7 @@ import { refresh } from 'next/cache'
 
 import * as z from 'zod'
 
+import { fetchAccessTokenCache } from '@/app/server/db/accounts'
 import { createIssueComment, deleteIssueComment, updateIssueComment } from '@/services/api/comments'
 import { catchParseWithUserRepoError, parseWithUserRepo } from '@/services/user-repo'
 import { getFormDataValue } from '@/utils/toolkit'
@@ -37,7 +38,8 @@ export async function createCommentAction(
 ): Promise<IssueFormState> {
   const content = getFormDataValue(formData, 'content')
   try {
-    const { data, userRepo } = await parseWithUserRepo(CreateCommentSchema, {
+    const token = await fetchAccessTokenCache()
+    const { data, userRepo } = parseWithUserRepo(token, CreateCommentSchema, {
       repoName: getFormDataValue(formData, 'repoName'),
       issueNumber: getFormDataValue(formData, 'issueNumber'),
       content,
@@ -56,7 +58,8 @@ export async function updateCommentAction(
 ): Promise<IssueFormState> {
   const content = getFormDataValue(formData, 'content')
   try {
-    const { data, userRepo } = await parseWithUserRepo(UpdateCommentSchema, {
+    const token = await fetchAccessTokenCache()
+    const { data, userRepo } = parseWithUserRepo(token, UpdateCommentSchema, {
       repoName: getFormDataValue(formData, 'repoName'),
       commentId: getFormDataValue(formData, 'commentId'),
       content,
@@ -71,7 +74,8 @@ export async function updateCommentAction(
 
 export async function deleteCommentAction(target: IssueTarget): Promise<ActionState> {
   try {
-    const { data, userRepo } = await parseWithUserRepo(DeleteCommentSchema, target)
+    const token = await fetchAccessTokenCache()
+    const { data, userRepo } = parseWithUserRepo(token, DeleteCommentSchema, target)
     const status = await deleteIssueComment(userRepo, data.commentId)
     refresh()
     return { status, message: '刪除成功' }

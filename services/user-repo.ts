@@ -1,7 +1,6 @@
 import * as z from 'zod'
 
 import { HTTP_STATUS } from '@/configs/constants'
-import { fetchAccessTokenCache } from '@/lib/auth'
 import { createOctokit } from '@/lib/octokit'
 import { isRequestError } from '@/utils/toolkit'
 
@@ -12,9 +11,7 @@ import 'server-only'
 
 const UNAUTHORIZED_MESSAGE = '請先登入'
 
-export async function fetchUserRepo(repoName?: string | null): Promise<UserRepo & { error: boolean }> {
-  const token = await fetchAccessTokenCache()
-
+export function fetchUserRepo(token: string | null, repoName?: string | null): UserRepo & { error: boolean } {
   const [owner, repo] = repoName?.split('/') ?? ['', '']
 
   return {
@@ -26,14 +23,15 @@ export async function fetchUserRepo(repoName?: string | null): Promise<UserRepo 
 }
 
 // 驗證 input 並取得使用者 repo，失敗時 throw，交由 catchParseWithUserRepoError 處理
-export async function parseWithUserRepo<S extends z.ZodType<{ repoName: string }>>(
+export function parseWithUserRepo<S extends z.ZodType<{ repoName: string }>>(
+  token: string | null,
   schema: S,
   input: unknown,
-): Promise<{ data: z.output<S>, userRepo: UserRepo }> {
+): { data: z.output<S>, userRepo: UserRepo } {
   const result = schema.safeParse(input)
   if (!result.success) throw result.error
 
-  const userRepo = await fetchUserRepo(result.data.repoName)
+  const userRepo = fetchUserRepo(token, result.data.repoName)
   if (userRepo.error) throw new Error(UNAUTHORIZED_MESSAGE)
 
   return { data: result.data, userRepo }

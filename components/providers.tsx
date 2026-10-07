@@ -1,3 +1,7 @@
+import { Suspense } from 'react'
+
+import { AppSidebar, AppSidebarSkeleton } from '@/components/layout/app-sidebar'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AuthProvider } from '@/contexts/auth-provider'
 import { ThemeProvider } from '@/contexts/theme-provider'
 
@@ -8,7 +12,14 @@ export function Providers({
   return (
     <ThemeProvider>
       <AuthProvider {...props}>
-        {children}
+        <SidebarProvider>
+          <Suspense fallback={<AppSidebarSkeleton />}>
+            <AppSidebar />
+          </Suspense>
+          <SidebarInset className="flex-row items-start justify-center gap-4">
+            {children}
+          </SidebarInset>
+        </SidebarProvider>
       </AuthProvider>
     </ThemeProvider>
   )

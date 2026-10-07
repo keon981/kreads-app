@@ -4,6 +4,7 @@ import { refresh } from 'next/cache'
 
 import * as z from 'zod'
 
+import { fetchAccessTokenCache } from '@/app/server/db/accounts'
 import { HTTP_STATUS } from '@/configs/constants'
 import { getSessionCache } from '@/lib/auth'
 import { closeIssue, createIssue, updateIssue } from '@/services/api/issues'
@@ -55,7 +56,8 @@ export async function createPostAction(
   }
 
   const session = await getSessionCache()
-  const userRepo = await fetchUserRepo(session?.user.repoName)
+  const token = await fetchAccessTokenCache()
+  const userRepo = fetchUserRepo(token, session?.user.repoName)
   if (userRepo.error) return { message: '發文失敗，請再試一次', content }
 
   try {
@@ -74,7 +76,8 @@ export async function updatePostAction(
 ): Promise<IssueFormState> {
   const content = getFormDataValue(formData, 'content')
   try {
-    const { data, userRepo } = await parseWithUserRepo(UpdatePostSchema, {
+    const token = await fetchAccessTokenCache()
+    const { data, userRepo } = parseWithUserRepo(token, UpdatePostSchema, {
       repoName: getFormDataValue(formData, 'repoName'),
       issueNumber: getFormDataValue(formData, 'issueNumber'),
       content,
@@ -89,7 +92,8 @@ export async function updatePostAction(
 
 export async function deletePostAction(target: IssueTarget): Promise<ActionState> {
   try {
-    const { data, userRepo } = await parseWithUserRepo(DeletePostSchema, target)
+    const token = await fetchAccessTokenCache()
+    const { data, userRepo } = parseWithUserRepo(token, DeletePostSchema, target)
     const status = await closeIssue(userRepo, data.issueNumber)
     // TODO: useOptimistic
     refresh()
@@ -101,7 +105,8 @@ export async function deletePostAction(target: IssueTarget): Promise<ActionState
 
 export async function toggleLikeAction(state: ToggleLikeState): Promise<LikeActionState> {
   try {
-    const { data, userRepo } = await parseWithUserRepo(LikePostSchema, state)
+    const token = await fetchAccessTokenCache()
+    const { data, userRepo } = parseWithUserRepo(token, LikePostSchema, state)
     const { issueNumber, isLiked, viewer } = data
 
     if (isLiked) {

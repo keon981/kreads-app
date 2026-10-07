@@ -2,12 +2,14 @@ import type { Metadata } from 'next'
 
 import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
+import { Suspense } from 'react'
+
 import { SignInDialog } from '@/components/blocks/sign-in'
 import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/toast'
+import { verifySession } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { cn } from '@/lib/utils'
-import { fetchGitHubUser } from '@/services/api/users'
 
 import '@/styles/globals.css'
 
@@ -29,9 +31,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const user = await fetchGitHubUser()
-  const isAuth = !!user
-
   return (
     <html
       lang="en"
@@ -39,21 +38,43 @@ export default async function RootLayout({
       className={cn('antialiased', fontMono.variable, 'font-sans', spaceGrotesk.variable, oxaniumHeading.variable)}
     >
       <body>
-        <Providers
-          isAuth={!!isAuth}
-          user={{
-            id: `@${user?.login}`,
-            name: user?.name,
-            avatarUrl: user?.avatar_url,
-          }}
+        <Suspense fallback={(
+          <Providers isAuth={false} user={null}>
+            <></>
+          </Providers>
+        )}
         >
-          {children}
-
-          {/* alert */}
-          <Toaster />
-          <SignInDialog />
-        </Providers>
+          <RootProviders>
+            {children}
+            {/* alert */}
+            <Toaster />
+            <SignInDialog />
+          </RootProviders>
+        </Suspense>
       </body>
     </html>
+  )
+}
+
+async function RootProviders({ children }: {
+  children: React.ReactNode
+}): Promise<React.ReactNode> {
+  // 只有完成註冊（有 repoName）的 session 才算登入
+  const { status, session } = await verifySession()
+  const user = status === 'active' ? session.user : null
+
+  return (
+    <Providers
+      isAuth={!!user}
+      user={user
+        ? {
+            id: user.username ?? undefined,
+            name: user.name,
+            avatarUrl: user.image ?? undefined,
+          }
+        : null}
+    >
+      {children}
+    </Providers>
   )
 }

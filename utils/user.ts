@@ -5,16 +5,11 @@ export function isUserActive(session: AuthSession | null) {
   return !!session?.user.repoName
 }
 
-export function getViewerUser(data: {
-  name: string
-  image?: string | null
-  username?: string | null
-  repoName?: string | null
-}): ViewerUser | null {
+export function getViewerUser(data: Partial<AuthSession['user']>): ViewerUser | null {
   if (!data.username || !data.repoName) return null
   return {
     username: data.username,
-    name: data.name,
+    name: data?.name ?? '',
     avatarUrl: data.image ?? undefined,
     repoName: data.repoName,
   }

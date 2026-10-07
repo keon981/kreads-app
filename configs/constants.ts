@@ -10,6 +10,8 @@ enum HTTP_STATUS {
   NOT_FOUND, // 404
   GONE = 410,
   INTERNAL_SERVER_ERROR = 500,
-
 }
-export { HTTP_STATUS }
+
+const COOKIE_MAX_AGE = 60 * 60
+
+export { COOKIE_MAX_AGE, HTTP_STATUS }

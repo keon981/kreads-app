@@ -1,13 +1,9 @@
 import { cache } from 'react'
 
-import { fetchAccessTokenCache } from '@/lib/auth'
 import { createOctokit } from '@/lib/octokit'
 import { isRequestError } from '@/utils/toolkit'
 
-const fetchGitHubUser = cache(async () => {
-  const token = await fetchAccessTokenCache()
-  if (!token) return null
-
+const fetchGitHubUser = cache(async (token: string) => {
   const octokit = createOctokit(token)
   const { data } = await octokit.rest.users.getAuthenticated()
   return data

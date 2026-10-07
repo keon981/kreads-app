@@ -99,9 +99,9 @@ async function fetchIssuesWithGraphql({ octokit, owner, repo }: UserRepo,
 }
 
 async function fetchIssues(userRepo: UserRepo & { error: boolean }): Promise<Issue[] | null> {
-  return userRepo.error
+  return (userRepo.error
     ? fetchIssuesWithRest(userRepo)
-    : fetchIssuesWithGraphql(userRepo)
+    : fetchIssuesWithGraphql(userRepo))
 }
 
 /* === Github Repo Issue === */

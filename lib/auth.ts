@@ -7,6 +7,7 @@ import { betterAuth } from 'better-auth/minimal'
 import { nextCookies } from 'better-auth/next-js'
 import { admin } from 'better-auth/plugins'
 
+import { COOKIE_MAX_AGE } from '@/configs/constants'
 import { db } from '@/db/drizzle' // your drizzle instance
 import * as schema from '@/db/schema/auth-schema'
 import { isUserActive } from '@/utils/user'
@@ -67,7 +68,7 @@ export const auth = betterAuth({
   session: {
     cookieCache: {
       enabled: true,
-      maxAge: 10 * 60, // Cache duration in seconds (10 min)
+      maxAge: COOKIE_MAX_AGE, // Cache duration in seconds (1 hour)
     },
   },
 })
@@ -76,35 +77,6 @@ export const getSessionCache = cache(async () => {
   return auth.api.getSession({ headers: await headers() })
 })
 
-export const fetchListUserAccounts = cache(async () => {
-  const session = await getSessionCache()
-  if (!session) return null
-
-  const nextHeaders = await headers()
-  const accounts = await auth.api.listUserAccounts({ headers: nextHeaders })
-  return accounts
-})
-
-export async function fetchAccessToken() {
-  const accounts = await fetchListUserAccounts()
-  const nextHeaders = await headers()
-  if (!accounts || !nextHeaders) return null
-
-  const github = accounts.find(a => a.providerId === 'github')
-  if (!github) return null
-
-  const { accessToken } = await auth.api.getAccessToken({
-    body: { accountId: github.id },
-    headers: nextHeaders,
-  })
-
-  return accessToken
-}
-
-export const fetchAccessTokenCache = cache(fetchAccessToken)
-
-// Only reports the status; AuthGuard and GuestOnlyRoute decide where to redirect,
-// so the current path can be kept (layouts and pages render in parallel).
 export const verifySession = cache(async (): Promise<VerifiedSession> => {
   const session = await getSessionCache()
   if (!session) return { status: 'signed-out', session: null }
