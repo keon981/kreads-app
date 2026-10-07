@@ -13,11 +13,13 @@ import { cn } from '@/lib/utils'
 
 import { ButtonGroup, ButtonGroupSeparator } from '../ui/button-group'
 
+import type { ButtonProps } from '@/components/ui/button'
+
 interface AlertDialog {
-  onCancel?: React.ComponentProps<typeof Button>['onClick']
-  onConfirm?: React.ComponentProps<typeof Button>['onClick']
-  confirmProps?: React.ComponentProps<typeof Button>
-  cancelProps?: React.ComponentProps<typeof Button>
+  onCancel?: ButtonProps['onClick']
+  onConfirm?: ButtonProps['onClick']
+  confirmProps?: ButtonProps
+  cancelProps?: ButtonProps
 }
 
 function DeleteAlertDialog({

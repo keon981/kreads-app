@@ -7,6 +7,8 @@ import { cn } from 'cn'
 
 import { Button } from '@/components/ui/button'
 
+import type { ButtonProps } from '@/components/ui/button'
+
 function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
 }
@@ -145,7 +147,7 @@ function AlertDialogDescription({
 function AlertDialogAction({
   className,
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: ButtonProps) {
   return (
     <Button
       data-slot="alert-dialog-action"
@@ -161,7 +163,7 @@ function AlertDialogCancel({
   size = 'default',
   ...props
 }: AlertDialogPrimitive.Close.Props
-  & Pick<React.ComponentProps<typeof Button>, 'variant' | 'size'>) {
+  & Pick<ButtonProps, 'variant' | 'size'>) {
   return (
     <AlertDialogPrimitive.Close
       data-slot="alert-dialog-cancel"

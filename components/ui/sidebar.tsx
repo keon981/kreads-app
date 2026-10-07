@@ -27,6 +27,7 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 
 import type { VariantProps } from 'class-variance-authority'
+import type { ButtonProps } from '@/components/ui/button'
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state'
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -258,7 +259,7 @@ function SidebarTrigger({
   className,
   onClick,
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: ButtonProps) {
   const { toggleSidebar } = useSidebar()
 
   return (

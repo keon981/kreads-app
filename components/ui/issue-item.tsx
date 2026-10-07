@@ -20,6 +20,8 @@ import { useAuth } from '@/contexts/auth-provider'
 import { cn } from '@/lib/utils'
 import { useSignInDialog } from '@/store/sign-in-dialog'
 
+import type { ButtonProps } from '@/components/ui/button'
+
 function IssueItem({
   children,
   className,
@@ -77,7 +79,7 @@ function IssueItemFooter({ ...props }: React.ComponentProps<typeof ButtonGroup>)
   return <ButtonGroup className="px-0 gap-0.5!" {...props} />
 }
 
-function IssueItemButton({ ...props }: React.ComponentProps<typeof Button>) {
+function IssueItemButton({ ...props }: ButtonProps) {
   return (
     <ButtonGroup>
       <Button

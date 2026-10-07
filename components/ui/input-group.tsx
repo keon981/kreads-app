@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 
 import type { VariantProps } from 'class-variance-authority'
+import type { ButtonProps } from '@/components/ui/button'
 
 function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -92,7 +93,7 @@ function InputGroupButton({
   variant = 'ghost',
   size = 'xs',
   ...props
-}: Omit<React.ComponentProps<typeof Button>, 'size' | 'type'>
+}: Omit<ButtonProps, 'size' | 'type'>
   & VariantProps<typeof inputGroupButtonVariants> & {
     type?: 'button' | 'submit' | 'reset'
   }) {
