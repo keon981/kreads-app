@@ -1,4 +1,4 @@
-import { HTTP_STATUS } from '@/configs/constants'
+import { HttpStatusCode } from '@/configs/constants'
 
 export function getFormDataValue(formData: FormData, key: string) {
   const formDataValue = formData.get(key) ?? ''
@@ -16,7 +16,7 @@ export function isRequestError(
 }
 
 export function isUnauthorizedError(error: unknown): boolean {
-  return isRequestError(error) && error.status === HTTP_STATUS.UNAUTHORIZED
+  return isRequestError(error) && error.status === HttpStatusCode.Unauthorized
 }
 
 export function isGraphqlNotFoundError(error: unknown): boolean {

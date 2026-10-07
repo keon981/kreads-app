@@ -2,6 +2,7 @@ interface Issue {
   number: number
   title: string
   body: string
+  bodyHTML: string
   createdAt: string
   author: {
     login: string
@@ -15,6 +16,7 @@ interface Issue {
 interface IssueComment {
   id: number
   body: string
+  bodyHTML: string
   createdAt: string
   author: {
     login: string

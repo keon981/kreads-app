@@ -5,7 +5,7 @@ import { refresh } from 'next/cache'
 import * as z from 'zod'
 
 import { fetchAccessTokenCache } from '@/app/server/db/accounts'
-import { HTTP_STATUS } from '@/configs/constants'
+import { HttpStatusCode } from '@/configs/constants'
 import { getSessionCache } from '@/lib/auth'
 import { closeIssue, createIssue, updateIssue } from '@/services/api/issues'
 import { createIssueLiked, deleteIssueLiked, fetchIssueLikes } from '@/services/api/reactions'
@@ -18,7 +18,6 @@ const PostFormSchema = z.object({
   content: z.string().trim().min(1, '請輸入內容'),
 })
 
-// repoName、issueNumber 由表單的 hidden input 帶入，issueNumber 是字串，用 coerce 轉型
 const UpdatePostSchema = PostFormSchema.extend({
   repoName: z.string().min(1),
   issueNumber: z.coerce.number().int().positive(),
@@ -115,7 +114,7 @@ export async function toggleLikeAction(state: ToggleLikeState): Promise<LikeActi
     } else {
       const reactions = await fetchIssueLikes(userRepo, issueNumber)
       const viewerReaction = reactions.find(reaction => `@${reaction.login}` === viewer)
-      if (!viewerReaction) return { status: HTTP_STATUS.OK, isLiked: false }
+      if (!viewerReaction) return { status: HttpStatusCode.Ok, isLiked: false }
 
       const status = await deleteIssueLiked(
         userRepo,

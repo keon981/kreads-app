@@ -23,18 +23,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { SECONDS, SIDEBAR_CONFIG } from '@/configs/constants'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 
 import type { VariantProps } from 'class-variance-authority'
 import type { ButtonProps } from '@/components/ui/button'
-
-const SIDEBAR_COOKIE_NAME = 'sidebar_state'
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
-const SIDEBAR_WIDTH = '20rem'
-const SIDEBAR_WIDTH_MOBILE = '18rem'
-const SIDEBAR_WIDTH_ICON = '5rem'
-const SIDEBAR_KEYBOARD_SHORTCUT = 'b'
 
 interface SidebarContextProps {
   state: 'expanded' | 'collapsed'
@@ -87,7 +81,7 @@ function SidebarProvider({
       }
 
       // This sets the cookie to keep the sidebar state.
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+      document.cookie = `${SIDEBAR_CONFIG.cookieName}=${openState}; path=/; max-age=${SECONDS.week}`
     },
     [setOpenProp, open],
   )
@@ -101,7 +95,7 @@ function SidebarProvider({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
-        event.key === SIDEBAR_KEYBOARD_SHORTCUT
+        event.key === SIDEBAR_CONFIG.keyboardShortcut
         && (event.metaKey || event.ctrlKey)
       ) {
         event.preventDefault()
@@ -136,8 +130,8 @@ function SidebarProvider({
         data-slot="sidebar-wrapper"
         style={
           {
-            '--sidebar-width': SIDEBAR_WIDTH,
-            '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
+            '--sidebar-width': SIDEBAR_CONFIG.width,
+            '--sidebar-width-icon': SIDEBAR_CONFIG.widthIcon,
             ...style,
           } as React.CSSProperties
         }
@@ -194,7 +188,7 @@ function Sidebar({
           className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
           style={
             {
-              '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
+              '--sidebar-width': SIDEBAR_CONFIG.widthMobile,
             } as React.CSSProperties
           }
           side={side}

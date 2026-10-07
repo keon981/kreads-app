@@ -1,6 +1,6 @@
 import * as z from 'zod'
 
-import { HTTP_STATUS } from '@/configs/constants'
+import { HttpStatusCode, UNAUTHORIZED_MESSAGE } from '@/configs/constants'
 import { createOctokit } from '@/lib/octokit'
 import { isRequestError } from '@/utils/toolkit'
 
@@ -8,8 +8,6 @@ import type { ActionState } from '@/types/action'
 import type { UserRepo } from '@/types/user'
 
 import 'server-only'
-
-const UNAUTHORIZED_MESSAGE = '請先登入'
 
 export function fetchUserRepo(token: string | null, repoName?: string | null): UserRepo & { error: boolean } {
   const [owner, repo] = repoName?.split('/') ?? ['', '']
@@ -40,11 +38,11 @@ export function parseWithUserRepo<S extends z.ZodType<{ repoName: string }>>(
 export function catchParseWithUserRepoError(err: unknown, message: string): ActionState {
   switch (true) {
     case err instanceof z.ZodError:
-      // schema.safeParse 錯誤處理
-      return { status: HTTP_STATUS.BAD_REQUEST, message: err.issues[0].message }
+      // schema.safeParse error handlers
+      return { status: HttpStatusCode.BadRequest, message: err.issues[0].message }
     case err instanceof Error && err.message === UNAUTHORIZED_MESSAGE:
       // fetchUserRepo 的 401 錯誤
-      return { status: HTTP_STATUS.UNAUTHORIZED, message: err.message }
+      return { status: HttpStatusCode.Unauthorized, message: err.message }
     case isRequestError(err):
       return { status: err.status, message }
     default:

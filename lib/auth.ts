@@ -7,7 +7,7 @@ import { betterAuth } from 'better-auth/minimal'
 import { nextCookies } from 'better-auth/next-js'
 import { admin } from 'better-auth/plugins'
 
-import { COOKIE_MAX_AGE } from '@/configs/constants'
+import { SECONDS } from '@/configs/constants'
 import { db } from '@/db/drizzle' // your drizzle instance
 import * as schema from '@/db/schema/auth-schema'
 import { isUserActive } from '@/utils/user'
@@ -15,6 +15,14 @@ import { isUserActive } from '@/utils/user'
 import { env } from './env'
 
 import type { VerifiedSession } from '@/types/auth'
+
+const isDeployed = ['production', 'preview'].includes(env.VERCEL_ENV ?? '')
+const allowedHosts = [
+  env.VERCEL_PROJECT_PRODUCTION_URL,
+  env.VERCEL_BRANCH_URL,
+  env.VERCEL_URL,
+  ...(isDeployed ? [] : ['localhost:*', '127.0.0.1:*']),
+].filter(Boolean) as string[]
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -36,11 +44,7 @@ export const auth = betterAuth({
     },
   },
   baseURL: {
-    allowedHosts: [
-      'localhost:*',
-      '127.0.0.1:*',
-      '*.vercel.app',
-    ],
+    allowedHosts,
     fallback: env.VERCEL_PROJECT_PRODUCTION_URL
       ? `https://${env.VERCEL_PROJECT_PRODUCTION_URL}`
       : 'http://localhost:3000',
@@ -68,7 +72,7 @@ export const auth = betterAuth({
   session: {
     cookieCache: {
       enabled: true,
-      maxAge: COOKIE_MAX_AGE, // Cache duration in seconds (1 hour)
+      maxAge: SECONDS.hour, // Cache duration in seconds (1 hour)
     },
   },
 })

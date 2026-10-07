@@ -153,3 +153,10 @@
   --typeset-leading: 1.75;
   --typeset-flow: 1.25em;
 }
+
+.typeset-post {
+  --typeset-font-body: inherit;
+  --typeset-size: 15px;
+  --typeset-leading: 1.4;
+  --typeset-flow: 1.4em;
+}

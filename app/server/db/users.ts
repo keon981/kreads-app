@@ -17,7 +17,7 @@ function viewerUserTag(username: string): string {
 async function fetchViewerUser(username: string): Promise<ViewerUser | null> {
   'use cache: remote'
   cacheLife('hours')
-  cacheTag(viewerUserTag(username)) // 替 viewerUser 記住的結果貼上標籤
+  cacheTag(viewerUserTag(username))
 
   const [foundUser] = await db
     .select({

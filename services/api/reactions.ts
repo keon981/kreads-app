@@ -1,8 +1,7 @@
+import { LIKE_REACTION, PAGE_SIZE } from '@/configs/constants'
+
 import type { IssueReaction } from '@/types/issue'
 import type { UserRepo } from '@/types/user'
-
-const LIKE_REACTION = 'heart'
-const REACTIONS_PER_PAGE = 100
 
 async function fetchIssueLikes(
   { octokit, owner, repo }: UserRepo,
@@ -13,7 +12,7 @@ async function fetchIssueLikes(
     repo,
     issue_number: issueNumber,
     content: LIKE_REACTION,
-    per_page: REACTIONS_PER_PAGE,
+    per_page: PAGE_SIZE.reactions,
   })
   return data.map(reaction => ({
     id: reaction.id,

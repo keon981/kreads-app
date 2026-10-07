@@ -59,7 +59,6 @@ export default async function RootLayout({
 async function RootProviders({ children }: {
   children: React.ReactNode
 }): Promise<React.ReactNode> {
-  // 只有完成註冊（有 repoName）的 session 才算登入
   const { status, session } = await verifySession()
   const user = status === 'active' ? session.user : null
 

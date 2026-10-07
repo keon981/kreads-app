@@ -1,4 +1,4 @@
-import { HTTP_STATUS } from '@/configs/constants'
+import { HttpStatusCode, LIKE_REACTION, PAGE_SIZE } from '@/configs/constants'
 import { isEqualWithCase, isGraphqlNotFoundError, isRequestError } from '@/utils/toolkit'
 
 import { ISSUE_QUERY, ISSUES_QUERY } from '../graphql/issues'
@@ -7,15 +7,13 @@ import type { Issue } from '@/types/issue'
 import type { UserRepo } from '@/types/user'
 import type { GraphqlIssue, GraphqlIssueResponse, GraphqlIssuesResponse } from '../graphql/issues'
 
-const ISSUES_PER_PAGE = 20
-const LIKE_REACTION = 'heart'
-
 /* === utils === */
 
 function toIssueFromRest(issue: {
   number: number
   title: string
   body?: string | null
+  body_html?: string
   created_at: string
   user: {
     login: string
@@ -30,6 +28,7 @@ function toIssueFromRest(issue: {
     number: issue.number,
     title: issue.title,
     body: issue.body ?? '',
+    bodyHTML: issue.body_html ?? '',
     createdAt: issue.created_at,
     author: issue.user
       ? { login: issue.user.login, avatarUrl: issue.user.avatar_url }
@@ -45,6 +44,7 @@ function toIssueFromGraphql(issue: GraphqlIssue): Issue {
     number: issue.number,
     title: issue.title,
     body: issue.body,
+    bodyHTML: issue.bodyHTML,
     createdAt: issue.createdAt,
     author: issue.author,
     likeCount: issue.reactions.totalCount,
@@ -69,7 +69,8 @@ async function fetchIssuesWithRest(
       state: 'open',
       sort: 'created',
       direction: 'desc',
-      per_page: ISSUES_PER_PAGE,
+      per_page: PAGE_SIZE.issues,
+      mediaType: { format: 'full' }, // return body & body_html
     })
 
     return data
@@ -77,7 +78,7 @@ async function fetchIssuesWithRest(
       .map(toIssueFromRest)
   } catch (err) {
     // 404: user repo 改為 private or 刪除
-    if (isRequestError(err) && err.status === HTTP_STATUS.NOT_FOUND) return null
+    if (isRequestError(err) && err.status === HttpStatusCode.NotFound) return null
     throw err
   }
 }
@@ -88,7 +89,7 @@ async function fetchIssuesWithGraphql({ octokit, owner, repo }: UserRepo,
     const { repository } = await octokit.graphql<GraphqlIssuesResponse>(ISSUES_QUERY, {
       owner,
       repo,
-      first: ISSUES_PER_PAGE,
+      first: PAGE_SIZE.issues,
     })
 
     return repository.issues.nodes.map(toIssueFromGraphql)
@@ -115,12 +116,13 @@ async function fetchIssueWithRest(
       owner,
       repo,
       issue_number: issueNumber,
+      mediaType: { format: 'full' }, // return body & body_html
     })
     if (issue.pull_request || issue.state !== 'open' || issue.user?.login !== owner) return null
 
     return toIssueFromRest(issue)
   } catch (err) {
-    const nonoRepo = [HTTP_STATUS.NOT_FOUND, HTTP_STATUS.GONE]
+    const nonoRepo = [HttpStatusCode.NotFound, HttpStatusCode.Gone]
     const isUnavailable = isRequestError(err) && nonoRepo.includes(err.status)
     if (isUnavailable) return null
     throw err

@@ -38,7 +38,7 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/toast'
-import { HTTP_STATUS } from '@/configs/constants'
+import { HttpStatusCode } from '@/configs/constants'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
 import { useDebouncedMutation } from '@/hooks/use-debounced-mutation'
@@ -58,14 +58,12 @@ interface IssueFormDialogProps {
   onSubmit?: IssueFormAction
   title: string
   placeholder?: string
-  // 表單欄位的預設值
   defaultValues?: {
     content?: string
     repoName?: string
     issueNumber?: number
     commentId?: number
   }
-  // 有傳 open 時為受控模式
   dialogProps?: Partial<UseDialogReturn['dialogProps']>
   children?: React.ReactNode
 }
@@ -87,7 +85,6 @@ function IssueFormDialog({
   const { dialogProps: alertDialogProps, trigger: triggerAlert, dismiss: dismissAlert } = useDialog()
   const { open, onOpenChange } = dialogProps ?? innerDialogProps
 
-  // 輸入中的草稿，null 表示未修改，沿用最新的 defaultValues
   const initialContent = defaultValues?.content ?? ''
   const [draft, setDraft] = useState<string | null>(null)
   const content = draft ?? initialContent
@@ -126,20 +123,20 @@ function IssueFormDialog({
         {children}
         <DialogContent
           showCloseButton={false}
-          className="p-0 w-155 sm:max-w-[calc(100%-2rem)]"
+          className="p-0 w-155 sm:max-w-[calc(100%-2rem)] flex flex-col max-h-[calc(100dvh-2rem)]"
         >
-          <DialogHeader className="flex-row h-14 px-4 justify-between items-center border-b">
+          <DialogHeader className="shrink-0 flex-row h-14 px-4 justify-between items-center border-b">
             <DialogClose>
               <RiCloseLine />
             </DialogClose>
             <DialogTitle className="flex-1 text-center">{title}</DialogTitle>
             <div className="size-6" />
           </DialogHeader>
-          <form action={formAction}>
+          <form action={formAction} className="flex flex-col min-h-0">
             <input type="hidden" name="repoName" value={defaultValues?.repoName} />
             <input type="hidden" name="issueNumber" value={defaultValues?.issueNumber} />
             <input type="hidden" name="commentId" value={defaultValues?.commentId} />
-            <article className="flex flex-col px-6">
+            <article className="flex flex-col px-6 min-h-0 overflow-y-auto overscroll-contain">
               <section className="w-full flex gap-x-3">
                 {/* 頭像 */}
                 <div className="flex flex-col">
@@ -178,7 +175,7 @@ function IssueFormDialog({
                 </p>
               </section>
             </article>
-            <DialogFooter className="mx-0 mb-0 p-6 pt-1 border-0 bg-transparent">
+            <DialogFooter className="shrink-0 mx-0 mb-0 p-6 pt-1 border-0 bg-transparent">
               {state.message
                 && <p className="me-auto text-sm text-destructive">{state.message}</p>}
               <Button type="submit" variant="outline" disabled={isPending}>
@@ -367,7 +364,7 @@ function IssueComposerItem({
 
 function toastActionState(res: ActionState) {
   toast.add({
-    type: res.status && res.status < HTTP_STATUS.BAD_REQUEST ? 'success' : 'error',
+    type: res.status && res.status < HttpStatusCode.BadRequest ? 'success' : 'error',
     description: res.message,
   })
 }
@@ -431,9 +428,7 @@ function PostItem({
             onDelete={triggerDeleteDialog}
           />
         </IssueItemTitle>
-        <IssueItemArticle>
-          {post.body}
-        </IssueItemArticle>
+        <IssueItemArticle html={post.bodyHTML} />
         <IssueItemFooter>
           {/* liked */}
           <IssueLikedButton
@@ -544,9 +539,7 @@ function CommentItem({
             onDelete={triggerDeleteDialog}
           />
         </IssueItemTitle>
-        <IssueItemArticle>
-          {comment.body}
-        </IssueItemArticle>
+        <IssueItemArticle html={comment.bodyHTML} />
         <IssueItemFooter>
           {/* liked */}
           <IssueLikedButton repoName={repoName} />

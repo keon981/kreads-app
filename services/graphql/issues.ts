@@ -2,6 +2,7 @@ interface GraphqlIssue {
   number: number
   title: string
   body: string
+  bodyHTML: string
   createdAt: string
   author: {
     login: string
@@ -37,6 +38,7 @@ const ISSUE_FIELDS = `
     number
     title
     body
+    bodyHTML
     createdAt
     author { login avatarUrl }
     reactions { totalCount }
@@ -47,7 +49,7 @@ const ISSUE_FIELDS = `
 
 // issue list
 const ISSUES_QUERY = `
-  query ($owner: String!, $repo: String!, $first: Int!) {
+  query GetIssues($owner: String!, $repo: String!, $first: Int!) {
     repository(owner: $owner, name: $repo) {
       issues(
         first: $first
@@ -65,7 +67,7 @@ const ISSUES_QUERY = `
 `
 // issue only
 const ISSUE_QUERY = `
-  query ($owner: String!, $repo: String!, $number: Int!) {
+  query GetIssue($owner: String!, $repo: String!, $number: Int!) {
     repository(owner: $owner, name: $repo) {
       issue(number: $number) {
         ...IssueFields

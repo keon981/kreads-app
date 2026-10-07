@@ -1,11 +1,12 @@
+import { PAGE_SIZE } from '@/configs/constants'
+
 import type { IssueComment } from '@/types/issue'
 import type { UserRepo } from '@/types/user'
-
-const COMMENTS_PER_PAGE = 100
 
 function toIssueComment(comment: {
   id: number | bigint
   body?: string
+  body_html?: string
   created_at: string
   user: {
     login: string
@@ -15,6 +16,7 @@ function toIssueComment(comment: {
   return {
     id: Number(comment.id),
     body: comment.body ?? '',
+    bodyHTML: comment.body_html ?? '',
     createdAt: comment.created_at,
     author: comment.user
       ? { login: comment.user.login, avatarUrl: comment.user.avatar_url }
@@ -30,7 +32,8 @@ async function fetchIssueComments(
     owner,
     repo,
     issue_number: issueNumber,
-    per_page: COMMENTS_PER_PAGE,
+    per_page: PAGE_SIZE.comments,
+    mediaType: { format: 'full' }, // return body & body_html
   })
   return data.map(toIssueComment)
 }

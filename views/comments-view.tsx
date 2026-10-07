@@ -30,7 +30,7 @@ async function CommentList({ repoName, issueNumber }: CommentListProps): Promise
     fetchIssueComments(userRepo, issueNumber),
     verifySession(),
   ])
-  // username 格式為 '@login'
+
   const viewer = status === 'active' ? session.user.username : null
 
   return comments.map(comment => (

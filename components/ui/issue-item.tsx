@@ -66,10 +66,12 @@ function IssueItemTitle({ children, ...props }: React.ComponentProps<typeof Item
   )
 }
 
-function IssueItemArticle({ ...props }: React.ComponentProps<typeof ItemDescription>) {
+function IssueItemArticle({ html, className, ...props }: React.ComponentProps<'div'> & { html: string }) {
   return (
-    <ItemDescription
-      className="mt-1 ps-2.5 line-clamp-none whitespace-pre-wrap wrap-break-word text-foreground text-base/tight"
+    <div
+      data-slot="item-description"
+      className={cn('mt-1 ps-2.5 typeset typeset-post', className)}
+      dangerouslySetInnerHTML={{ __html: html }}
       {...props}
     />
   )
