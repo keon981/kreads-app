@@ -2,7 +2,7 @@
 
 import type { Url } from 'next/dist/shared/lib/router/router'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 import React from 'react'
 
@@ -25,14 +25,20 @@ import { useTheme } from 'next-themes'
 
 import { createPostAction } from '@/app/server/actions/posts'
 import { AuthDialogTrigger } from '@/components/auth/auth-dialog-trigger'
+import { NoticeAlertDialog } from '@/components/blocks/confirm-dialog'
 import { IssueFormDialog } from '@/components/blocks/issue'
+import { DialogTrigger } from '@/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
@@ -49,6 +55,7 @@ import {
 import { homeList } from '@/configs/nav-config'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
+import { signOutWithClient } from '@/lib/auth-client'
 
 function AppSidebarContainer({ children, ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -123,13 +130,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       {/* Bookmark */}
       <SidebarMenuItem>
-        <SidebarMenuLink
-          href="/saved"
-          isActive={getIsRoute('/saved')}
-          onClick={onAuthGuardClick}
+        <NoticeAlertDialog
+          title="功能尚未開放"
+          description="書籤收藏功能正在努力開發中，敬請期待！"
         >
-          {getIsRoute('/saved') ? <RiBookmarkFill /> : <RiBookmarkLine />}
-        </SidebarMenuLink>
+          <DialogTrigger
+            render={(
+              <SidebarMenuButton
+                isActive={getIsRoute('/saved')}
+              />
+            )}
+          >
+            {getIsRoute('/saved') ? <RiBookmarkFill /> : <RiBookmarkLine />}
+          </DialogTrigger>
+        </NoticeAlertDialog>
       </SidebarMenuItem>
 
       {/* Profile */}
@@ -184,7 +198,31 @@ function SidebarMenuLink({
 }
 
 function SidebarSettingsMenu() {
+  const router = useRouter()
+  const { isAuth } = useAuth()
   const { theme, setTheme } = useTheme()
+
+  const handleSignOut = async () => {
+    await signOutWithClient()
+    router.refresh()
+  }
+
+  const themeOptions = (
+    <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+      <DropdownMenuRadioItem value="light">
+        <RiSunLine />
+        Light
+      </DropdownMenuRadioItem>
+      <DropdownMenuRadioItem value="dark">
+        <RiMoonLine />
+        Dark
+      </DropdownMenuRadioItem>
+      <DropdownMenuRadioItem value="system">
+        <RiComputerLine />
+        System
+      </DropdownMenuRadioItem>
+    </DropdownMenuRadioGroup>
+  )
 
   return (
     <SidebarMenuItem>
@@ -201,23 +239,28 @@ function SidebarSettingsMenu() {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent side="right" align="end">
-          <DropdownMenuGroup>
-            <DropdownMenuLabel>外觀</DropdownMenuLabel>
-            <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-              <DropdownMenuRadioItem value="light">
-                <RiSunLine />
-                Light
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="dark">
-                <RiMoonLine />
-                Dark
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="system">
-                <RiComputerLine />
-                System
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuGroup>
+          {isAuth
+            ? (
+                <DropdownMenuGroup>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      外觀
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      {themeOptions}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    登出
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              )
+            : (
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>外觀</DropdownMenuLabel>
+                  {themeOptions}
+                </DropdownMenuGroup>
+              )}
         </DropdownMenuContent>
       </DropdownMenu>
     </SidebarMenuItem>

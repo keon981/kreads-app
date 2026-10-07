@@ -41,9 +41,11 @@ import { toast } from '@/components/ui/toast'
 import { HttpStatusCode } from '@/configs/constants'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
+import { copyLink } from '@/hooks/use-copy-link'
 import { useDebouncedMutation } from '@/hooks/use-debounced-mutation'
 import { useDialog } from '@/hooks/use-dialog'
 import { formatDateTime } from '@/lib/utils'
+import { chatHref } from '@/utils/navigation'
 
 import { CancelAlertDialog, DeleteAlertDialog } from './confirm-dialog'
 
@@ -377,6 +379,7 @@ function PostItem({
   updateAction,
   onDelete,
   onSubmit,
+  onCopyLink,
   ...props
 }: {
   post: Issue
@@ -386,6 +389,7 @@ function PostItem({
   updateAction?: IssueFormAction
   onDelete?: IssueDeleteAction
   onSubmit?: IssueFormAction
+  onCopyLink?: DropdownMenuItemOnClick
 } & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>) {
   // dialog
   const { dialogProps, trigger: triggerFormDialog } = useDialog()
@@ -401,6 +405,12 @@ function PostItem({
 
   // auth
   const onAuthGuardClick = useAuthGuard(triggerChatDialog)
+
+  const handleCopyLink = () => {
+    if (typeof window === 'undefined') return
+    const path = (href || chatHref(post)).replace(/^\//, '')
+    copyLink(`${window.location.origin}/${path}`)
+  }
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -425,6 +435,7 @@ function PostItem({
             isOwner={isOwner}
             loading={isPending}
             onEdit={triggerFormDialog}
+            onCopyLink={onCopyLink ?? handleCopyLink}
             onDelete={triggerDeleteDialog}
           />
         </IssueItemTitle>
@@ -443,32 +454,32 @@ function PostItem({
           {/* chat */}
           {onSubmit
             ? (
-              <IssueFormDialog
-                onSubmit={onSubmit}
-                title="新貼文"
-                placeholder="有什麼新鮮事？"
-                dialogProps={chatDialogProps}
-                defaultValues={{ repoName, issueNumber: post.number }}
-              >
-                <DialogTrigger
-                  render={<IssueItemButton size="lg" />}
-                  onClick={onAuthGuardClick}
+                <IssueFormDialog
+                  onSubmit={onSubmit}
+                  title="新貼文"
+                  placeholder="有什麼新鮮事？"
+                  dialogProps={chatDialogProps}
+                  defaultValues={{ repoName, issueNumber: post.number }}
+                >
+                  <DialogTrigger
+                    render={<IssueItemButton size="lg" />}
+                    onClick={onAuthGuardClick}
+                  >
+                    <RiChat1Line />
+                    {post.commentCount > 0 && post.commentCount}
+                  </DialogTrigger>
+                </IssueFormDialog>
+              )
+            : (
+                <IssueItemButton
+                  size="lg"
+                  nativeButton={false}
+                  render={<Link href={href ?? ''} />}
                 >
                   <RiChat1Line />
                   {post.commentCount > 0 && post.commentCount}
-                </DialogTrigger>
-              </IssueFormDialog>
-            )
-            : (
-              <IssueItemButton
-                size="lg"
-                nativeButton={false}
-                render={<Link href={href ?? ''} />}
-              >
-                <RiChat1Line />
-                {post.commentCount > 0 && post.commentCount}
-              </IssueItemButton>
-            )}
+                </IssueItemButton>
+              )}
 
           {/* share */}
           <IssueItemButton>
@@ -495,6 +506,7 @@ function CommentItem({
   isOwner = false,
   updateAction,
   onDelete,
+  onCopyLink,
   ...props
 }: {
   comment: IssueComment
@@ -502,6 +514,7 @@ function CommentItem({
   isOwner?: boolean
   updateAction?: IssueFormAction
   onDelete?: IssueDeleteAction
+  onCopyLink?: DropdownMenuItemOnClick
 } & React.ComponentProps<typeof IssueItem>) {
   const { dialogProps, trigger: triggerFormDialog } = useDialog()
   const {
@@ -512,6 +525,11 @@ function CommentItem({
   const [isPending, startTransition] = useTransition()
 
   const authorName = comment.author?.login ?? 'ghost'
+
+  const handleCopyLink = () => {
+    if (typeof window === 'undefined') return
+    copyLink(`${window.location.origin}${window.location.pathname}#comment-${comment.id}`)
+  }
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -536,6 +554,7 @@ function CommentItem({
             isOwner={isOwner}
             loading={isPending}
             onEdit={triggerFormDialog}
+            onCopyLink={onCopyLink ?? handleCopyLink}
             onDelete={triggerDeleteDialog}
           />
         </IssueItemTitle>
