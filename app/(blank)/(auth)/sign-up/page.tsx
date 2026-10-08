@@ -10,6 +10,7 @@ import { SignUpForm } from '@/views/sign-up-form'
 const errorMessages: Record<string, string> = {
   signup_disabled: '',
   invalid_invite: '邀請碼無效',
+  invite_limit: '此邀請碼已達到上限',
   access_denied: 'GitHub 沒有完成授權，請再試一次。',
   no_permission: 'GitHub 授權不足，請重新授權。',
   invalid_name: '倉庫名稱不合法，請換一個。',
@@ -24,9 +25,9 @@ function getError(error?: string) {
 async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string, error?: string }>
+  searchParams: Promise<{ next?: string, error?: string, aff?: string }>
 }) {
-  const { next, error } = await searchParams
+  const { next, error, aff } = await searchParams
   const session = await getSessionCache()
   const nextPath = safeNext(next)
   if (isUserActive(session)) redirect(nextPath)
@@ -37,7 +38,7 @@ async function Page({
       <h2 className="text-3xl font-bold">
         Kreads APP
       </h2>
-      <SignUpForm error={err} nextPath={nextPath} />
+      <SignUpForm error={err} nextPath={nextPath} inviteCode={aff} isInvited={!!aff} />
     </section>
   )
 }

@@ -22,11 +22,12 @@ export function authorizeGitHubRepo() {
 export function signInWithGitHub() {
   const url = new URL(window.location.href)
   const next = safeNext(url.searchParams.get('next') ?? url.pathname + url.search)
+  const aff = url.searchParams.get('aff')
   return authClient.signIn.social({
     provider: 'github',
     scopes: ['public_repo'],
     callbackURL: next,
-    errorCallbackURL: signUpPath(next),
+    errorCallbackURL: signUpPath({ next, aff }),
   })
 }
 

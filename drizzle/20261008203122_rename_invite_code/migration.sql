@@ -1,0 +1,1 @@
+ALTER TABLE "user" RENAME COLUMN "aff_code" TO "invite_code";

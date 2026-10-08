@@ -87,10 +87,10 @@ async function RootProviders({ children }: {
       isAuth={!!user}
       user={user
         ? {
-          id: user.username ?? undefined,
-          name: user.name,
-          avatarUrl: user.image ?? undefined,
-        }
+            id: user.username ?? undefined,
+            name: user.name,
+            avatarUrl: user.image ?? undefined,
+          }
         : null}
     >
       {children}

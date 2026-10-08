@@ -3,12 +3,12 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import type { NextRequest } from 'next/server'
 
-import { and, eq, isNull } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
+import { redeemInviteCode } from '@/app/server/db/invites'
 import { viewerUserTag } from '@/app/server/db/users'
 import { db } from '@/db/drizzle'
 import { user } from '@/db/schema/auth-schema'
-import { inviteCode as inviteCodeSchema } from '@/db/schema/invite-schema'
 import {
   auth,
   fetchAccessTokenCache,
@@ -16,6 +16,7 @@ import {
   signOutWithServer,
 } from '@/lib/auth'
 import { findOrCreateRepo } from '@/services/api/users'
+import { generateInviteCode } from '@/utils/invite'
 import { safeNext, signUpPath } from '@/utils/navigation'
 import { isRequestError } from '@/utils/toolkit'
 import { isUserActive } from '@/utils/user'
@@ -30,7 +31,14 @@ export async function GET(request: NextRequest) {
   if (!session) redirect('/') // 登入過期或失敗
   if (isUserActive(session)) redirect(nextPath) // 帳戶已經註冊
 
-  const handleAbortSignUp = (m: string) => abortSignUp(session.user.id, nextPath, m)
+  const handleAbortSignUp = (msg: string) => abortSignUp(
+    session.user.id,
+    signUpPath({
+      next: nextPath,
+      error: msg,
+      aff: inviteCode,
+    }),
+  )
 
   // 表單尚未填寫
   if (!repoName) return handleAbortSignUp('invalid_name')
@@ -55,17 +63,20 @@ export async function GET(request: NextRequest) {
   }
 
   // 核銷 invite code
-  const redeemed = await db
-    .update(inviteCodeSchema)
-    .set({ redeemedBy: session.user.id, redeemedAt: new Date() })
-    .where(and(eq(inviteCodeSchema.code, inviteCode), isNull(inviteCodeSchema.redeemedAt)))
-    .returning({ id: inviteCodeSchema.id })
-  if (redeemed.length === 0) return handleAbortSignUp('invalid_invite')
+  const redeemed = await redeemInviteCode(inviteCode, session.user.id)
+  if (redeemed.status !== 'valid') {
+    return handleAbortSignUp(redeemed.status === 'limit' ? 'invite_limit' : 'invalid_invite')
+  }
 
   // database
   await db
     .update(user)
-    .set({ repoName: fullName, username })
+    .set({
+      repoName: fullName,
+      username,
+      inviteCode: generateInviteCode(),
+      invitedBy: redeemed.invitedBy,
+    })
     .where(eq(user.id, session.user.id))
 
   // A cached "not found" for this username would hide the new profile
@@ -87,12 +98,8 @@ function getErrorStatus(status: number) {
   return 'repo_failed'
 }
 
-async function abortSignUp(
-  userId: string,
-  nextPath: string,
-  message: string,
-) {
+async function abortSignUp(userId: string, redirectPath: string): Promise<never> {
   await signOutWithServer()
   await db.delete(user).where(eq(user.id, userId))
-  redirect(signUpPath(nextPath, message))
+  redirect(redirectPath)
 }

@@ -1,7 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-
 import { RiCheckLine, RiFileCopyLine, RiGithubFill } from '@remixicon/react'
 
 import {
@@ -25,6 +23,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
   InputGroup,
@@ -34,6 +33,7 @@ import {
 } from '@/components/ui/input-group'
 import { paths } from '@/configs/path-config'
 import { useCopyLink } from '@/hooks/use-copy-link'
+import { getAbsoluteUrl, invitePath } from '@/utils/navigation'
 
 import { ButtonGroup } from '../ui/button-group'
 
@@ -42,87 +42,87 @@ interface Props {
   name: string
   id: string
   avatarUrl?: string
+  inviteCode?: string | null
 }
 
-export function AboutUser({ name, id, children, avatarUrl }: Props) {
-  const [isShareOpen, setIsShareOpen] = useState(false)
-
+export function AboutUser({ name, id, children, avatarUrl, inviteCode }: Props) {
   const login = id.replace(/^@/, '')
-  const githubPath = `https://github.com/${login}`
-  const userPath = paths.user(login)
-  const shareLink = typeof window !== 'undefined' ? `${window.location.origin}${userPath}` : userPath
+  const githubUrl = `https://github.com/${login}`
+  const shareUrl = getAbsoluteUrl(paths.user(login))
+  const inviteUrl = inviteCode ? getAbsoluteUrl(invitePath(inviteCode)) : ''
 
   return (
-    <>
-      <Card className="gap-0 bg-transparent border-0 rounded-none">
-        <CardHeader className="[--card-spacing:--spacing(4)] gap-0">
-          <CardTitle className="text-2xl/tight">
-            {name}
-          </CardTitle>
-          <CardDescription>{id}</CardDescription>
-          <CardAction>
-            <Avatar className="size-21">
-              <AvatarImage src={avatarUrl} />
-              <AvatarFallback>
-                {name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </CardAction>
-        </CardHeader>
-        <CardContent>{children}</CardContent>
-        <CardFooter className="flex-col pt-3 gap-4 bg-transparent border-transparent rounded-none">
-          <ButtonGroup className="w-full flex-1 justify-end">
-            <Button
-              variant="ghost"
-              size="icon-lg"
-              nativeButton={false}
-              render={<a target="_blank" href={githubPath} rel="noopener noreferrer" />}
-            >
-              <RiGithubFill />
-            </Button>
-          </ButtonGroup>
+    <Card className="gap-0 bg-transparent border-0 rounded-none">
+      <CardHeader className="[--card-spacing:--spacing(4)] gap-0">
+        <CardTitle className="text-2xl/tight">
+          {name}
+        </CardTitle>
+        <CardDescription>{id}</CardDescription>
+        <CardAction>
+          <Avatar className="size-21">
+            <AvatarImage src={avatarUrl} />
+            <AvatarFallback>
+              {name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </CardAction>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+      <CardFooter className="flex-col pt-3 gap-4 bg-transparent border-transparent rounded-none">
+        <ButtonGroup className="w-full flex-1 justify-end">
           <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={() => setIsShareOpen(true)}
+            variant="ghost"
+            size="icon-lg"
+            nativeButton={false}
+            render={<a target="_blank" href={githubUrl} rel="noopener noreferrer" />}
           >
-            Share
+            <RiGithubFill />
           </Button>
-        </CardFooter>
-      </Card>
-
-      <ShareDialog
-        open={isShareOpen}
-        onOpenChange={setIsShareOpen}
-        shareLink={shareLink}
-      />
-    </>
+        </ButtonGroup>
+        <div className="w-full flex gap-2">
+          <ShareDialog shareUrl={shareUrl}>
+            <DialogTrigger render={<Button type="button" variant="outline" className="flex-1" />}>
+              Share
+            </DialogTrigger>
+          </ShareDialog>
+          {inviteUrl && (
+            <ShareDialog
+              shareUrl={inviteUrl}
+              title="邀請朋友加入"
+              description="複製邀請連結，朋友可直接前往註冊"
+            >
+              <DialogTrigger render={<Button type="button" variant="outline" className="flex-1" />}>
+                邀請
+              </DialogTrigger>
+            </ShareDialog>
+          )}
+        </div>
+      </CardFooter>
+    </Card>
   )
 }
 
 interface ShareDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  shareLink: string
+  children: React.ReactNode
+  shareUrl: string
   title?: string
   description?: string
 }
 function ShareDialog({
-  open,
-  onOpenChange,
-  shareLink,
+  children,
+  shareUrl,
   title = '分享個人檔案',
   description = '複製連結以分享給其他人',
 }: ShareDialogProps) {
   const { copied, copy } = useCopyLink()
 
   const handleCopy = () => {
-    copy(shareLink)
+    copy(shareUrl)
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog>
+      {children}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -131,7 +131,7 @@ function ShareDialog({
         <InputGroup>
           <InputGroupInput
             readOnly
-            value={shareLink}
+            value={shareUrl}
           />
           <InputGroupAddon align="inline-end">
             <InputGroupButton
@@ -141,11 +141,11 @@ function ShareDialog({
             >
               {copied
                 ? (
-                  <RiCheckLine className="text-emerald-500" />
-                )
+                    <RiCheckLine className="text-emerald-500" />
+                  )
                 : (
-                  <RiFileCopyLine />
-                )}
+                    <RiFileCopyLine />
+                  )}
             </InputGroupButton>
           </InputGroupAddon>
         </InputGroup>

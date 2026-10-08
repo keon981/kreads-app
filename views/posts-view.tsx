@@ -56,6 +56,7 @@ async function UserPostList({ repoName, isOwner }: {
 export async function UserPostsView({ user }: UserPostsViewProps): Promise<React.ReactNode> {
   const session = await getSessionCache()
   const isOwner = session?.user.username === user.username
+  const ownerInviteCode = isOwner ? session?.user.inviteCode : null
 
   return (
     <ArticleLayout>
@@ -63,6 +64,7 @@ export async function UserPostsView({ user }: UserPostsViewProps): Promise<React
         name={user?.name ?? ''}
         id={user?.username}
         avatarUrl={user?.avatarUrl}
+        inviteCode={ownerInviteCode}
       />
       {/* new post */}
       {isOwner && (

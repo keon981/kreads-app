@@ -6,6 +6,7 @@ export const env = createEnv({
   server: {
     GITHUB_CLIENT_ID: z.string(),
     GITHUB_CLIENT_SECRET: z.string(),
+    INVITE_LIMIT: z.coerce.number().int().positive().default(3),
   },
   client: {
     NEXT_PUBLIC_HOME_USERNAME: z.string(),
@@ -16,6 +17,7 @@ export const env = createEnv({
   runtimeEnv: {
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+    INVITE_LIMIT: process.env.INVITE_LIMIT,
     NEXT_PUBLIC_HOME_USERNAME: process.env.NEXT_PUBLIC_HOME_USERNAME,
     NEXT_PUBLIC_APP_TITLE: process.env.NEXT_PUBLIC_APP_TITLE,
   },

@@ -3,10 +3,7 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { and, eq, isNull } from 'drizzle-orm'
-
-import { db } from '@/db/drizzle'
-import { inviteCode } from '@/db/schema/invite-schema'
+import { getInviteCodeStatus } from '@/app/server/db/invites'
 import { auth, getSessionCache } from '@/lib/auth'
 import { signUpPath } from '@/utils/navigation'
 import { getFormDataValue } from '@/utils/toolkit'
@@ -31,10 +28,9 @@ export async function completeSignUpAction(
   if (!code) return { message: '請輸入邀請碼' }
   if (!repo) return { message: '請輸入倉庫名稱' }
 
-  // verifyInviteCode
-  const message = await verifyInviteCode(code)
-
-  if (message) return message
+  const inviteStatus = await getInviteCodeStatus(code)
+  if (inviteStatus === 'invalid') return { message: '邀請碼無效或已被使用' }
+  if (inviteStatus === 'limit') return { message: '此邀請碼已達到上限' }
 
   // 取得 github 授權
   const { url } = await auth.api.signInSocial({
@@ -43,21 +39,11 @@ export async function completeSignUpAction(
       requestSignUp: true,
       scopes: ['public_repo'],
       callbackURL: `/api/sign-up?${new URLSearchParams({ repo, next_path: nextPath, invite_code: code })}`,
-      errorCallbackURL: signUpPath(nextPath),
+      errorCallbackURL: signUpPath({ next: nextPath, aff: code }),
     },
     headers: await headers(),
   })
   if (!url) return { message: '無法取得 GitHub 授權網址，請再試一次' }
 
   redirect(url)
-}
-
-// 查詢邀請碼存在與否或者是否已被使用過
-async function verifyInviteCode(code: string) {
-  const [invite] = await db
-    .select({ id: inviteCode.id })
-    .from(inviteCode)
-    .where(and(eq(inviteCode.code, code), isNull(inviteCode.redeemedAt)))
-    .limit(1)
-  if (!invite) return { message: '邀請碼無效或已被使用' }
 }

@@ -69,13 +69,13 @@ function MobileHeader(): React.ReactNode {
       <div className="flex items-center justify-end w-20">
         {!isAuth
           ? (
-            <SignInButton className="h-8 px-3 text-xs font-semibold rounded-full">
-              登入
-            </SignInButton>
-          )
+              <SignInButton className="h-8 px-3 text-xs font-semibold rounded-full">
+                登入
+              </SignInButton>
+            )
           : (
-            <div className="size-9" />
-          )}
+              <div className="size-9" />
+            )}
       </div>
     </div>
   )

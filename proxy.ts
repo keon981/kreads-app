@@ -17,7 +17,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     // Optimistic cookie-only check; pages under (private) still verify the session themselves.
     const { pathname, search } = request.nextUrl
     if (privatePaths.includes(pathname)) {
-      return NextResponse.redirect(new URL(signInPath(pathname + search), request.url))
+      return NextResponse.redirect(new URL(signInPath({ next: pathname + search }), request.url))
     }
     return NextResponse.next({ request: { headers: requestHeaders } })
   }

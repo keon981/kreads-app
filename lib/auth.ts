@@ -62,6 +62,17 @@ export const auth = betterAuth({
         input: false,
         unique: true,
       },
+      inviteCode: {
+        type: 'string',
+        required: false,
+        input: false,
+        unique: true,
+      },
+      invitedBy: {
+        type: 'string',
+        required: false,
+        input: false,
+      },
     },
   },
   account: {

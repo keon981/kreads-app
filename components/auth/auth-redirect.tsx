@@ -10,5 +10,5 @@ interface AuthRedirectProps {
 
 export function AuthRedirect({ target }: AuthRedirectProps): never {
   const pathname = usePathname()
-  redirect(target === 'sign-in' ? signInPath(pathname) : signUpPath(pathname))
+  redirect(target === 'sign-in' ? signInPath({ next: pathname }) : signUpPath({ next: pathname }))
 }

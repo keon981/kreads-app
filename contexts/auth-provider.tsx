@@ -32,13 +32,13 @@ function AuthProvider({
 } & AuthContextProps) {
   const contextValue = useMemo(() => isAuth
     ? ({
-      isAuth,
-      user,
-    })
+        isAuth,
+        user,
+      })
     : ({
-      isAuth,
-      user: null,
-    }), [isAuth, user])
+        isAuth,
+        user: null,
+      }), [isAuth, user])
 
   return (
     <AuthContext value={contextValue}>

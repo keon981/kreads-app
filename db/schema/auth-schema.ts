@@ -1,6 +1,8 @@
 import { relations } from 'drizzle-orm/_relations'
 import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
+import type { AnyPgColumn } from 'drizzle-orm/pg-core'
+
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -18,6 +20,8 @@ export const user = pgTable('user', {
   banExpires: timestamp('ban_expires'),
   repoName: text('repo_name'),
   username: text('username').unique(),
+  inviteCode: text('invite_code').unique(),
+  invitedBy: text('invited_by').references((): AnyPgColumn => user.id, { onDelete: 'set null' }),
 })
 
 export const session = pgTable(
