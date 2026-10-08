@@ -17,7 +17,7 @@
 @layer components {
   .typeset {
     font-family: var(--typeset-font-body);
-    font-size: calc(var(--typeset-size) * 1.125);
+    font-size: calc(var(--typeset-size));
     line-height: var(--typeset-leading);
     color: var(--color-foreground, currentColor);
     overflow-wrap: break-word;

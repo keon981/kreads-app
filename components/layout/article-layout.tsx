@@ -91,7 +91,7 @@ function AppHeader(): React.ReactNode {
       {isMobile && <MobileHeader />}
 
       {/* bottom */}
-      <div className="absolute bottom-0 left-0 w-full md:left-2 md:w-[98%] border-b border-border" />
+      <div className="absolute bottom-0 left-0 w-full md:left-2 md:w-[98%] md:border-b border-border" />
 
       {/* bottom left */}
       <div className="hidden md:block absolute top-15 -left-3 size-9 overflow-hidden">

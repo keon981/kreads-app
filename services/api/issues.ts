@@ -1,7 +1,8 @@
-import { HttpStatusCode, LIKE_REACTION, PAGE_SIZE } from '@/configs/constants'
-import { isEqualWithCase, isGraphqlNotFoundError, isRequestError } from '@/utils/toolkit'
+import { HttpStatusCode, PAGE_SIZE } from '@/configs/constants'
+import { isGraphqlNotFoundError, isRequestError } from '@/utils/toolkit'
 
 import { ISSUE_QUERY, ISSUES_QUERY } from '../graphql/issues'
+import { isViewerReacted } from './reactions'
 
 import type { Issue } from '@/types/issue'
 import type { UserRepo } from '@/types/user'
@@ -20,7 +21,7 @@ function toIssueFromRest(issue: {
     avatar_url: string
   } | null
   reactions?: {
-    total_count: number
+    heart: number
   }
   comments: number
 }): Issue {
@@ -33,8 +34,8 @@ function toIssueFromRest(issue: {
     author: issue.user
       ? { login: issue.user.login, avatarUrl: issue.user.avatar_url }
       : null,
-    likeCount: issue.reactions?.total_count ?? 0,
-    isLiked: false,
+    reactionCount: issue.reactions?.heart ?? 0,
+    isReacted: false,
     commentCount: issue.comments,
   }
 }
@@ -47,10 +48,8 @@ function toIssueFromGraphql(issue: GraphqlIssue): Issue {
     bodyHTML: issue.bodyHTML,
     createdAt: issue.createdAt,
     author: issue.author,
-    likeCount: issue.reactions.totalCount,
-    isLiked: issue.reactionGroups?.some(
-      group => isEqualWithCase(LIKE_REACTION, group.content) && group.viewerHasReacted,
-    ) ?? false,
+    reactionCount: issue.reactions.totalCount,
+    isReacted: isViewerReacted(issue.reactionGroups),
     commentCount: issue.comments.totalCount,
   }
 }

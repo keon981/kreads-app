@@ -1,7 +1,13 @@
 import { PAGE_SIZE } from '@/configs/constants'
 
+import { ISSUE_COMMENTS_QUERY } from '../graphql/comments'
+import { isViewerReacted } from './reactions'
+
 import type { IssueComment } from '@/types/issue'
 import type { UserRepo } from '@/types/user'
+import type { GraphqlIssueComment, GraphqlIssueCommentsResponse } from '../graphql/comments'
+
+/* === utils === */
 
 function toIssueComment(comment: {
   id: number | bigint
@@ -12,6 +18,9 @@ function toIssueComment(comment: {
     login: string
     avatar_url: string
   } | null
+  reactions?: {
+    heart: number
+  }
 }): IssueComment {
   return {
     id: Number(comment.id),
@@ -21,10 +30,26 @@ function toIssueComment(comment: {
     author: comment.user
       ? { login: comment.user.login, avatarUrl: comment.user.avatar_url }
       : null,
+    reactionCount: comment.reactions?.heart ?? 0,
+    isReacted: false,
   }
 }
 
-async function fetchIssueComments(
+function toIssueCommentFromGraphql(comment: GraphqlIssueComment): IssueComment {
+  return {
+    id: Number(comment.fullDatabaseId),
+    body: comment.body,
+    bodyHTML: comment.bodyHTML,
+    createdAt: comment.createdAt,
+    author: comment.author,
+    reactionCount: comment.reactions.totalCount,
+    isReacted: isViewerReacted(comment.reactionGroups),
+  }
+}
+
+/* === Issue Comments === */
+
+async function fetchIssueCommentsWithRest(
   { octokit, owner, repo }: UserRepo,
   issueNumber: number,
 ): Promise<IssueComment[]> {
@@ -36,6 +61,28 @@ async function fetchIssueComments(
     mediaType: { format: 'full' }, // return body & body_html
   })
   return data.map(toIssueComment)
+}
+
+async function fetchIssueCommentsWithGraphql(
+  { octokit, owner, repo }: UserRepo,
+  issueNumber: number,
+): Promise<IssueComment[]> {
+  const { repository } = await octokit.graphql<GraphqlIssueCommentsResponse>(ISSUE_COMMENTS_QUERY, {
+    owner,
+    repo,
+    number: issueNumber,
+    first: PAGE_SIZE.comments,
+  })
+  return repository.issue.comments.nodes.map(toIssueCommentFromGraphql)
+}
+
+async function fetchIssueComments(
+  userRepo: UserRepo & { error: boolean },
+  issueNumber: number,
+): Promise<IssueComment[]> {
+  return userRepo.error
+    ? fetchIssueCommentsWithRest(userRepo, issueNumber)
+    : fetchIssueCommentsWithGraphql(userRepo, issueNumber)
 }
 
 async function createIssueComment(

@@ -47,16 +47,16 @@ const PAGE_SIZE = {
   comments: 100,
   reactions: 100,
 } as const
-const LIKE_REACTION = 'heart'
+const REACTION_EMOJI = 'heart'
 
 export {
   ACCOUNT_COOKIE_SALT,
   GITHUB_TOKEN_HEADER,
   HttpStatusCode,
-  LIKE_REACTION,
   MOBILE_BREAKPOINT,
   MOBILE_QUERY,
   PAGE_SIZE,
+  REACTION_EMOJI,
   SECONDS,
   SIDEBAR_CONFIG,
   SIGN_OUT_PATH,

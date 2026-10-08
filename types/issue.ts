@@ -8,8 +8,8 @@ interface Issue {
     login: string
     avatarUrl: string
   } | null
-  likeCount: number
-  isLiked: boolean
+  reactionCount: number
+  isReacted: boolean
   commentCount: number
 }
 
@@ -22,6 +22,8 @@ interface IssueComment {
     login: string
     avatarUrl: string
   } | null
+  reactionCount: number
+  isReacted: boolean
 }
 
 interface IssueReaction {

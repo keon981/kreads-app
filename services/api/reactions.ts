@@ -1,54 +1,59 @@
-import { LIKE_REACTION, PAGE_SIZE } from '@/configs/constants'
+import { PAGE_SIZE, REACTION_EMOJI } from '@/configs/constants'
+import { isEqualWithCase } from '@/utils/toolkit'
 
 import type { IssueReaction } from '@/types/issue'
 import type { UserRepo } from '@/types/user'
+import type { GraphqlReactionGroup } from '../graphql/issues'
 
-async function fetchIssueLikes(
+type ReactionSubject = { issueNumber: number } | { commentId: number }
+
+function isViewerReacted(reactionGroups: GraphqlReactionGroup[] | null): boolean {
+  return reactionGroups?.some(
+    group => isEqualWithCase(REACTION_EMOJI, group.content) && group.viewerHasReacted,
+  ) ?? false
+}
+
+async function fetchIssueReactions(
   { octokit, owner, repo }: UserRepo,
-  issueNumber: number,
+  subject: ReactionSubject,
 ): Promise<IssueReaction[]> {
-  const { data } = await octokit.rest.reactions.listForIssue({
-    owner,
-    repo,
-    issue_number: issueNumber,
-    content: LIKE_REACTION,
-    per_page: PAGE_SIZE.reactions,
-  })
+  const params = { owner, repo, content: REACTION_EMOJI, per_page: PAGE_SIZE.reactions } as const
+  const { data } = 'commentId' in subject
+    ? await octokit.rest.reactions.listForIssueComment({ ...params, comment_id: subject.commentId })
+    : await octokit.rest.reactions.listForIssue({ ...params, issue_number: subject.issueNumber })
   return data.map(reaction => ({
     id: reaction.id,
     login: reaction.user?.login ?? null,
   }))
 }
 
-async function createIssueLiked(
+async function createIssueReaction(
   { octokit, owner, repo }: UserRepo,
-  issueNumber: number,
+  subject: ReactionSubject,
 ): Promise<number> {
-  const { status } = await octokit.rest.reactions.createForIssue({
-    owner,
-    repo,
-    issue_number: issueNumber,
-    content: LIKE_REACTION,
-  })
+  const params = { owner, repo, content: REACTION_EMOJI } as const
+  const { status } = 'commentId' in subject
+    ? await octokit.rest.reactions.createForIssueComment({ ...params, comment_id: subject.commentId })
+    : await octokit.rest.reactions.createForIssue({ ...params, issue_number: subject.issueNumber })
   return status
 }
 
-async function deleteIssueLiked(
+async function deleteIssueReaction(
   { octokit, owner, repo }: UserRepo,
-  issueNumber: number,
+  subject: ReactionSubject,
   reactionId: number,
 ): Promise<number> {
-  const { status } = await octokit.rest.reactions.deleteForIssue({
-    owner,
-    repo,
-    issue_number: issueNumber,
-    reaction_id: reactionId,
-  })
+  const params = { owner, repo, reaction_id: reactionId }
+  const { status } = 'commentId' in subject
+    ? await octokit.rest.reactions.deleteForIssueComment({ ...params, comment_id: subject.commentId })
+    : await octokit.rest.reactions.deleteForIssue({ ...params, issue_number: subject.issueNumber })
   return status
 }
 
+export type { ReactionSubject }
 export {
-  createIssueLiked,
-  deleteIssueLiked,
-  fetchIssueLikes,
+  createIssueReaction,
+  deleteIssueReaction,
+  fetchIssueReactions,
+  isViewerReacted,
 }

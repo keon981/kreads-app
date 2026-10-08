@@ -7,10 +7,11 @@ import * as z from 'zod'
 import { HttpStatusCode } from '@/configs/constants'
 import { fetchAccessTokenCache, getSessionCache } from '@/lib/auth'
 import { closeIssue, createIssue, updateIssue } from '@/services/api/issues'
-import { createIssueLiked, deleteIssueLiked, fetchIssueLikes } from '@/services/api/reactions'
+import { createIssueReaction, deleteIssueReaction, fetchIssueReactions } from '@/services/api/reactions'
 import { catchParseWithUserRepoError, fetchUserRepo, parseWithUserRepo } from '@/services/user-repo'
 import { getFormDataValue } from '@/utils/toolkit'
 
+import type { ReactionSubject } from '@/services/api/reactions'
 import type { ActionState, IssueFormState, IssueTarget } from '@/types/action'
 
 const PostFormSchema = z.object({
@@ -27,17 +28,24 @@ const DeletePostSchema = z.object({
   issueNumber: z.int().positive(),
 })
 
-const LikePostSchema = z.object({
+const ReactionBaseSchema = z.object({
   repoName: z.string().min(1),
-  issueNumber: z.int().positive(),
-  isLiked: z.boolean(),
+  isReacted: z.boolean(),
   viewer: z.string(),
 })
 
-type ToggleLikeState = z.infer<typeof LikePostSchema>
+const ReactionSchema = z.union([
+  ReactionBaseSchema.extend({ commentId: z.int().positive() }),
+  ReactionBaseSchema.extend({ issueNumber: z.int().positive() }),
+])
 
-interface LikeActionState extends ActionState {
-  isLiked?: boolean
+interface ToggleReactionState extends IssueTarget {
+  isReacted: boolean
+  viewer: string
+}
+
+interface ReactionActionState extends ActionState {
+  isReacted?: boolean
 }
 
 export async function createPostAction(
@@ -101,28 +109,31 @@ export async function deletePostAction(target: IssueTarget): Promise<ActionState
   }
 }
 
-export async function toggleLikeAction(state: ToggleLikeState): Promise<LikeActionState> {
+export async function toggleReactionAction(state: ToggleReactionState): Promise<ReactionActionState> {
   try {
     const token = await fetchAccessTokenCache()
-    const { data, userRepo } = parseWithUserRepo(token, LikePostSchema, state)
-    const { issueNumber, isLiked, viewer } = data
+    const { data, userRepo } = parseWithUserRepo(token, ReactionSchema, state)
+    const { isReacted, viewer } = data
+    const subject: ReactionSubject = 'commentId' in data
+      ? { commentId: data.commentId }
+      : { issueNumber: data.issueNumber }
 
-    if (isLiked) {
-      const status = await createIssueLiked(userRepo, issueNumber)
-      return { status, isLiked: true }
+    if (isReacted) {
+      const status = await createIssueReaction(userRepo, subject)
+      return { status, isReacted: true }
     } else {
-      const reactions = await fetchIssueLikes(userRepo, issueNumber)
+      const reactions = await fetchIssueReactions(userRepo, subject)
       const viewerReaction = reactions.find(reaction => `@${reaction.login}` === viewer)
-      if (!viewerReaction) return { status: HttpStatusCode.Ok, isLiked: false }
+      if (!viewerReaction) return { status: HttpStatusCode.Ok, isReacted: false }
 
-      const status = await deleteIssueLiked(
+      const status = await deleteIssueReaction(
         userRepo,
-        issueNumber,
+        subject,
         viewerReaction.id,
       )
-      return { status, isLiked: false }
+      return { status, isReacted: false }
     }
   } catch (err) {
-    return catchParseWithUserRepoError(err, state.isLiked ? '按讚失敗，請再試一次' : '收回讚失敗，請再試一次')
+    return catchParseWithUserRepoError(err, state.isReacted ? '按讚失敗，請再試一次' : '收回讚失敗，請再試一次')
   }
 }

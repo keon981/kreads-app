@@ -6,7 +6,7 @@ import { useActionState, useState, useTransition } from 'react'
 
 import { RiBookmarkLine, RiChat1Line, RiCloseLine, RiDeleteBin7Line, RiEditLine, RiHeartFill, RiHeartLine, RiLink, RiMoreLine, RiShareForwardLine } from '@remixicon/react'
 
-import { toggleLikeAction } from '@/app/server/actions/posts'
+import { toggleReactionAction } from '@/app/server/actions/posts'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -32,8 +32,10 @@ import {
   IssueItemButton,
   IssueItemContent,
   IssueItemFooter,
+  IssueItemHeader,
   IssueItemMedia,
   IssueItemTitle,
+  IssueUser,
 } from '@/components/ui/issue-item'
 import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
@@ -44,13 +46,13 @@ import { useAuthGuard } from '@/hooks/use-auth-guard'
 import { useCopyLink } from '@/hooks/use-copy-link'
 import { useDebouncedMutation } from '@/hooks/use-debounced-mutation'
 import { useDialog } from '@/hooks/use-dialog'
-import { formatDateTime } from '@/lib/utils'
+import { cn, formatDateTime } from '@/lib/utils'
 import { chatHref } from '@/utils/navigation'
 
 import { CancelAlertDialog, DeleteAlertDialog } from './confirm-dialog'
 
 import type { UseDialogReturn } from '@/hooks/use-dialog'
-import type { ActionState, IssueDeleteAction, IssueFormAction, IssueFormState } from '@/types/action'
+import type { ActionState, IssueDeleteAction, IssueFormAction, IssueFormState, IssueTarget } from '@/types/action'
 import type { Issue, IssueComment } from '@/types/issue'
 
 type IssueItemButtonProps = React.ComponentProps<typeof IssueItemButton>
@@ -272,54 +274,49 @@ function IssueDropdownMenu({
   )
 }
 
-function IssueLikedButton({ repoName = '', like }: {
-  repoName?: string
-  like?: {
-    issueNumber: number
-    likeCount: number
-    isLiked: boolean
+function IssueReactionButton({ target, reaction }: {
+  target: IssueTarget
+  reaction?: {
+    reactionCount: number
+    isReacted: boolean
   }
 } & IssueItemButtonProps) {
   const { user } = useAuth()
-  const serverIsLiked = like?.isLiked ?? false
-  const serverLikeCount = like?.likeCount ?? 0
-  const issueNumber = like?.issueNumber
+  const serverIsReacted = reaction?.isReacted ?? false
+  const serverReactionCount = reaction?.reactionCount ?? 0
   const viewer = user?.id ?? ''
 
-  const { data: isLiked, mutate: setIsLiked } = useDebouncedMutation({
-    data: serverIsLiked,
-    mutationFn: async (nextIsLiked) => {
-      if (issueNumber === undefined) return
-
-      const res = await toggleLikeAction({
-        issueNumber,
-        isLiked: nextIsLiked,
-        repoName,
+  const { data: isReacted, mutate: setIsReacted } = useDebouncedMutation({
+    data: serverIsReacted,
+    mutationFn: async (nextIsReacted) => {
+      const res = await toggleReactionAction({
+        ...target,
+        isReacted: nextIsReacted,
         viewer,
       })
 
-      if (res.isLiked === undefined) throw new Error(res.message)
+      if (res.isReacted === undefined) throw new Error(res.message)
     },
     onError: (error) => {
       toast.add({ type: 'error', description: error.message })
     },
   })
 
-  const likeCount = serverLikeCount + Number(isLiked) - Number(serverIsLiked)
+  const reactionCount = serverReactionCount + Number(isReacted) - Number(serverIsReacted)
 
   const handleClickHeart = () => {
-    if (!like) return
-    setIsLiked(prev => !prev)
+    if (!reaction) return
+    setIsReacted(prev => !prev)
   }
 
   const onAuthGuardClick = useAuthGuard(handleClickHeart)
 
   return (
     <IssueItemButton size="lg" onClick={onAuthGuardClick}>
-      {isLiked
+      {isReacted
         ? <RiHeartFill className="size-5 text-destructive" />
         : <RiHeartLine className="size-5" />}
-      {likeCount}
+      {reactionCount}
     </IssueItemButton>
   )
 }
@@ -424,12 +421,12 @@ function PostItem({
 
   return (
     <IssueItem {...props}>
-      <IssueItemMedia src={post.author?.avatarUrl} fallback={post.author?.login} />
+      <IssueItemMedia src={post.author?.avatarUrl} login={post.author?.login} />
       <IssueItemContent>
         <IssueItemTitle>
-          <div className="flex flex-1 gap-1.5">
-            <h4 className="font-bold">{post.author?.login}</h4>
-            <time className="text-muted-foreground font-normal" dateTime={post.createdAt}>
+          <div className="flex flex-1 min-w-0 items-center gap-1.5">
+            <IssueUser login={post.author?.login} avatarUrl={post.author?.avatarUrl} />
+            <time className="text-muted-foreground font-normal shrink-0" dateTime={post.createdAt}>
               {formatDateTime(post.createdAt)}
             </time>
           </div>
@@ -443,13 +440,12 @@ function PostItem({
         </IssueItemTitle>
         <IssueItemArticle html={post.bodyHTML} />
         <IssueItemFooter>
-          {/* liked */}
-          <IssueLikedButton
-            repoName={repoName}
-            like={{
-              issueNumber: post.number,
-              likeCount: post.likeCount,
-              isLiked: post.isLiked,
+          {/* reaction */}
+          <IssueReactionButton
+            target={{ repoName, issueNumber: post.number }}
+            reaction={{
+              reactionCount: post.reactionCount,
+              isReacted: post.isReacted,
             }}
           />
 
@@ -484,7 +480,7 @@ function PostItem({
               )}
 
           {/* share */}
-          <IssueItemButton>
+          <IssueItemButton onClick={handleCopyLink}>
             <RiShareForwardLine />
           </IssueItemButton>
         </IssueItemFooter>
@@ -503,17 +499,27 @@ function PostItem({
 }
 
 function CommentItem({
-  comment,
-  repoName,
+  issue,
+  target,
   isOwner = false,
+  editTitle = '編輯留言',
+  reaction,
+  reply,
   updateAction,
   onDelete,
   onCopyLink,
+  className,
   ...props
 }: {
-  comment: IssueComment
-  repoName: string
+  issue: Pick<IssueComment, 'body' | 'bodyHTML' | 'createdAt' | 'author'>
+  target: IssueTarget
   isOwner?: boolean
+  editTitle?: string
+  reaction?: React.ComponentProps<typeof IssueReactionButton>['reaction']
+  reply?: {
+    action: IssueFormAction
+    count?: number
+  }
   updateAction?: IssueFormAction
   onDelete?: IssueDeleteAction
   onCopyLink?: DropdownMenuItemOnClick
@@ -524,62 +530,94 @@ function CommentItem({
     trigger: triggerDeleteDialog,
     dismiss: dismissDeleteDialog,
   } = useDialog()
+  const { dialogProps: replyDialogProps, trigger: triggerReplyDialog } = useDialog()
   const [isPending, startTransition] = useTransition()
 
-  const authorName = comment.author?.login ?? 'ghost'
+  const onAuthGuardClick = useAuthGuard(triggerReplyDialog)
+
+  const authorName = issue.author?.login ?? 'ghost'
 
   const { copy } = useCopyLink()
 
   const handleCopyLink = () => {
     if (typeof window === 'undefined') return
-    copy(`${window.location.origin}${window.location.pathname}#comment-${comment.id}`)
+    copy(`${window.location.origin}${window.location.pathname}`)
   }
 
   const handleDelete = () => {
     startTransition(async () => {
-      const res = await onDelete?.({ repoName, commentId: comment.id })
+      const res = await onDelete?.(target)
       if (res) toastActionState(res)
     })
     dismissDeleteDialog()
   }
 
   return (
-    <IssueItem {...props}>
-      <IssueItemMedia src={comment.author?.avatarUrl} fallback={authorName} />
-      <IssueItemContent>
-        <IssueItemTitle>
-          <div className="flex flex-1 gap-1.5">
-            <h4 className="font-bold">{authorName}</h4>
-            <time className="text-muted-foreground font-normal" dateTime={comment.createdAt}>
-              {formatDateTime(comment.createdAt)}
+    <IssueItem className={cn('flex-col items-start gap-2.5', className)} {...props}>
+      {/* Header: avatar, name/time, menu */}
+      <IssueItemHeader>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <IssueItemMedia
+            src={issue.author?.avatarUrl}
+            login={issue.author?.login}
+            className="group-has-data-[slot=item-description]/item:translate-y-0 group-has-data-[slot=item-description]/item:self-center"
+          />
+          <div className="flex items-center gap-1.5 min-w-0">
+            <IssueUser login={issue.author?.login} avatarUrl={issue.author?.avatarUrl} className="text-base" />
+            <time className="text-muted-foreground font-normal text-sm shrink-0" dateTime={issue.createdAt}>
+              {formatDateTime(issue.createdAt)}
             </time>
           </div>
-          <IssueDropdownMenu
-            isOwner={isOwner}
-            loading={isPending}
-            onEdit={triggerFormDialog}
-            onCopyLink={onCopyLink ?? handleCopyLink}
-            onDelete={triggerDeleteDialog}
-          />
-        </IssueItemTitle>
-        <IssueItemArticle html={comment.bodyHTML} />
-        <IssueItemFooter>
-          {/* liked */}
-          <IssueLikedButton repoName={repoName} />
+        </div>
+        <IssueDropdownMenu
+          isOwner={isOwner}
+          loading={isPending}
+          onEdit={triggerFormDialog}
+          onCopyLink={onCopyLink ?? handleCopyLink}
+          onDelete={triggerDeleteDialog}
+        />
+      </IssueItemHeader>
 
-          {/* share */}
-          <IssueItemButton>
-            <RiShareForwardLine />
-          </IssueItemButton>
-        </IssueItemFooter>
-      </IssueItemContent>
+      {/* Content: below header */}
+      <IssueItemArticle html={issue.bodyHTML} className="ps-0 mt-0 w-full" />
+
+      {/* Footer: buttons below content */}
+      <IssueItemFooter className="mt-1">
+        {/* reaction */}
+        <IssueReactionButton target={target} reaction={reaction} />
+
+        {/* reply */}
+        {reply && (
+          <IssueFormDialog
+            onSubmit={reply.action}
+            title="回覆"
+            placeholder={`回覆${authorName}……`}
+            dialogProps={replyDialogProps}
+            defaultValues={{ repoName: target.repoName, issueNumber: target.issueNumber }}
+          >
+            <DialogTrigger
+              render={<IssueItemButton size="lg" />}
+              onClick={onAuthGuardClick}
+            >
+              <RiChat1Line />
+              {!!reply.count && reply.count}
+            </DialogTrigger>
+          </IssueFormDialog>
+        )}
+
+        {/* share */}
+        <IssueItemButton onClick={handleCopyLink}>
+          <RiShareForwardLine />
+        </IssueItemButton>
+      </IssueItemFooter>
+
       <DeleteAlertDialog {...deleteDialogProps} onConfirm={handleDelete} />
 
       {isOwner && (
         <IssueFormDialog
           onSubmit={updateAction}
-          title="編輯貼文"
-          defaultValues={{ content: comment.body, repoName, commentId: comment.id }}
+          title={editTitle}
+          defaultValues={{ content: issue.body, ...target }}
           dialogProps={dialogProps}
         />
       )}
@@ -592,6 +630,6 @@ export {
   IssueComposerItem,
   IssueDropdownMenu,
   IssueFormDialog,
-  IssueLikedButton,
+  IssueReactionButton,
   PostItem,
 }

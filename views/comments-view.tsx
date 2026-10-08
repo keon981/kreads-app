@@ -4,7 +4,7 @@ import { Suspense } from 'react'
 
 import { createCommentAction, deleteCommentAction, updateCommentAction } from '@/app/(pages)/[id]/post/[number]/action'
 import { deletePostAction, updatePostAction } from '@/app/server/actions/posts'
-import { CommentItem, IssueComposerItem, PostItem } from '@/components/blocks/issue'
+import { CommentItem, IssueComposerItem } from '@/components/blocks/issue'
 import ArticleLayout from '@/components/layout/article-layout'
 import {
   IssueItemGroup,
@@ -35,9 +35,10 @@ async function CommentList({ repoName, issueNumber }: CommentListProps): Promise
   return comments.map(comment => (
     <CommentItem
       key={comment.id}
-      comment={comment}
-      repoName={repoName}
+      issue={comment}
+      target={{ repoName, commentId: comment.id }}
       isOwner={!!viewer && viewer === `@${comment.author?.login}`}
+      reaction={{ reactionCount: comment.reactionCount, isReacted: comment.isReacted }}
       updateAction={updateCommentAction}
       onDelete={deleteCommentAction}
     />
@@ -64,14 +65,16 @@ export async function IssueDetailView({ user, issueNumber }: IssueDetailViewProp
     <ArticleLayout>
       <IssueItemGroup className="mt-2">
         {/* post */}
-        <PostItem
+        <CommentItem
           className="border-0 border-b rounded-none"
-          post={issue}
-          repoName={repoName}
+          issue={issue}
+          target={{ repoName, issueNumber }}
           isOwner={isOwner}
+          editTitle="編輯貼文"
+          reaction={{ reactionCount: issue.reactionCount, isReacted: issue.isReacted }}
+          reply={{ action: createCommentAction, count: issue.commentCount }}
           updateAction={updatePostAction}
           onDelete={deletePostAction}
-          onSubmit={createCommentAction}
         />
 
         {/* comment composer */}

@@ -22,7 +22,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Review Checklist
 
-- [ ] `vp run lint`：只看改動檔案新增的問題；格式用 `vp run lint:fix`
+- [ ] `vp run lint:fix`：改動檔案並格式。Lint 由 agent 自行處理到乾淨，不要回報給使用者、也不要叫使用者去跑。
+  - 只有在修正會改變程式行為或需要使用者決策時，才提出來詢問
 - [ ] `vp run typecheck`：錯誤只在 `.next/types/` 是過期產物，執行 `vp exec next typegen` 後重跑
 - [ ] 改了 DB schema → `vp run drizzle:generate`
 - [ ] ❌ 不要執行 `vp check`、`vp test`、`vp fmt`、`vp lint`、`vp check --fix`（不適用本專案，`--fix` 會用 oxfmt 重排整個專案）

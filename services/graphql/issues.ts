@@ -1,3 +1,10 @@
+import { REACTION_EMOJI } from '@/configs/constants'
+
+interface GraphqlReactionGroup {
+  content: string
+  viewerHasReacted: boolean
+}
+
 interface GraphqlIssue {
   number: number
   title: string
@@ -11,10 +18,7 @@ interface GraphqlIssue {
   reactions: {
     totalCount: number
   }
-  reactionGroups: {
-    content: string
-    viewerHasReacted: boolean
-  }[] | null
+  reactionGroups: GraphqlReactionGroup[] | null
   comments: {
     totalCount: number
   }
@@ -41,7 +45,7 @@ const ISSUE_FIELDS = `
     bodyHTML
     createdAt
     author { login avatarUrl }
-    reactions { totalCount }
+    reactions(content: ${REACTION_EMOJI.toUpperCase()}) { totalCount }
     reactionGroups { content viewerHasReacted }
     comments { totalCount }
   }
@@ -78,5 +82,5 @@ const ISSUE_QUERY = `
   ${ISSUE_FIELDS}
 `
 
-export type { GraphqlIssue, GraphqlIssueResponse, GraphqlIssuesResponse }
+export type { GraphqlIssue, GraphqlIssueResponse, GraphqlIssuesResponse, GraphqlReactionGroup }
 export { ISSUE_QUERY, ISSUES_QUERY }
