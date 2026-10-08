@@ -10,30 +10,18 @@ import { cva } from 'class-variance-authority'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { SECONDS, SIDEBAR_CONFIG } from '@/configs/constants'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 
 import type { VariantProps } from 'class-variance-authority'
-
-const SIDEBAR_COOKIE_NAME = 'sidebar_state'
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
-const SIDEBAR_WIDTH = '20rem'
-const SIDEBAR_WIDTH_MOBILE = '18rem'
-const SIDEBAR_WIDTH_ICON = '5rem'
-const SIDEBAR_KEYBOARD_SHORTCUT = 'b'
+import type { ButtonProps } from '@/components/ui/button'
 
 interface SidebarContextProps {
   state: 'expanded' | 'collapsed'
@@ -86,7 +74,7 @@ function SidebarProvider({
       }
 
       // This sets the cookie to keep the sidebar state.
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+      document.cookie = `${SIDEBAR_CONFIG.cookieName}=${openState}; path=/; max-age=${SECONDS.week}`
     },
     [setOpenProp, open],
   )
@@ -100,7 +88,7 @@ function SidebarProvider({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
-        event.key === SIDEBAR_KEYBOARD_SHORTCUT
+        event.key === SIDEBAR_CONFIG.keyboardShortcut
         && (event.metaKey || event.ctrlKey)
       ) {
         event.preventDefault()
@@ -135,8 +123,8 @@ function SidebarProvider({
         data-slot="sidebar-wrapper"
         style={
           {
-            '--sidebar-width': SIDEBAR_WIDTH,
-            '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
+            '--sidebar-width': SIDEBAR_CONFIG.width,
+            '--sidebar-width-icon': SIDEBAR_CONFIG.widthIcon,
             ...style,
           } as React.CSSProperties
         }
@@ -158,14 +146,13 @@ function Sidebar({
   collapsible = 'offcanvas',
   className,
   children,
-  dir,
   ...props
 }: React.ComponentProps<'div'> & {
   side?: 'left' | 'right'
   variant?: 'sidebar' | 'floating' | 'inset'
   collapsible?: 'offcanvas' | 'icon' | 'none'
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const { state } = useSidebar()
 
   if (collapsible === 'none') {
     return (
@@ -179,32 +166,6 @@ function Sidebar({
       >
         {children}
       </div>
-    )
-  }
-
-  if (isMobile) {
-    return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-        <SheetContent
-          dir={dir}
-          data-sidebar="sidebar"
-          data-slot="sidebar"
-          data-mobile="true"
-          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-          style={
-            {
-              '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
-          }
-          side={side}
-        >
-          <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-          </SheetHeader>
-          <div className="flex h-full w-full flex-col">{children}</div>
-        </SheetContent>
-      </Sheet>
     )
   }
 
@@ -258,7 +219,7 @@ function SidebarTrigger({
   className,
   onClick,
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: ButtonProps) {
   const { toggleSidebar } = useSidebar()
 
   return (
@@ -531,9 +492,7 @@ function SidebarMenuButton({
     },
   })
 
-  if (!tooltip) {
-    return comp
-  }
+  if (!tooltip) return comp
 
   if (typeof tooltip === 'string') {
     tooltip = {

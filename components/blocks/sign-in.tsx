@@ -19,8 +19,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { toast } from '@/components/ui/toast'
 import { signInWithGitHub } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
+import { useSignInDialog } from '@/store/sign-in-dialog'
+
+import type { ButtonProps } from '@/components/ui/button'
 
 export function SignInCard({
   className,
@@ -47,22 +51,61 @@ export function SignInCard({
   )
 }
 
-export function SignInButton({ children, ...props }: React.ComponentProps<typeof Button>) {
+export function SignInButton({
+  children,
+  onClick,
+  disabled,
+  ...props
+}: ButtonProps) {
+  const [isLoading, setIsLoading] = React.useState(false)
+
+  const handleClick: ButtonProps['onClick'] = async (e) => {
+    onClick?.(e)
+    if (e.defaultPrevented || isLoading) return
+
+    setIsLoading(true)
+    const toastId = toast.add({
+      type: 'loading',
+      description: '正在前往 GitHub 登入...',
+    })
+
+    try {
+      const res = await signInWithGitHub()
+      if (res?.error) {
+        toast.update(toastId, {
+          type: 'error',
+          description: res.error.message || '登入失敗，請稍後再試',
+          timeout: 5000,
+        })
+        setIsLoading(false)
+      }
+    } catch (error) {
+      toast.update(toastId, {
+        type: 'error',
+        description: error instanceof Error ? error.message : '登入失敗，請稍後再試',
+        timeout: 5000,
+      })
+      setIsLoading(false)
+    }
+  }
+
   return (
-    <Button onClick={signInWithGitHub} {...props}>
+    <Button
+      onClick={handleClick}
+      disabled={disabled || isLoading}
+      {...props}
+    >
       {children}
     </Button>
   )
 }
 
-export function SignInDialog({
-  children,
-  ...props
-}: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
-  children?: React.ReactNode
-}) {
+export function SignInDialog({ children, ...props }: WithNodeChildren<typeof Dialog>) {
+  const open = useSignInDialog(s => s.open)
+  const setOpen = useSignInDialog(s => s.setOpen)
+
   return (
-    <Dialog {...props}>
+    <Dialog open={open} onOpenChange={setOpen} {...props}>
       {children}
       <DialogContent showCloseButton={false} className="w-md sm:max-w-md px-14 py-12 gap-8">
         <DialogHeader className="text-center">

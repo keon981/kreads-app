@@ -1,5 +1,4 @@
 import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
 
 import { cache } from 'react'
 
@@ -8,12 +7,22 @@ import { betterAuth } from 'better-auth/minimal'
 import { nextCookies } from 'better-auth/next-js'
 import { admin } from 'better-auth/plugins'
 
-import process from 'node:process'
-
+import { GITHUB_TOKEN_HEADER, SECONDS } from '@/configs/constants'
 import { db } from '@/db/drizzle' // your drizzle instance
 import * as schema from '@/db/schema/auth-schema'
-import { signInPath, signUpPath } from '@/utils/navigation'
 import { isUserActive } from '@/utils/user'
+
+import { env } from './env'
+
+import type { VerifiedSession } from '@/types/auth'
+
+const isDeployed = ['production', 'preview'].includes(env.VERCEL_ENV ?? '')
+const allowedHosts = [
+  env.VERCEL_PROJECT_PRODUCTION_URL,
+  env.VERCEL_BRANCH_URL,
+  env.VERCEL_URL,
+  ...(isDeployed ? [] : ['localhost:*', '127.0.0.1:*']),
+].filter(Boolean) as string[]
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -29,19 +38,15 @@ export const auth = betterAuth({
   ],
   socialProviders: {
     github: {
-      clientId: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      clientId: env.GITHUB_CLIENT_ID as string,
+      clientSecret: env.GITHUB_CLIENT_SECRET as string,
       disableImplicitSignUp: true, // 停用自動創建新用戶
     },
   },
   baseURL: {
-    allowedHosts: [
-      'localhost:*',
-      '127.0.0.1:*',
-      '*.vercel.app',
-    ],
-    fallback: process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    allowedHosts,
+    fallback: env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${env.VERCEL_PROJECT_PRODUCTION_URL}`
       : 'http://localhost:3000',
   },
   user: {
@@ -51,18 +56,40 @@ export const auth = betterAuth({
         required: false,
         input: false,
       },
+      username: {
+        type: 'string',
+        required: false,
+        input: false,
+        unique: true,
+      },
+      inviteCode: {
+        type: 'string',
+        required: false,
+        input: false,
+        unique: true,
+      },
+      invitedBy: {
+        type: 'string',
+        required: false,
+        input: false,
+      },
     },
   },
   account: {
-    updateAccountOnSignIn: false,
     accountLinking: {
       trustedProviders: ['github'],
     },
+    storeAccountCookie: true,
   },
   session: {
     cookieCache: {
       enabled: true,
-      maxAge: 10 * 60, // Cache duration in seconds (10 min)
+      maxAge: SECONDS.hour, // Cache duration in seconds (1 hour)
+    },
+  },
+  advanced: {
+    cookies: {
+      account_data: { attributes: { maxAge: SECONDS.week } },
     },
   },
 })
@@ -71,22 +98,19 @@ export const getSessionCache = cache(async () => {
   return auth.api.getSession({ headers: await headers() })
 })
 
-export const getListUserAccounts = cache(async () => {
+export const fetchAccessTokenCache = cache(async (): Promise<string | null> => {
   const session = await getSessionCache()
   if (!session) return null
 
-  const nextHeaders = await headers()
-  const accounts = await auth.api.listUserAccounts({ headers: nextHeaders })
-  return accounts
+  return (await headers()).get(GITHUB_TOKEN_HEADER)
 })
 
-export async function verifySession(url = '/') {
+export const verifySession = cache(async (): Promise<VerifiedSession> => {
   const session = await getSessionCache()
+  if (!session) return { status: 'signed-out', session: null }
 
-  if (!session) redirect(signInPath(url)) // 登入失敗 or 登入過期，跳到登入頁面重新登入或註冊
-  if (!isUserActive(session)) redirect(signUpPath(url))
-  return session
-}
+  return { status: isUserActive(session) ? 'active' : 'unregistered', session }
+})
 
 export async function signOutWithServer() {
   await auth.api.signOut({ headers: await headers() })

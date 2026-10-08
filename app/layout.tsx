@@ -1,13 +1,19 @@
+import type { Metadata } from 'next'
+
 import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
-import { AppSidebar } from '@/components/layouts/app-sidebar'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
-import { AuthProvider } from '@/contexts/auth-provider'
-import { ThemeProvider } from '@/contexts/theme-provider'
-import { getGitHubUser } from '@/lib/github'
+import { Suspense } from 'react'
+
+import { getInitialIsMobile } from '@/app/server/device'
+import { SignInDialog } from '@/components/blocks/sign-in'
+import { Providers } from '@/components/providers'
+import { Toaster } from '@/components/ui/toast'
+import { DeviceProvider } from '@/contexts/device-provider'
+import { verifySession } from '@/lib/auth'
+import { env } from '@/lib/env'
 import { cn } from '@/lib/utils'
 
-import './globals.css'
+import '@/styles/globals.css'
 
 const oxaniumHeading = Oxanium({ subsets: ['latin'], variable: '--font-heading' })
 
@@ -18,14 +24,15 @@ const fontMono = Geist_Mono({
   variable: '--font-mono',
 })
 
+export const metadata: Metadata = {
+  title: env.NEXT_PUBLIC_APP_TITLE,
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const user = await getGitHubUser()
-  const isAuth = !!user
-
   return (
     <html
       lang="en"
@@ -33,24 +40,60 @@ export default async function RootLayout({
       className={cn('antialiased', fontMono.variable, 'font-sans', spaceGrotesk.variable, oxaniumHeading.variable)}
     >
       <body>
-        <ThemeProvider>
-          <AuthProvider
-            isAuth={!!isAuth}
-            user={{
-              id: `@${user?.login}`,
-              name: user?.name,
-              avatarUrl: user?.avatar_url,
-            }}
-          >
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset className="flex-row items-start justify-center gap-4">
+        <Suspense>
+          <DeviceRoot>
+            <Suspense fallback={(
+              <Providers isAuth={false} user={null}>
+                <></>
+              </Providers>
+            )}
+            >
+              <RootProviders>
                 {children}
-              </SidebarInset>
-            </SidebarProvider>
-          </AuthProvider>
-        </ThemeProvider>
+                <SignInDialog />
+                {/* alert */}
+                <Toaster />
+              </RootProviders>
+            </Suspense>
+          </DeviceRoot>
+        </Suspense>
       </body>
     </html>
+  )
+}
+
+interface DeviceRootProps {
+  children: React.ReactNode
+}
+
+async function DeviceRoot({ children }: DeviceRootProps): Promise<React.ReactNode> {
+  const initialIsMobile = await getInitialIsMobile()
+
+  return (
+    <DeviceProvider initialIsMobile={initialIsMobile}>
+      {children}
+    </DeviceProvider>
+  )
+}
+
+async function RootProviders({ children }: {
+  children: React.ReactNode
+}): Promise<React.ReactNode> {
+  const { status, session } = await verifySession()
+  const user = status === 'active' ? session.user : null
+
+  return (
+    <Providers
+      isAuth={!!user}
+      user={user
+        ? {
+            id: user.username ?? undefined,
+            name: user.name,
+            avatarUrl: user.image ?? undefined,
+          }
+        : null}
+    >
+      {children}
+    </Providers>
   )
 }

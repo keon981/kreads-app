@@ -113,4 +113,10 @@ export default antfu({
     'eslint-comments/no-unlimited-disable': 'off',
     'eslint-comments/no-unused-disable': 'off',
   },
+}, {
+  // 針對生成的檔案禁用特定規則
+  files: ['**/*.config.ts', '**/lib/env.ts'],
+  rules: {
+    'node/prefer-global/process': 'off',
+  },
 })
