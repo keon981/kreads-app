@@ -41,7 +41,7 @@ import { toast } from '@/components/ui/toast'
 import { HttpStatusCode } from '@/configs/constants'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
-import { copyLink } from '@/hooks/use-copy-link'
+import { useCopyLink } from '@/hooks/use-copy-link'
 import { useDebouncedMutation } from '@/hooks/use-debounced-mutation'
 import { useDialog } from '@/hooks/use-dialog'
 import { formatDateTime } from '@/lib/utils'
@@ -406,10 +406,12 @@ function PostItem({
   // auth
   const onAuthGuardClick = useAuthGuard(triggerChatDialog)
 
+  const { copy } = useCopyLink()
+
   const handleCopyLink = () => {
     if (typeof window === 'undefined') return
     const path = (href || chatHref(post)).replace(/^\//, '')
-    copyLink(`${window.location.origin}/${path}`)
+    copy(`${window.location.origin}/${path}`)
   }
 
   const handleDelete = () => {
@@ -526,9 +528,11 @@ function CommentItem({
 
   const authorName = comment.author?.login ?? 'ghost'
 
+  const { copy } = useCopyLink()
+
   const handleCopyLink = () => {
     if (typeof window === 'undefined') return
-    copyLink(`${window.location.origin}${window.location.pathname}#comment-${comment.id}`)
+    copy(`${window.location.origin}${window.location.pathname}#comment-${comment.id}`)
   }
 
   const handleDelete = () => {

@@ -1,6 +1,7 @@
 import { adminClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/react'
 
+import { paths } from '@/configs/path-config'
 import { safeNext, signUpPath } from '@/utils/navigation'
 
 export const authClient = createAuthClient({
@@ -13,8 +14,8 @@ export function authorizeGitHubRepo() {
   return authClient.linkSocial({
     provider: 'github',
     scopes: ['public_repo'],
-    callbackURL: '/sign-up',
-    errorCallbackURL: '/sign-up',
+    callbackURL: paths.signUp,
+    errorCallbackURL: paths.signUp,
   })
 }
 

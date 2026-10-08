@@ -4,9 +4,11 @@ import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
 import { Suspense } from 'react'
 
+import { getInitialIsMobile } from '@/app/server/device'
 import { SignInDialog } from '@/components/blocks/sign-in'
 import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/toast'
+import { DeviceProvider } from '@/contexts/device-provider'
 import { verifySession } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { cn } from '@/lib/utils'
@@ -38,21 +40,39 @@ export default async function RootLayout({
       className={cn('antialiased', fontMono.variable, 'font-sans', spaceGrotesk.variable, oxaniumHeading.variable)}
     >
       <body>
-        <Suspense fallback={(
-          <Providers isAuth={false} user={null}>
-            <></>
-          </Providers>
-        )}
-        >
-          <RootProviders>
-            {children}
-            <SignInDialog />
-            {/* alert */}
-            <Toaster />
-          </RootProviders>
+        <Suspense>
+          <DeviceRoot>
+            <Suspense fallback={(
+              <Providers isAuth={false} user={null}>
+                <></>
+              </Providers>
+            )}
+            >
+              <RootProviders>
+                {children}
+                <SignInDialog />
+                {/* alert */}
+                <Toaster />
+              </RootProviders>
+            </Suspense>
+          </DeviceRoot>
         </Suspense>
       </body>
     </html>
+  )
+}
+
+interface DeviceRootProps {
+  children: React.ReactNode
+}
+
+async function DeviceRoot({ children }: DeviceRootProps): Promise<React.ReactNode> {
+  const initialIsMobile = await getInitialIsMobile()
+
+  return (
+    <DeviceProvider initialIsMobile={initialIsMobile}>
+      {children}
+    </DeviceProvider>
   )
 }
 

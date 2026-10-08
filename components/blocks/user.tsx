@@ -32,6 +32,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from '@/components/ui/input-group'
+import { paths } from '@/configs/path-config'
 import { useCopyLink } from '@/hooks/use-copy-link'
 
 import { ButtonGroup } from '../ui/button-group'
@@ -48,7 +49,8 @@ export function AboutUser({ name, id, children, avatarUrl }: Props) {
 
   const login = id.replace(/^@/, '')
   const githubPath = `https://github.com/${login}`
-  const shareLink = (typeof window !== 'undefined' ? `${window.location.origin}/@${login}` : `/@${login}`)
+  const userPath = paths.user(login)
+  const shareLink = typeof window !== 'undefined' ? `${window.location.origin}${userPath}` : userPath
 
   return (
     <>
@@ -139,11 +141,11 @@ function ShareDialog({
             >
               {copied
                 ? (
-                    <RiCheckLine className="text-emerald-500" />
-                  )
+                  <RiCheckLine className="text-emerald-500" />
+                )
                 : (
-                    <RiFileCopyLine />
-                  )}
+                  <RiFileCopyLine />
+                )}
             </InputGroupButton>
           </InputGroupAddon>
         </InputGroup>

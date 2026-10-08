@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { debounce, isEqual, isError, isFunction } from 'es-toolkit'
+import { useEventCallback } from 'usehooks-ts'
 
 interface Snapshot<TData> {
   value: TData
@@ -36,17 +37,12 @@ export function useDebouncedMutation<TData, TResult = unknown>(
   const [isPending, setIsPending] = useState<boolean>(false)
   const [error, setError] = useState<Error | null>(null)
 
-  const optionsRef = useRef(options)
   const committedRef = useRef<CommittedSnapshot<TData> | null>(null)
   const versionRef = useRef<number>(0)
   const inFlightRef = useRef<number>(0)
 
-  useLayoutEffect(() => {
-    optionsRef.current = options
-  })
-
-  const [debounced] = useState(() => debounce(async (variables: TData, version: number): Promise<void> => {
-    const { data: source, mutationFn, onSuccess, onError, onSettled } = optionsRef.current
+  const commitMutation = useEventCallback(async (variables: TData, version: number): Promise<void> => {
+    const { data: source, mutationFn, onSuccess, onError, onSettled } = options
     const committed = committedRef.current
     const base = committed && isEqual(committed.source, source) ? committed.value : source
     const isLatest = (): boolean => version === versionRef.current
@@ -78,7 +74,10 @@ export function useDebouncedMutation<TData, TResult = unknown>(
     } finally {
       inFlightRef.current -= 1
     }
-  }, delay))
+  })
+
+  // Not useDebounceCallback: it cancels on unmount, but pending mutations must be flushed.
+  const [debounced] = useState(() => debounce(commitMutation, delay))
 
   useEffect(() => () => debounced.flush(), [debounced])
 

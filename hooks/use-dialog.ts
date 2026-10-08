@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
+
+import { useBoolean } from 'usehooks-ts'
 
 interface DialogHooksProps {
   onClick?: () => void
@@ -8,13 +10,11 @@ interface DialogHooksProps {
 export function useDialog(props?: DialogHooksProps) {
   const { onClick, onOpenChange }: DialogHooksProps = props || {}
 
-  const [isOpen, setIsOpen] = useState(false)
+  const { value: isOpen, setTrue: trigger, setFalse: close, setValue: setIsOpen } = useBoolean(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
 
-  const trigger = () => setIsOpen(true)
-
   const dismiss = () => {
-    setIsOpen(false)
+    close()
     triggerRef.current?.focus()
   }
 

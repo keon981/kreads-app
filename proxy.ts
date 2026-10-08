@@ -3,7 +3,8 @@ import type { NextRequest } from 'next/server'
 
 import { getSessionCookie } from 'better-auth/cookies'
 
-import { GITHUB_TOKEN_HEADER, PRIVATE_PATHS } from '@/configs/constants'
+import { GITHUB_TOKEN_HEADER } from '@/configs/constants'
+import { privatePaths } from '@/configs/path-config'
 import { auth } from '@/lib/auth'
 import { decodeAccountCookie, isTokenFresh } from '@/lib/cookie'
 import { signInPath } from '@/utils/navigation'
@@ -15,7 +16,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   if (!getSessionCookie(request)) {
     // Optimistic cookie-only check; pages under (private) still verify the session themselves.
     const { pathname, search } = request.nextUrl
-    if (PRIVATE_PATHS.includes(pathname)) {
+    if (privatePaths.includes(pathname)) {
       return NextResponse.redirect(new URL(signInPath(pathname + search), request.url))
     }
     return NextResponse.next({ request: { headers: requestHeaders } })

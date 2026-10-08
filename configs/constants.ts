@@ -20,6 +20,12 @@ const SECONDS = {
 } as const
 
 const MOBILE_BREAKPOINT = 768
+const MOBILE_QUERY = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`
+
+const VIEWPORT_COOKIE = {
+  name: 'viewport',
+  maxAge: SECONDS.week * 52,
+} as const
 
 const SIDEBAR_CONFIG = {
   cookieName: 'sidebar_state',
@@ -31,7 +37,6 @@ const SIDEBAR_CONFIG = {
 
 const SIGN_OUT_PATH = '/api/sign-out'
 const UNAUTHORIZED_MESSAGE = '請先登入'
-const PRIVATE_PATHS: readonly string[] = ['/profile', '/saved']
 
 const GITHUB_TOKEN_HEADER = 'x-github-token'
 const ACCOUNT_COOKIE_SALT = 'better-auth-account'
@@ -50,11 +55,12 @@ export {
   HttpStatusCode,
   LIKE_REACTION,
   MOBILE_BREAKPOINT,
+  MOBILE_QUERY,
   PAGE_SIZE,
-  PRIVATE_PATHS,
   SECONDS,
   SIDEBAR_CONFIG,
   SIGN_OUT_PATH,
   TOKEN_EXPIRY_BUFFER_MS,
   UNAUTHORIZED_MESSAGE,
+  VIEWPORT_COOKIE,
 }

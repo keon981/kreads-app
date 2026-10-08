@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { AuthRedirect } from '@/components/auth/auth-redirect'
-import { homePageUrl } from '@/configs/nav-config'
+import { paths } from '@/configs/path-config'
 import { verifySession } from '@/lib/auth'
 
 interface AuthGuardProps {
@@ -22,7 +22,7 @@ interface GuestOnlyRouteProps {
 
 export async function GuestOnlyRoute({ children }: GuestOnlyRouteProps): Promise<React.ReactNode> {
   const { status } = await verifySession()
-  if (status === 'active') redirect(homePageUrl)
+  if (status === 'active') redirect(paths.home)
 
   return children
 }

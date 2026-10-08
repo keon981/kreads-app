@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
+import { paths } from '@/configs/path-config'
 
 export default function NotFound() {
   return (
@@ -12,7 +13,7 @@ export default function NotFound() {
         <p className="text-sm text-muted-foreground">
           連結失效或頁面不存在。請返回以繼續探索。
         </p>
-        <Button nativeButton={false} variant="secondary" size="lg" render={<Link href="/" />}>
+        <Button nativeButton={false} variant="secondary" size="lg" render={<Link href={paths.home} />}>
           返回
         </Button>
       </hgroup>
