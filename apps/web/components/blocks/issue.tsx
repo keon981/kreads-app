@@ -27,7 +27,7 @@ import {
 import { Spinner } from '@workspace/ui/components/spinner'
 import { Textarea } from '@workspace/ui/components/textarea'
 import { toast } from '@workspace/ui/components/toast'
-import { useCopyLink } from '@workspace/ui/hooks/use-copy-link'
+import { useCopy } from '@workspace/ui/hooks/use-copy'
 import { useDebouncedMutation } from '@workspace/ui/hooks/use-debounced-mutation'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
 import { cn } from '@workspace/ui/lib/utils'
@@ -418,7 +418,7 @@ function PostItem({
   // auth
   const onAuthGuardClick = useAuthGuard(triggerChatDialog)
 
-  const { copy } = useCopyLink()
+  const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
 
   const handleCopyLink = () => {
     if (typeof window === 'undefined') return
@@ -552,7 +552,7 @@ function CommentItem({
 
   const authorName = issue.author?.login ?? 'ghost'
 
-  const { copy } = useCopyLink()
+  const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
 
   const handleCopyLink = () => {
     if (typeof window === 'undefined') return

@@ -3,23 +3,20 @@
 import { toast } from '@workspace/ui/components/toast'
 import { useBoolean, useCopyToClipboard, useTimeout } from 'usehooks-ts'
 
-interface UseCopyLinkOptions {
+interface UseCopyOptions {
   successMessage?: string
   errorMessage?: string
   timeout?: number
 }
 
-interface UseCopyLinkReturn {
-  copied: boolean
-  copy: (text: string) => Promise<boolean>
-}
+type UseCopyReturn = [copied: boolean, copy: (text: string) => Promise<boolean>]
 
 /**
  * Hook to copy text to the clipboard with a toast notification and temporary copied state.
  */
-export function useCopyLink(options: UseCopyLinkOptions = {}): UseCopyLinkReturn {
+export function useCopy(options: UseCopyOptions = {}): UseCopyReturn {
   const {
-    successMessage = '已複製連結至剪貼簿',
+    successMessage = '已複製到剪貼簿',
     errorMessage = '複製失敗，請手動複製',
     timeout = 2000,
   } = options
@@ -40,7 +37,7 @@ export function useCopyLink(options: UseCopyLinkOptions = {}): UseCopyLinkReturn
     return success
   }
 
-  return { copied, copy }
+  return [copied, copy]
 }
 
-export type { UseCopyLinkOptions, UseCopyLinkReturn }
+export type { UseCopyOptions, UseCopyReturn }
