@@ -1,0 +1,36 @@
+import { adminClient } from 'better-auth/client/plugins'
+import { createAuthClient } from 'better-auth/react'
+
+import { paths } from '@/configs/path-config'
+import { safeNext, signUpPath } from '@/utils/navigation'
+
+export const authClient = createAuthClient({
+  plugins: [
+    adminClient(),
+  ],
+})
+
+export function authorizeGitHubRepo() {
+  return authClient.linkSocial({
+    provider: 'github',
+    scopes: ['public_repo'],
+    callbackURL: paths.signUp,
+    errorCallbackURL: paths.signUp,
+  })
+}
+
+export function signInWithGitHub() {
+  const url = new URL(window.location.href)
+  const next = safeNext(url.searchParams.get('next') ?? url.pathname + url.search)
+  const aff = url.searchParams.get('aff')
+  return authClient.signIn.social({
+    provider: 'github',
+    scopes: ['public_repo'],
+    callbackURL: next,
+    errorCallbackURL: signUpPath({ next, aff }),
+  })
+}
+
+export async function signOutWithClient() {
+  await authClient.signOut()
+}

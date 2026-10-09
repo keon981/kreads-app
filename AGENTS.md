@@ -1,5 +1,9 @@
 <!-- BEGIN:nextjs-agent-rules -->
 
+# Workflows
+
+**請先閱讀並嚴格遵守系統 CLAUDE.md 工作流程與指令!!!**
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
@@ -8,30 +12,37 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-<!--VITE PLUS START-->
+# Tooling
 
-# Using Vite+, the Unified Toolchain for the Web
+`vp` 只當 runtime / 套件管理（pnpm）與 script runner 使用；本專案沒有 `vite.config.ts`，也沒安裝 vite-plus、Vitest、Oxlint、Oxfmt。
 
-This project is using Vite+, a unified toolchain built on top of Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task. Vite+ wraps runtime management, package management, and frontend tooling in a single global CLI called `vp`. Vite+ is distinct from Vite, and it invokes Vite through `vp dev` and `vp build`. Run `vp help` to print a list of commands and `vp <command> --help` for information about a specific command.
+- 格式由 ESLint（`@antfu/eslint-config` stylistic）負責，不用 Prettier
 
-Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.dev/guide/.
+## Monorepo（pnpm workspace，結構參考 shadcn `next-monorepo` 模板）
 
-## Built-in Commands vs Scripts
+| Workspace | 套件名稱 | 內容 |
+| --- | --- | --- |
+| `apps/web` | `web` | 主站（Next.js） |
+| `packages/ui` | `@workspace/ui` | shadcn 元件、通用 hooks、`cn`（re-export 自 shadcn 的 `cn` 套件）、`formatDateTime`、UI 常數、`globals.css`；Storybook 設定在 `.storybook/`，stories 放在 `stories/`（不放進 `src/`） |
+| `packages/db` | `@workspace/db` | Drizzle schema、client、migrations、DB 腳本 |
+| `packages/eslint-config` | `@workspace/eslint-config` | antfu 共用設定 |
+| `packages/typescript-config` | `@workspace/typescript-config` | 共用 tsconfig |
 
-`vp <name>` runs a built-in command. `vp run <name>` runs a `package.json` script or a `vite.config.ts` task. Scripts cannot overwrite built-ins, so `vp dev` and `vp run dev` may do different things. Check `package.json` and `vite.config.ts` first, and run `vp run <name>` when the project defines a script or task with that name.
-
-## Tool Versions
-
-Run `vp toolchain` to show versions and relationships in the active Vite+
-release. Add a tool name to select part of the graph. For example, run
-`vp toolchain vite`. Use `--global` to ignore the local `vite-plus` package. Use
-`vp why <package>` to show the package-manager dependency graph.
+- 套件：`vp install`；加到指定 workspace：`vp add <pkg> --filter <套件名稱>`
+- 根目錄 scripts 一律 `vp run <script>`（見根目錄 `package.json`）：
+  - `dev`：只跑 `web`
+  - `storybook`：在 `@workspace/ui` 啟動 Storybook（http://localhost:6006）
+  - `build`、`lint`、`lint:fix`、`typecheck`：跑所有 workspace
+  - `drizzle:generate`、`drizzle:migrate`：在 `@workspace/db` 執行，需要 `packages/db/.env` 的 `DATABASE_URL`
+- 只跑單一 workspace：`vp run -F <套件名稱> <script>`，例如 `vp run -F web build`
+- 各 App 的 `build` script 必須是原生指令（`next build`），不能寫成 `vp …`：Vercel 只會在 Root Directory 執行 App 的 script，而且沒有 `vp`
+- 改 `packages/ui` 時：`vp run dev` 看主站實際畫面，`vp run storybook` 看單一元件的各種變體
+- shadcn：在 `apps/web` 執行 `vp dlx shadcn@latest add <元件>`（`apps/web` 不裝 `shadcn`），元件會裝到 `packages/ui/src/components`；不依賴主站的元件、hooks、工具函式放 `packages/ui`，業務相關的（例如 `issue-item`、`use-auth-guard`）留在 `apps/web`
 
 ## Review Checklist
 
-- [ ] Run `vp install` after pulling remote changes and before getting started.
-- [ ] Run `vp check` and `vp test` to format, lint, type check and test changes.
-- [ ] Check if there are `vite.config.ts` tasks or `package.json` scripts necessary for validation, run via `vp run <script>`.
-- [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.
-
-<!--VITE PLUS END-->
+- [ ] `vp run lint:fix`：改動檔案並格式。Lint 由 agent 自行處理到乾淨，不要回報給使用者、也不要叫使用者去跑。
+  - 只有在修正會改變程式行為或需要使用者決策時，才提出來詢問
+- [ ] `vp run typecheck`：錯誤只在 `.next/types/` 是過期產物，在 `apps/web` 執行 `vp exec next typegen` 後重跑
+- [ ] 改了 DB schema → `vp run drizzle:generate`
+- [ ] ❌ 不要執行 `vp check`、`vp test`、`vp fmt`、`vp lint`、`vp check --fix`（不適用本專案，`--fix` 會用 oxfmt 重排整個專案）
