@@ -17,6 +17,8 @@ out/
 
 # production
 build/
+storybook-static/
+*storybook.log
 
 # misc
 .DS_Store
