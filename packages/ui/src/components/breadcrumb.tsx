@@ -3,7 +3,7 @@ import * as React from 'react'
 import { mergeProps } from '@base-ui/react/merge-props'
 import { useRender } from '@base-ui/react/use-render'
 import { RiArrowRightSLine, RiMoreLine } from '@remixicon/react'
-import { cn } from '@workspace/ui/lib/utils'
+import { cn } from 'cn'
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<'nav'>) {
   return (

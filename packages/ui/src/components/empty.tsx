@@ -1,5 +1,5 @@
-import { cn } from '@workspace/ui/lib/utils'
 import { cva } from 'class-variance-authority'
+import { cn } from 'cn'
 
 import type { VariantProps } from 'class-variance-authority'
 

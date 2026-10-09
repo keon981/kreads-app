@@ -1,5 +1,5 @@
 import { mergeProps, useRender } from '@base-ui/react'
-import { cn } from '@workspace/ui/lib/utils'
+import { cn } from 'cn'
 
 function Skeleton({ className, render, ...props }: useRender.ComponentProps<'div'>) {
   return useRender({

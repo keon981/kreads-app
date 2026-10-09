@@ -16,8 +16,8 @@ import {
 } from '@workspace/ui/components/tooltip'
 import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
 import { SECONDS, SIDEBAR_CONFIG } from '@workspace/ui/lib/constants'
-import { cn } from '@workspace/ui/lib/utils'
 import { cva } from 'class-variance-authority'
+import { cn } from 'cn'
 
 import type { ButtonProps } from '@workspace/ui/components/button'
 import type { VariantProps } from 'class-variance-authority'
