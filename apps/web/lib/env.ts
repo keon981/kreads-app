@@ -7,6 +7,7 @@ export const env = createEnv({
     GITHUB_CLIENT_ID: z.string(),
     GITHUB_CLIENT_SECRET: z.string(),
     INVITE_LIMIT: z.coerce.number().int().positive().default(3),
+    REACTION_EMOJI: z.enum(['laugh', 'confused', 'heart', 'hooray', 'rocket', 'eyes']).default('heart'),
   },
   client: {
     NEXT_PUBLIC_HOME_USERNAME: z.string(),
@@ -18,6 +19,7 @@ export const env = createEnv({
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
     INVITE_LIMIT: process.env.INVITE_LIMIT,
+    REACTION_EMOJI: process.env.REACTION_EMOJI,
     NEXT_PUBLIC_HOME_USERNAME: process.env.NEXT_PUBLIC_HOME_USERNAME,
     NEXT_PUBLIC_APP_TITLE: process.env.NEXT_PUBLIC_APP_TITLE,
   },

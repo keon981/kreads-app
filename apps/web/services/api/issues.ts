@@ -1,4 +1,4 @@
-import { HttpStatusCode, PAGE_SIZE } from '@/configs/constants'
+import { HttpStatusCode } from '@/configs/constants'
 import { isGraphqlNotFoundError, isRequestError } from '@/utils/toolkit'
 
 import { ISSUE_QUERY, ISSUES_QUERY } from '../graphql/issues'
@@ -7,6 +7,8 @@ import { isViewerReacted } from './reactions'
 import type { Issue } from '@/types/issue'
 import type { UserRepo } from '@/types/user'
 import type { GraphqlIssue, GraphqlIssueResponse, GraphqlIssuesResponse } from '../graphql/issues'
+
+const perPage = 20
 
 /* === utils === */
 
@@ -68,7 +70,7 @@ async function fetchIssuesWithRest(
       state: 'open',
       sort: 'created',
       direction: 'desc',
-      per_page: PAGE_SIZE.issues,
+      per_page: perPage,
       mediaType: { format: 'full' }, // return body & body_html
     })
 
@@ -88,7 +90,7 @@ async function fetchIssuesWithGraphql({ octokit, owner, repo }: UserRepo,
     const { repository } = await octokit.graphql<GraphqlIssuesResponse>(ISSUES_QUERY, {
       owner,
       repo,
-      first: PAGE_SIZE.issues,
+      first: perPage,
     })
 
     return repository.issues.nodes.map(toIssueFromGraphql)

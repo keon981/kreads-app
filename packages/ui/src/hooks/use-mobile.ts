@@ -1,5 +1,5 @@
-import { useInitialIsMobile } from '@workspace/ui/components/device-provider'
-import { MOBILE_QUERY } from '@workspace/ui/lib/constants'
+import { MOBILE_QUERY } from '@workspace/ui/configs/constants'
+import { useInitialIsMobile } from '@workspace/ui/contexts/device-provider'
 import { useMediaQuery } from 'usehooks-ts'
 
 export function useIsMobile(): boolean {

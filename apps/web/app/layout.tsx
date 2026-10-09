@@ -4,8 +4,8 @@ import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
 import { Suspense } from 'react'
 
-import { DeviceProvider } from '@workspace/ui/components/device-provider'
 import { Toaster } from '@workspace/ui/components/toast'
+import { DeviceProvider } from '@workspace/ui/contexts/device-provider'
 import { cn } from '@workspace/ui/lib/utils'
 
 import { getInitialIsMobile } from '@/app/server/device'
