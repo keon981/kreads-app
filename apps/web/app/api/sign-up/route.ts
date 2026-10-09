@@ -3,12 +3,12 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import type { NextRequest } from 'next/server'
 
+import { db } from '@workspace/db/client'
+import { user } from '@workspace/db/schema/auth-schema'
 import { eq } from 'drizzle-orm'
 
 import { redeemInviteCode } from '@/app/server/db/invites'
 import { viewerUserTag } from '@/app/server/db/users'
-import { db } from '@/db/drizzle'
-import { user } from '@/db/schema/auth-schema'
 import {
   auth,
   fetchAccessTokenCache,

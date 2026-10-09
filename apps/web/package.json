@@ -10,9 +10,7 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit",
-    "drizzle:generate": "vpx drizzle-kit generate",
-    "drizzle:migrate": "vpx drizzle-kit migrate"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -21,6 +19,7 @@
     "@octokit/rest": "^22.0.1",
     "@remixicon/react": "^4.9.0",
     "@t3-oss/env-nextjs": "^0.13.11",
+    "@workspace/db": "workspace:*",
     "@workspace/ui": "workspace:*",
     "better-auth": "^1.7.3",
     "class-variance-authority": "^0.7.1",

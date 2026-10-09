@@ -1,8 +1,8 @@
+import { db } from '@workspace/db/client'
+import { user } from '@workspace/db/schema/auth-schema'
+import { inviteCode as inviteCodeTable } from '@workspace/db/schema/invite-schema'
 import { and, count, eq, isNull } from 'drizzle-orm'
 
-import { db } from '@/db/drizzle'
-import { user } from '@/db/schema/auth-schema'
-import { inviteCode as inviteCodeTable } from '@/db/schema/invite-schema'
 import { env } from '@/lib/env'
 import { isAdminRole } from '@/utils/user'
 

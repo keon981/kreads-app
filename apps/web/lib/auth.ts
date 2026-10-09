@@ -3,13 +3,13 @@ import { headers } from 'next/headers'
 import { cache } from 'react'
 
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
+import { db } from '@workspace/db/client' // your drizzle instance
+import * as schema from '@workspace/db/schema/auth-schema'
 import { betterAuth } from 'better-auth/minimal'
 import { nextCookies } from 'better-auth/next-js'
 import { admin } from 'better-auth/plugins'
 
 import { GITHUB_TOKEN_HEADER, SECONDS } from '@/configs/constants'
-import { db } from '@/db/drizzle' // your drizzle instance
-import * as schema from '@/db/schema/auth-schema'
 import { isUserActive } from '@/utils/user'
 
 import { env } from './env'

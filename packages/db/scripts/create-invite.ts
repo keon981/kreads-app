@@ -2,8 +2,8 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import process from 'node:process'
 
-import { db } from '../db/drizzle'
-import { inviteCode } from '../db/schema/invite-schema'
+import { db } from '../src/client'
+import { inviteCode } from '../src/schema/invite-schema'
 
 const code = randomBytes(12).toString('base64url')
 const note = process.argv[2] ?? null

@@ -8,7 +8,9 @@
     "build": "vp run -r build",
     "lint": "vp run -r lint",
     "lint:fix": "vp run -r lint:fix",
-    "typecheck": "vp run -r typecheck"
+    "typecheck": "vp run -r typecheck",
+    "drizzle:generate": "vp run -F @workspace/db drizzle:generate",
+    "drizzle:migrate": "vp run -F @workspace/db drizzle:migrate"
   },
   "devDependencies": {
     "@workspace/typescript-config": "workspace:*"
