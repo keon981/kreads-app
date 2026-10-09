@@ -1,0 +1,274 @@
+'use client'
+
+import {
+  columnFilteringFeature,
+  createFilteredRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  filterFn_equalsString,
+  filterFn_includesString,
+  metaHelper,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  sortFn_basic,
+  sortFn_text,
+  tableFeatures,
+} from '@tanstack/react-table'
+import type { Column, ReactTable, Row, RowData, Table as TableInstance } from '@tanstack/react-table'
+
+import {
+  RiArrowDownLine,
+  RiArrowLeftSLine,
+  RiArrowRightSLine,
+  RiArrowUpDownLine,
+  RiArrowUpLine,
+} from '@remixicon/react'
+import { Button } from '@workspace/ui/components/button'
+import { Checkbox } from '@workspace/ui/components/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@workspace/ui/components/table'
+import { cn } from '@workspace/ui/lib/utils'
+
+import type { OptionItem } from '@/types/keys'
+
+interface DataTableColumnMeta {
+  readonly headerClassName?: string
+  readonly cellClassName?: string
+}
+
+export const dataTableFeatures = tableFeatures({
+  columnFilteringFeature,
+  rowSortingFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  filteredRowModel: createFilteredRowModel(),
+  sortedRowModel: createSortedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  filterFns: { includesString: filterFn_includesString, equalsString: filterFn_equalsString },
+  sortFns: { basic: sortFn_basic, text: sortFn_text },
+  columnMeta: metaHelper<DataTableColumnMeta>(),
+})
+
+export type DataTableFeatures = typeof dataTableFeatures
+
+const SORT_ICONS = {
+  asc: RiArrowUpLine,
+  desc: RiArrowDownLine,
+} as const
+
+export type DataTableInstance<TData extends RowData> = ReactTable<DataTableFeatures, TData>
+
+interface DataTableProps<TData extends RowData> {
+  table: DataTableInstance<TData>
+  emptyText?: string
+}
+
+export function DataTable<TData extends RowData>({
+  table,
+  emptyText = '沒有資料',
+}: DataTableProps<TData>): React.ReactNode {
+  const rows = table.getRowModel().rows
+  const columnCount = table.getAllLeafColumns().length
+
+  return (
+    <div className="min-w-0 overflow-hidden rounded-xl border bg-card">
+      <Table>
+        <TableHeader className="bg-muted/50">
+          {table.getHeaderGroups().map(headerGroup => (
+            <TableRow key={headerGroup.id} className="hover:bg-transparent">
+              {headerGroup.headers.map(header => (
+                <TableHead
+                  key={header.id}
+                  className={cn('h-11 px-3 text-muted-foreground', header.column.columnDef.meta?.headerClassName)}
+                >
+                  {header.isPlaceholder ? null : <table.FlexRender header={header} />}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {rows.length > 0
+            ? rows.map(row => (
+                <TableRow key={row.id} data-state={row.getIsSelected() ? 'selected' : undefined}>
+                  {row.getAllCells().map(cell => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn('px-3 py-2.5', cell.column.columnDef.meta?.cellClassName)}
+                    >
+                      <table.FlexRender cell={cell} />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            : (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={columnCount} className="h-32 text-center text-muted-foreground">
+                    {emptyText}
+                  </TableCell>
+                </TableRow>
+              )}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+
+interface DataTableColumnHeaderProps<TData extends RowData, TValue> {
+  column: Column<DataTableFeatures, TData, TValue>
+  title: string
+  className?: string
+}
+
+export function DataTableColumnHeader<TData extends RowData, TValue>({
+  column,
+  title,
+  className,
+}: DataTableColumnHeaderProps<TData, TValue>): React.ReactNode {
+  if (!column.getCanSort()) {
+    return <span className={className}>{title}</span>
+  }
+
+  const sortDirection = column.getIsSorted()
+  const SortIcon = sortDirection ? SORT_ICONS[sortDirection] : RiArrowUpDownLine
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className={cn('-ml-2.5 text-muted-foreground hover:text-foreground data-[sorted=true]:text-foreground', className)}
+      data-sorted={sortDirection !== false}
+      onClick={column.getToggleSortingHandler()}
+    >
+      {title}
+      <SortIcon data-icon="inline-end" className={cn(sortDirection === false && 'opacity-50')} />
+    </Button>
+  )
+}
+
+interface DataTableSelectHeaderProps<TData extends RowData> {
+  table: TableInstance<DataTableFeatures, TData>
+}
+
+export function DataTableSelectHeader<TData extends RowData>({
+  table,
+}: DataTableSelectHeaderProps<TData>): React.ReactNode {
+  return (
+    <Checkbox
+      aria-label="選擇本頁全部"
+      className="data-indeterminate:border-primary data-indeterminate:bg-primary data-indeterminate:text-primary-foreground"
+      checked={table.getIsAllPageRowsSelected()}
+      indeterminate={!table.getIsAllPageRowsSelected() && table.getIsSomePageRowsSelected()}
+      onCheckedChange={checked => table.toggleAllPageRowsSelected(checked)}
+    />
+  )
+}
+
+interface DataTableSelectCellProps<TData extends RowData> {
+  row: Row<DataTableFeatures, TData>
+}
+
+export function DataTableSelectCell<TData extends RowData>({
+  row,
+}: DataTableSelectCellProps<TData>): React.ReactNode {
+  return (
+    <Checkbox
+      aria-label="選擇此列"
+      checked={row.getIsSelected()}
+      disabled={!row.getCanSelect()}
+      onCheckedChange={checked => row.toggleSelected(checked)}
+    />
+  )
+}
+
+interface DataTablePaginationProps<TData extends RowData> {
+  table: DataTableInstance<TData>
+  pageSizeOptions: readonly OptionItem<number>[]
+}
+
+export function DataTablePagination<TData extends RowData>({
+  table,
+  pageSizeOptions,
+}: DataTablePaginationProps<TData>): React.ReactNode {
+  const { pageIndex, pageSize } = table.state.pagination
+  const pageCount = Math.max(table.getPageCount(), 1)
+  const selectedCount = table.getSelectedRowIds().length
+  const filteredCount = table.getFilteredRowModel().rows.length
+
+  return (
+    <div className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+      <p>
+        已選擇
+        {' '}
+        <span className="font-medium text-foreground tabular-nums">{selectedCount}</span>
+        {' '}
+        項，共
+        {' '}
+        <span className="font-medium text-foreground tabular-nums">{filteredCount}</span>
+        {' '}
+        項
+      </p>
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+        <Select
+          items={pageSizeOptions}
+          value={pageSize}
+          onValueChange={(value) => {
+            if (value !== null) {
+              table.setPageSize(value)
+            }
+          }}
+        >
+          <SelectTrigger size="sm" aria-label="每頁筆數">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {pageSizeOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <span className="tabular-nums">
+          第
+          {' '}
+          <span className="font-medium text-foreground">{pageIndex + 1}</span>
+          {' '}
+          /
+          {' '}
+          {pageCount}
+          {' '}
+          頁
+        </span>
+        <div className="ml-auto flex items-center gap-1 sm:ml-0">
+          <Button
+            variant="outline"
+            size="icon-sm"
+            aria-label="上一頁"
+            disabled={!table.getCanPreviousPage()}
+            onClick={() => table.previousPage()}
+          >
+            <RiArrowLeftSLine />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            aria-label="下一頁"
+            disabled={!table.getCanNextPage()}
+            onClick={() => table.nextPage()}
+          >
+            <RiArrowRightSLine />
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}

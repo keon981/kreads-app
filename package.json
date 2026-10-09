@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "vp run -F web dev",
+    "dev:dashboard": "vp run -F dashboard dev",
     "storybook": "vp run -F @workspace/ui storybook",
     "build": "vp run -r build",
     "lint": "vp run -r lint",
