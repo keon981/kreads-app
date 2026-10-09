@@ -5,7 +5,7 @@ import { Toaster } from '@workspace/ui/components/toast'
 
 import type { Decorator, Preview } from '@storybook/react-vite'
 
-import '@workspace/ui/globals.css'
+import './preview.css'
 
 // Mirrors apps/web: dark mode is the `dark` class on <html>
 function ThemeRoot({ isDark, children }: { isDark: boolean, children: React.ReactNode }) {
