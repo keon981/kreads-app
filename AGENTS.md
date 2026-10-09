@@ -23,7 +23,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 | Workspace | 套件名稱 | 內容 |
 | --- | --- | --- |
 | `apps/web` | `web` | 主站（Next.js） |
-| `packages/ui` | `@workspace/ui` | shadcn 元件、`cn()`、`globals.css` |
+| `packages/ui` | `@workspace/ui` | shadcn 元件、通用 hooks、`cn()` 等工具、UI 常數、`globals.css` |
 | `packages/db` | `@workspace/db` | Drizzle schema、client、migrations、DB 腳本 |
 | `packages/eslint-config` | `@workspace/eslint-config` | antfu 共用設定 |
 | `packages/typescript-config` | `@workspace/typescript-config` | 共用 tsconfig |
@@ -35,7 +35,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   - `drizzle:generate`、`drizzle:migrate`：在 `@workspace/db` 執行，需要 `packages/db/.env` 的 `DATABASE_URL`
 - 只跑單一 workspace：`vp run -F <套件名稱> <script>`，例如 `vp run -F web build`
 - 各 App 的 `build` script 必須是原生指令（`next build`），不能寫成 `vp …`：Vercel 只會在 Root Directory 執行 App 的 script，而且沒有 `vp`
-- shadcn：在 `apps/web` 執行 `shadcn add`，元件會裝到 `packages/ui/src/components`；`apps/web/components/ui/` 只放依賴主站程式碼的元件
+- shadcn：在 `apps/web` 執行 `shadcn add`，元件會裝到 `packages/ui/src/components`；不依賴主站的元件、hooks、工具函式放 `packages/ui`，業務相關的（例如 `issue-item`、`use-auth-guard`）留在 `apps/web`
 
 ## Review Checklist
 

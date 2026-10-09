@@ -1,7 +1,8 @@
 import { Suspense } from 'react'
 
+import { SidebarInset, SidebarProvider } from '@workspace/ui/components/sidebar'
+
 import { AppNav, AppNavSkeleton } from '@/components/layout/app-sidebar'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AuthProvider } from '@/contexts/auth-provider'
 import { ThemeProvider } from '@/contexts/theme-provider'
 

@@ -13,12 +13,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@workspace/ui/components/card'
+import { Field, FieldDescription, FieldError, FieldLabel } from '@workspace/ui/components/field'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@workspace/ui/components/input-group'
 import { Password } from '@workspace/ui/components/password'
 import { Spinner } from '@workspace/ui/components/spinner'
 
 import { completeSignUpAction } from '@/app/(blank)/(auth)/sign-up/action'
-import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { safeNext, signInPath } from '@/utils/navigation'
 
 import type { ActionState } from '@/types/action'

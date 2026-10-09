@@ -27,7 +27,10 @@ import {
 import { Spinner } from '@workspace/ui/components/spinner'
 import { Textarea } from '@workspace/ui/components/textarea'
 import { toast } from '@workspace/ui/components/toast'
-import { cn } from '@workspace/ui/lib/utils'
+import { useCopyLink } from '@workspace/ui/hooks/use-copy-link'
+import { useDebouncedMutation } from '@workspace/ui/hooks/use-debounced-mutation'
+import { useDialog } from '@workspace/ui/hooks/use-dialog'
+import { cn, formatDateTime } from '@workspace/ui/lib/utils'
 
 import { toggleReactionAction } from '@/app/server/actions/posts'
 import {
@@ -44,15 +47,11 @@ import {
 import { HttpStatusCode } from '@/configs/constants'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
-import { useCopyLink } from '@/hooks/use-copy-link'
-import { useDebouncedMutation } from '@/hooks/use-debounced-mutation'
-import { useDialog } from '@/hooks/use-dialog'
-import { formatDateTime } from '@/lib/utils'
 import { chatHref } from '@/utils/navigation'
 
 import { CancelAlertDialog, DeleteAlertDialog } from './confirm-dialog'
 
-import type { UseDialogReturn } from '@/hooks/use-dialog'
+import type { UseDialogReturn } from '@workspace/ui/hooks/use-dialog'
 import type { ActionState, IssueDeleteAction, IssueFormAction, IssueFormState, IssueTarget } from '@/types/action'
 import type { Issue, IssueComment } from '@/types/issue'
 

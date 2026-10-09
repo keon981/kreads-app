@@ -15,12 +15,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@workspace/ui/components/sheet'
+import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
 import { cn } from '@workspace/ui/lib/utils'
 
 import { settings } from '@/configs/nav-config'
 import { paths } from '@/configs/path-config'
 import { useAuth } from '@/contexts/auth-provider'
-import { useIsMobile } from '@/hooks/use-mobile'
 
 import { SignInButton, SignInCard } from '../blocks/sign-in'
 

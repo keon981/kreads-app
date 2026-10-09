@@ -2,9 +2,8 @@
 
 import React, { use, useEffect } from 'react'
 
+import { MOBILE_QUERY, VIEWPORT_COOKIE } from '@workspace/ui/lib/constants'
 import { useMediaQuery } from 'usehooks-ts'
-
-import { MOBILE_QUERY, VIEWPORT_COOKIE } from '@/configs/constants'
 
 interface DeviceProviderProps {
   children: React.ReactNode

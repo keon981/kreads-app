@@ -14,11 +14,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@workspace/ui/components/tooltip'
+import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
+import { SECONDS, SIDEBAR_CONFIG } from '@workspace/ui/lib/constants'
 import { cn } from '@workspace/ui/lib/utils'
 import { cva } from 'class-variance-authority'
-
-import { SECONDS, SIDEBAR_CONFIG } from '@/configs/constants'
-import { useIsMobile } from '@/hooks/use-mobile'
 
 import type { ButtonProps } from '@workspace/ui/components/button'
 import type { VariantProps } from 'class-variance-authority'

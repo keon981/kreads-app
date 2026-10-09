@@ -9,7 +9,6 @@ import { cva } from 'class-variance-authority'
 import { cn } from 'cn'
 
 import type { VariantProps } from 'class-variance-authority'
-import type { ActionState } from '@/types/action'
 
 function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
   return (
@@ -184,7 +183,7 @@ function FieldError({
   errors,
   ...props
 }: React.ComponentProps<'div'> & {
-  errors?: Array<ActionState | undefined>
+  errors?: Array<{ message?: string } | undefined>
   icon?: React.ReactNode
 }) {
   const content = useMemo(() => {

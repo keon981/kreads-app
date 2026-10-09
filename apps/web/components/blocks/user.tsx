@@ -31,9 +31,9 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from '@workspace/ui/components/input-group'
+import { useCopyLink } from '@workspace/ui/hooks/use-copy-link'
 
 import { paths } from '@/configs/path-config'
-import { useCopyLink } from '@/hooks/use-copy-link'
 import { getAbsoluteUrl, invitePath } from '@/utils/navigation'
 
 interface Props {

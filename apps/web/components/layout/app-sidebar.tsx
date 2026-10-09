@@ -2,11 +2,12 @@
 
 import React from 'react'
 
+import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
+
 import { DesktopSidebar, DesktopSidebarSkeleton } from '@/components/layout/desktop-sidebar'
 import { MobileTabBar, MobileTabBarSkeleton } from '@/components/layout/mobile-tab-bar'
-import { useIsMobile } from '@/hooks/use-mobile'
 
-import type { Sidebar } from '@/components/ui/sidebar'
+import type { Sidebar } from '@workspace/ui/components/sidebar'
 
 export function AppNav(props: React.ComponentProps<typeof Sidebar>): React.ReactNode {
   const isMobile = useIsMobile()

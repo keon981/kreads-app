@@ -3,7 +3,6 @@
 import React from 'react'
 
 import { RiCommandLine } from '@remixicon/react'
-
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +13,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar'
+} from '@workspace/ui/components/sidebar'
+
 import { sidebar } from '@/configs/nav-config'
 
 interface DesktopSidebarContainerProps extends React.ComponentProps<typeof Sidebar> {
