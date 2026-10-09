@@ -3,28 +3,28 @@
 import React from 'react'
 
 import { RiArrowRightSLine, RiGithubFill } from '@remixicon/react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '@workspace/ui/components/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from '@workspace/ui/components/card'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { toast } from '@/components/ui/toast'
+} from '@workspace/ui/components/dialog'
+import { toast } from '@workspace/ui/components/toast'
+import { cn } from '@workspace/ui/lib/utils'
+
 import { signInWithGitHub } from '@/lib/auth-client'
-import { cn } from '@/lib/utils'
 import { useSignInDialog } from '@/store/sign-in-dialog'
 
-import type { ButtonProps } from '@/components/ui/button'
+import type { ButtonProps } from '@workspace/ui/components/button'
 
 export function SignInCard({
   className,

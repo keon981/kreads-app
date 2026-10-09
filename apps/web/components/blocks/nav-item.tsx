@@ -5,9 +5,9 @@ import Link from 'next/link'
 import React from 'react'
 
 import { useRender } from '@base-ui/react/use-render'
+import { DialogTrigger } from '@workspace/ui/components/dialog'
 
 import { NoticeAlertDialog } from '@/components/blocks/confirm-dialog'
-import { DialogTrigger } from '@/components/ui/dialog'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
 

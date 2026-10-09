@@ -5,8 +5,7 @@ import Link from 'next/link'
 import React from 'react'
 
 import { RiCommandLine, RiMenu2Line } from '@remixicon/react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from '@workspace/ui/components/button'
 import {
   Sheet,
   SheetContent,
@@ -15,12 +14,13 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet'
+} from '@workspace/ui/components/sheet'
+import { cn } from '@workspace/ui/lib/utils'
+
 import { settings } from '@/configs/nav-config'
 import { paths } from '@/configs/path-config'
 import { useAuth } from '@/contexts/auth-provider'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { cn } from '@/lib/utils'
 
 import { SignInButton, SignInCard } from '../blocks/sign-in'
 

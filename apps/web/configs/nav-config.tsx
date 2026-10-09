@@ -17,12 +17,6 @@ import {
   RiUserFill,
   RiUserLine,
 } from '@remixicon/react'
-import { useTheme } from 'next-themes'
-
-import { createPostAction } from '@/app/server/actions/posts'
-import { AuthDialogTrigger } from '@/components/auth/auth-dialog-trigger'
-import { IssueFormDialog } from '@/components/blocks/issue'
-import { LinkNavItem, NoticeNavItem } from '@/components/blocks/nav-item'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,12 +29,18 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { SheetClose } from '@/components/ui/sheet'
+} from '@workspace/ui/components/dropdown-menu'
+import { SheetClose } from '@workspace/ui/components/sheet'
+import { cn } from '@workspace/ui/lib/utils'
+import { useTheme } from 'next-themes'
+
+import { createPostAction } from '@/app/server/actions/posts'
+import { AuthDialogTrigger } from '@/components/auth/auth-dialog-trigger'
+import { IssueFormDialog } from '@/components/blocks/issue'
+import { LinkNavItem, NoticeNavItem } from '@/components/blocks/nav-item'
 import { homePaths, paths } from '@/configs/path-config'
 import { useAuth } from '@/contexts/auth-provider'
 import { signOutWithClient } from '@/lib/auth-client'
-import { cn } from '@/lib/utils'
 
 import type { RemixiconComponentType } from '@remixicon/react'
 import type { NavItemProps } from '@/components/blocks/nav-item'

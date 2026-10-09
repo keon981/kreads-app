@@ -4,16 +4,17 @@ import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
 import { Suspense } from 'react'
 
+import { Toaster } from '@workspace/ui/components/toast'
+import { cn } from '@workspace/ui/lib/utils'
+
 import { getInitialIsMobile } from '@/app/server/device'
 import { SignInDialog } from '@/components/blocks/sign-in'
 import { Providers } from '@/components/providers'
-import { Toaster } from '@/components/ui/toast'
 import { DeviceProvider } from '@/contexts/device-provider'
 import { verifySession } from '@/lib/auth'
 import { env } from '@/lib/env'
-import { cn } from '@/lib/utils'
 
-import '@/styles/globals.css'
+import '@workspace/ui/globals.css'
 
 const oxaniumHeading = Oxanium({ subsets: ['latin'], variable: '--font-heading' })
 

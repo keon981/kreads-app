@@ -1,13 +1,13 @@
 'use client'
 
 import { RiCheckLine, RiFileCopyLine, RiGithubFill } from '@remixicon/react'
-
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+} from '@workspace/ui/components/avatar'
+import { Button } from '@workspace/ui/components/button'
+import { ButtonGroup } from '@workspace/ui/components/button-group'
 import {
   Card,
   CardAction,
@@ -16,7 +16,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from '@workspace/ui/components/card'
 import {
   Dialog,
   DialogContent,
@@ -24,18 +24,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from '@workspace/ui/components/dialog'
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from '@/components/ui/input-group'
+} from '@workspace/ui/components/input-group'
+
 import { paths } from '@/configs/path-config'
 import { useCopyLink } from '@/hooks/use-copy-link'
 import { getAbsoluteUrl, invitePath } from '@/utils/navigation'
-
-import { ButtonGroup } from '../ui/button-group'
 
 interface Props {
   children?: React.ReactNode

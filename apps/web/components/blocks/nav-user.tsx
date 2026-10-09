@@ -1,12 +1,11 @@
 'use client'
 
 import { RiArrowUpDownLine, RiBankCardLine, RiCheckboxCircleLine, RiLogoutBoxLine, RiNotificationLine, RiSparklingLine } from '@remixicon/react'
-
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from '@/components/ui/avatar'
+} from '@workspace/ui/components/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +14,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@workspace/ui/components/dropdown-menu'
+
 import {
   SidebarMenu,
   SidebarMenuButton,

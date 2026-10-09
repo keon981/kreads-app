@@ -1,5 +1,6 @@
 'use client'
-import { Button } from '@/components/ui/button'
+import { Button } from '@workspace/ui/components/button'
+import { ButtonGroup, ButtonGroupSeparator } from '@workspace/ui/components/button-group'
 import {
   Dialog,
   DialogClose,
@@ -8,12 +9,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
+} from '@workspace/ui/components/dialog'
+import { cn } from '@workspace/ui/lib/utils'
 
-import { ButtonGroup, ButtonGroupSeparator } from '../ui/button-group'
-
-import type { ButtonProps } from '@/components/ui/button'
+import type { ButtonProps } from '@workspace/ui/components/button'
 
 interface AlertDialog {
   onCancel?: ButtonProps['onClick']

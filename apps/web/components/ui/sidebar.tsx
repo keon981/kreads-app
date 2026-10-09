@@ -5,23 +5,23 @@ import React, { use, useCallback, useEffect, useState } from 'react'
 import { mergeProps } from '@base-ui/react/merge-props'
 import { useRender } from '@base-ui/react/use-render'
 import { RiSideBarLine } from '@remixicon/react'
-import { cva } from 'class-variance-authority'
-
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@workspace/ui/components/button'
+import { Input } from '@workspace/ui/components/input'
+import { Separator } from '@workspace/ui/components/separator'
+import { Skeleton } from '@workspace/ui/components/skeleton'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@workspace/ui/components/tooltip'
+import { cn } from '@workspace/ui/lib/utils'
+import { cva } from 'class-variance-authority'
+
 import { SECONDS, SIDEBAR_CONFIG } from '@/configs/constants'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { cn } from '@/lib/utils'
 
+import type { ButtonProps } from '@workspace/ui/components/button'
 import type { VariantProps } from 'class-variance-authority'
-import type { ButtonProps } from '@/components/ui/button'
 
 interface SidebarContextProps {
   state: 'expanded' | 'collapsed'

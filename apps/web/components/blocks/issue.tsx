@@ -5,10 +5,8 @@ import Link from 'next/link'
 import { useActionState, useState, useTransition } from 'react'
 
 import { RiBookmarkLine, RiChat1Line, RiCloseLine, RiDeleteBin7Line, RiEditLine, RiHeartFill, RiHeartLine, RiLink, RiMoreLine, RiShareForwardLine } from '@remixicon/react'
-
-import { toggleReactionAction } from '@/app/server/actions/posts'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar'
+import { Button } from '@workspace/ui/components/button'
 import {
   Dialog,
   DialogClose,
@@ -17,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from '@workspace/ui/components/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +23,13 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@workspace/ui/components/dropdown-menu'
+import { Spinner } from '@workspace/ui/components/spinner'
+import { Textarea } from '@workspace/ui/components/textarea'
+import { toast } from '@workspace/ui/components/toast'
+import { cn } from '@workspace/ui/lib/utils'
+
+import { toggleReactionAction } from '@/app/server/actions/posts'
 import {
   IssueItem,
   IssueItemArticle,
@@ -37,16 +41,13 @@ import {
   IssueItemTitle,
   IssueUser,
 } from '@/components/ui/issue-item'
-import { Spinner } from '@/components/ui/spinner'
-import { Textarea } from '@/components/ui/textarea'
-import { toast } from '@/components/ui/toast'
 import { HttpStatusCode } from '@/configs/constants'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
 import { useCopyLink } from '@/hooks/use-copy-link'
 import { useDebouncedMutation } from '@/hooks/use-debounced-mutation'
 import { useDialog } from '@/hooks/use-dialog'
-import { cn, formatDateTime } from '@/lib/utils'
+import { formatDateTime } from '@/lib/utils'
 import { chatHref } from '@/utils/navigation'
 
 import { CancelAlertDialog, DeleteAlertDialog } from './confirm-dialog'

@@ -8,10 +8,10 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { ButtonGroup } from '@/components/ui/button-group'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
+} from '@workspace/ui/components/avatar'
+import { Button } from '@workspace/ui/components/button'
+import { ButtonGroup } from '@workspace/ui/components/button-group'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@workspace/ui/components/hover-card'
 import {
   Item,
   ItemContent,
@@ -19,12 +19,13 @@ import {
   ItemGroup,
   ItemMedia,
   ItemTitle,
-} from '@/components/ui/item'
-import { Skeleton } from '@/components/ui/skeleton'
-import { paths } from '@/configs/path-config'
-import { cn } from '@/lib/utils'
+} from '@workspace/ui/components/item'
+import { Skeleton } from '@workspace/ui/components/skeleton'
+import { cn } from '@workspace/ui/lib/utils'
 
-import type { ButtonProps } from '@/components/ui/button'
+import { paths } from '@/configs/path-config'
+
+import type { ButtonProps } from '@workspace/ui/components/button'
 
 function IssueItem({
   children,

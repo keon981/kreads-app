@@ -1,8 +1,7 @@
 'use client'
 
+import { toast } from '@workspace/ui/components/toast'
 import { useBoolean, useCopyToClipboard, useTimeout } from 'usehooks-ts'
-
-import { toast } from '@/components/ui/toast'
 
 interface UseCopyLinkOptions {
   successMessage?: string

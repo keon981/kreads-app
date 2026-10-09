@@ -2,13 +2,11 @@
 
 import { useMemo } from 'react'
 
+import { Alert, AlertTitle } from '@workspace/ui/components/alert'
+import { Label } from '@workspace/ui/components/label'
+import { Separator } from '@workspace/ui/components/separator'
 import { cva } from 'class-variance-authority'
 import { cn } from 'cn'
-
-import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
-
-import { Alert, AlertTitle } from './alert'
 
 import type { VariantProps } from 'class-variance-authority'
 import type { ActionState } from '@/types/action'

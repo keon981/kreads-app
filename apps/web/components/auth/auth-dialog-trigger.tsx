@@ -1,6 +1,7 @@
 'use client'
 
-import { DialogTrigger } from '@/components/ui/dialog'
+import { DialogTrigger } from '@workspace/ui/components/dialog'
+
 import { useAuthGuard } from '@/hooks/use-auth-guard'
 
 export function AuthDialogTrigger({ onClick, ...props }: React.ComponentProps<typeof DialogTrigger>): React.ReactNode {

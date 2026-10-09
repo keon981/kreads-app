@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@workspace/ui/components/button'
+
 import { paths } from '@/configs/path-config'
 
 export default function NotFound() {

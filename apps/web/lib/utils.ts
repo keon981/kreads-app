@@ -1,10 +1,3 @@
-import { clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-import type { ClassValue } from 'clsx'
-
-export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs))
-
 // fr-CA 輸出 YYYY-MM-DD；固定時區避免 SSR 與 client 日期不一致
 const dateFormatter = new Intl.DateTimeFormat('fr-CA', {
   year: 'numeric',

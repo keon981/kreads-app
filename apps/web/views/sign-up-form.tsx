@@ -4,9 +4,7 @@ import Link from 'next/link'
 import { useActionState } from 'react'
 
 import { RiGitRepositoryLine } from '@remixicon/react'
-
-import { completeSignUpAction } from '@/app/(blank)/(auth)/sign-up/action'
-import { Button } from '@/components/ui/button'
+import { Button } from '@workspace/ui/components/button'
 import {
   Card,
   CardContent,
@@ -14,11 +12,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from '@workspace/ui/components/card'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@workspace/ui/components/input-group'
+import { Password } from '@workspace/ui/components/password'
+import { Spinner } from '@workspace/ui/components/spinner'
+
+import { completeSignUpAction } from '@/app/(blank)/(auth)/sign-up/action'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { Password } from '@/components/ui/password'
-import { Spinner } from '@/components/ui/spinner'
 import { safeNext, signInPath } from '@/utils/navigation'
 
 import type { ActionState } from '@/types/action'
