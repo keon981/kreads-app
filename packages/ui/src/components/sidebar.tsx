@@ -14,13 +14,21 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@workspace/ui/components/tooltip'
+import { SECONDS } from '@workspace/ui/configs/constants'
 import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
-import { SECONDS, SIDEBAR_CONFIG } from '@workspace/ui/lib/constants'
 import { cva } from 'class-variance-authority'
 import { cn } from 'cn'
 
 import type { ButtonProps } from '@workspace/ui/components/button'
 import type { VariantProps } from 'class-variance-authority'
+
+const sidebarConfig = {
+  cookieName: 'sidebar_state',
+  width: '20rem',
+  widthMobile: '18rem',
+  widthIcon: '5rem',
+  keyboardShortcut: 'b',
+}
 
 interface SidebarContextProps {
   state: 'expanded' | 'collapsed'
@@ -73,7 +81,7 @@ function SidebarProvider({
       }
 
       // This sets the cookie to keep the sidebar state.
-      document.cookie = `${SIDEBAR_CONFIG.cookieName}=${openState}; path=/; max-age=${SECONDS.week}`
+      document.cookie = `${sidebarConfig.cookieName}=${openState}; path=/; max-age=${SECONDS.week}`
     },
     [setOpenProp, open],
   )
@@ -87,7 +95,7 @@ function SidebarProvider({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
-        event.key === SIDEBAR_CONFIG.keyboardShortcut
+        event.key === sidebarConfig.keyboardShortcut
         && (event.metaKey || event.ctrlKey)
       ) {
         event.preventDefault()
@@ -122,8 +130,8 @@ function SidebarProvider({
         data-slot="sidebar-wrapper"
         style={
           {
-            '--sidebar-width': SIDEBAR_CONFIG.width,
-            '--sidebar-width-icon': SIDEBAR_CONFIG.widthIcon,
+            '--sidebar-width': sidebarConfig.width,
+            '--sidebar-width-icon': sidebarConfig.widthIcon,
             ...style,
           } as React.CSSProperties
         }

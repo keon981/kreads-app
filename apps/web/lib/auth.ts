@@ -5,11 +5,12 @@ import { cache } from 'react'
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { db } from '@workspace/db/client' // your drizzle instance
 import * as schema from '@workspace/db/schema/auth-schema'
+import { SECONDS } from '@workspace/ui/configs/constants'
 import { betterAuth } from 'better-auth/minimal'
 import { nextCookies } from 'better-auth/next-js'
 import { admin } from 'better-auth/plugins'
 
-import { GITHUB_TOKEN_HEADER, SECONDS } from '@/configs/constants'
+import { GITHUB_TOKEN_HEADER } from '@/configs/constants'
 import { isUserActive } from '@/utils/user'
 
 import { env } from './env'

@@ -1,6 +1,5 @@
+import { SECONDS } from '@workspace/ui/configs/constants'
 import { symmetricDecodeJWT } from 'better-auth/crypto'
-
-import { ACCOUNT_COOKIE_SALT, TOKEN_EXPIRY_BUFFER_MS } from '@/configs/constants'
 
 import { auth } from './auth'
 
@@ -36,12 +35,12 @@ export async function decodeAccountCookie(cookies: CookieReader): Promise<Accoun
   const value = getChunkedCookie(cookies, ctx.authCookies.accountData.name)
   if (!value) return null
 
-  return symmetricDecodeJWT<AccountCookie>(value, ctx.secretConfig, ACCOUNT_COOKIE_SALT)
+  return symmetricDecodeJWT<AccountCookie>(value, ctx.secretConfig, 'better-auth-account')
 }
 
 export function isTokenFresh(account: AccountCookie): account is AccountCookie & { accessToken: string } {
   if (!account.accessToken) return false
   if (!account.accessTokenExpiresAt) return true
 
-  return new Date(account.accessTokenExpiresAt).getTime() - Date.now() > TOKEN_EXPIRY_BUFFER_MS
+  return new Date(account.accessTokenExpiresAt).getTime() - Date.now() > SECONDS.minute * 1000
 }
