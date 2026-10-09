@@ -17,6 +17,7 @@ import {
   RiUserFill,
   RiUserLine,
 } from '@remixicon/react'
+import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +26,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -173,7 +175,7 @@ export const sidebar: Sidebar = {
       icon: RiListSettingsFill,
       NavItem({ children }: NavItemProps): ReactNode {
         const router = useRouter()
-        const { isAuth } = useAuth()
+        const { isAuth, user } = useAuth()
         const { theme, setTheme } = useTheme()
 
         const handleSignOut = async (): Promise<void> => {
@@ -198,7 +200,24 @@ export const sidebar: Sidebar = {
               <RiListSettingsFill />
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent side="right" align="end" sideOffset={8}>
+            <DropdownMenuContent side="right" align="end" sideOffset={8} className="min-w-56">
+              {user && (
+                <>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel className="flex items-center gap-2 font-normal">
+                      <Avatar className="size-8">
+                        <AvatarImage src={user.avatarUrl} alt={user.name ?? user.id} />
+                        <AvatarFallback>{(user.name ?? user.id ?? '').slice(0, 1).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-medium text-foreground">{user.name ?? user.id}</span>
+                        {user.id && <span className="truncate text-xs text-muted-foreground">{user.id}</span>}
+                      </div>
+                    </DropdownMenuLabel>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               {isAuth
                 ? (
                     <DropdownMenuGroup>
