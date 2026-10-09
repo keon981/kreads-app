@@ -10,6 +10,9 @@
     "lint:fix": "vp run -r lint:fix",
     "typecheck": "vp run -r typecheck"
   },
+  "devDependencies": {
+    "@workspace/typescript-config": "workspace:*"
+  },
   "devEngines": {
     "packageManager": {
       "name": "pnpm",

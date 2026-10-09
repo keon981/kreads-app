@@ -107,7 +107,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      '@workspace/typescript-config':
+        specifier: workspace:*
+        version: link:packages/typescript-config
 
   apps/web:
     dependencies:
@@ -120,9 +124,6 @@ importers:
       '@neondatabase/serverless':
         specifier: ^1.1.0
         version: 1.1.0
-      '@next/eslint-plugin-next':
-        specifier: ^16.3.3
-        version: 16.3.3(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
       '@octokit/rest':
         specifier: ^22.0.1
         version: 22.0.1
@@ -184,12 +185,6 @@ importers:
         specifier: ^5.0.15
         version: 5.0.15(@types/react@19.2.18)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
-      '@antfu/eslint-config':
-        specifier: ^9.3.0
-        version: 9.3.0(@eslint-react/eslint-plugin@5.18.6(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(@next/eslint-plugin-next@16.3.3(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0)))(@typescript-eslint/typescript-estree@8.68.0(supports-color@7.2.0)(typescript@5.9.3))(@typescript-eslint/utils@8.68.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(@vue/compiler-sfc@3.5.42)(eslint-plugin-jsx-a11y@6.10.2(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0)))(eslint-plugin-react-refresh@0.5.5(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0)))(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
-      '@eslint-react/eslint-plugin':
-        specifier: ^5.18.6
-        version: 5.18.6(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.3.3
@@ -202,6 +197,12 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.5(@types/react@19.2.18)
+      '@workspace/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@workspace/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       drizzle-kit:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4
@@ -211,9 +212,6 @@ importers:
       eslint-config-next:
         specifier: 16.2.6
         version: 16.2.6(@typescript-eslint/parser@8.68.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
-      eslint-plugin-react-refresh:
-        specifier: ^0.5.5
-        version: 0.5.5(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
       prettier:
         specifier: ^3.8.3
         version: 3.9.6
@@ -226,6 +224,26 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+
+  packages/eslint-config:
+    devDependencies:
+      '@antfu/eslint-config':
+        specifier: ^9.3.0
+        version: 9.3.0(@eslint-react/eslint-plugin@5.18.6(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(@next/eslint-plugin-next@16.3.3(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0)))(@typescript-eslint/typescript-estree@8.68.0(supports-color@7.2.0)(typescript@5.9.3))(@typescript-eslint/utils@8.68.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3))(@vue/compiler-sfc@3.5.42)(eslint-plugin-jsx-a11y@6.10.2(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0)))(eslint-plugin-react-refresh@0.5.5(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0)))(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
+      '@eslint-react/eslint-plugin':
+        specifier: ^5.18.6
+        version: 5.18.6(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
+      '@next/eslint-plugin-next':
+        specifier: ^16.3.3
+        version: 16.3.3(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
+      eslint:
+        specifier: ^9
+        version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
+      eslint-plugin-react-refresh:
+        specifier: ^0.5.5
+        version: 0.5.5(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
+
+  packages/typescript-config: {}
 
 packages:
 
