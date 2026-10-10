@@ -31,7 +31,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from '@workspace/ui/components/input-group'
-import { useCopyLink } from '@workspace/ui/hooks/use-copy-link'
+import { useCopy } from '@workspace/ui/hooks/use-copy'
 
 import { paths } from '@/configs/path-config'
 import { getAbsoluteUrl, invitePath } from '@/utils/navigation'
@@ -113,7 +113,7 @@ function ShareDialog({
   title = '分享個人檔案',
   description = '複製連結以分享給其他人',
 }: ShareDialogProps) {
-  const { copied, copy } = useCopyLink()
+  const [copied, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
 
   const handleCopy = () => {
     copy(shareUrl)

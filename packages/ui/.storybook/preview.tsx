@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
-import { DeviceProvider } from '@workspace/ui/components/device-provider'
 import { Toaster } from '@workspace/ui/components/toast'
+import { DeviceProvider } from '@workspace/ui/contexts/device-provider'
 
 import type { Decorator, Preview } from '@storybook/react-vite'
 

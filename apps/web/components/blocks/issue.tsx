@@ -27,10 +27,10 @@ import {
 import { Spinner } from '@workspace/ui/components/spinner'
 import { Textarea } from '@workspace/ui/components/textarea'
 import { toast } from '@workspace/ui/components/toast'
-import { useCopyLink } from '@workspace/ui/hooks/use-copy-link'
+import { useCopy } from '@workspace/ui/hooks/use-copy'
 import { useDebouncedMutation } from '@workspace/ui/hooks/use-debounced-mutation'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
-import { cn, formatDateTime } from '@workspace/ui/lib/utils'
+import { cn } from '@workspace/ui/lib/utils'
 
 import { toggleReactionAction } from '@/app/server/actions/posts'
 import {
@@ -54,6 +54,21 @@ import { CancelAlertDialog, DeleteAlertDialog } from './confirm-dialog'
 import type { UseDialogReturn } from '@workspace/ui/hooks/use-dialog'
 import type { ActionState, IssueDeleteAction, IssueFormAction, IssueFormState, IssueTarget } from '@/types/action'
 import type { Issue, IssueComment } from '@/types/issue'
+
+// fr-CA 輸出 YYYY-MM-DD；固定時區避免 SSR 與 client 日期不一致
+const dateFormatter = new Intl.DateTimeFormat('fr-CA', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: 'Asia/Taipei',
+})
+
+function formatDateTime(value: string | number | Date): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  return dateFormatter.format(date)
+}
 
 type IssueItemButtonProps = React.ComponentProps<typeof IssueItemButton>
 type DropdownMenuItemOnClick = React.ComponentProps<typeof DropdownMenuItem>['onClick']
@@ -403,7 +418,7 @@ function PostItem({
   // auth
   const onAuthGuardClick = useAuthGuard(triggerChatDialog)
 
-  const { copy } = useCopyLink()
+  const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
 
   const handleCopyLink = () => {
     if (typeof window === 'undefined') return
@@ -537,7 +552,7 @@ function CommentItem({
 
   const authorName = issue.author?.login ?? 'ghost'
 
-  const { copy } = useCopyLink()
+  const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
 
   const handleCopyLink = () => {
     if (typeof window === 'undefined') return

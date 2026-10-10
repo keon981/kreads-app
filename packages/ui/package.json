@@ -40,6 +40,8 @@
   "exports": {
     "./globals.css": "./src/styles/globals.css",
     "./postcss.config": "./postcss.config.mjs",
+    "./configs/*": "./src/configs/*.ts",
+    "./contexts/*": "./src/contexts/*.tsx",
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts"

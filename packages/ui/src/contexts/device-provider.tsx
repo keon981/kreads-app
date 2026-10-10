@@ -2,7 +2,8 @@
 
 import React, { use, useEffect } from 'react'
 
-import { MOBILE_QUERY, VIEWPORT_COOKIE } from '@workspace/ui/lib/constants'
+import { MOBILE_QUERY } from '@workspace/ui/configs/constants'
+import { viewportCookie } from '@workspace/ui/configs/cookie-config'
 import { useMediaQuery } from 'usehooks-ts'
 
 interface DeviceProviderProps {
@@ -31,7 +32,7 @@ function DeviceProvider({ children, initialIsMobile }: DeviceProviderProps): Rea
   })
 
   useEffect(() => {
-    document.cookie = `${VIEWPORT_COOKIE.name}=${isMobile ? 'mobile' : 'desktop'}; path=/; max-age=${VIEWPORT_COOKIE.maxAge}`
+    document.cookie = `${viewportCookie.name}=${isMobile ? 'mobile' : 'desktop'}; path=/; max-age=${viewportCookie.maxAge}`
   }, [isMobile])
 
   return (
