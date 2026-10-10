@@ -2,7 +2,7 @@
 
 import { RiCheckLine, RiFileCopyLine } from '@remixicon/react'
 import { Button } from '@workspace/ui/components/button'
-import { useCopyLink } from '@workspace/ui/hooks/use-copy-link'
+import { useCopy } from '@workspace/ui/hooks/use-copy'
 
 interface CopyButtonProps extends Omit<React.ComponentProps<typeof Button>, 'onClick' | 'children'> {
   text: string
@@ -16,7 +16,7 @@ export function CopyButton({
   size = 'icon-sm',
   ...props
 }: CopyButtonProps): React.ReactNode {
-  const { copied, copy } = useCopyLink({ successMessage })
+  const [copied, copy] = useCopy({ successMessage })
 
   return (
     <Button variant={variant} size={size} onClick={() => copy(text)} {...props}>

@@ -18,6 +18,11 @@ const defaultTokenFormValues: TokenFormValues = {
   allowIps: '',
 }
 
+export function formatDateTime(value: string): string {
+  // fr-CA renders YYYY-MM-DD; a fixed time zone keeps SSR and client output identical
+  return new Intl.DateTimeFormat('fr-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'Asia/Taipei' }).format(new Date(value))
+}
+
 export function formatQuota(value: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
 }

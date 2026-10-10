@@ -25,13 +25,12 @@ import {
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu'
 import { Progress } from '@workspace/ui/components/progress'
-import { formatDateTime } from '@workspace/ui/lib/utils'
 
 import { tokenGroups } from '@/__mocks__/keys'
 import { CopyButton } from '@/components/ui/copy-button'
 import { DataTableColumnHeader, DataTableSelectCell, DataTableSelectHeader } from '@/components/ui/data-table'
 
-import { formatQuota, getMaskedKey, getQuotaPercent, tokenStatusLabels } from './utils'
+import { formatDateTime, formatQuota, getMaskedKey, getQuotaPercent, tokenStatusLabels } from './utils'
 
 import type { DataTableFeatures } from '@/components/ui/data-table'
 import type { Token } from './types'

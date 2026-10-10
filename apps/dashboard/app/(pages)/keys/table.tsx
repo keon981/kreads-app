@@ -28,7 +28,7 @@ import { Button } from '@workspace/ui/components/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@workspace/ui/components/input-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select'
 import { toast } from '@workspace/ui/components/toast'
-import { useCopyLink } from '@workspace/ui/hooks/use-copy-link'
+import { useCopy } from '@workspace/ui/hooks/use-copy'
 
 import { tokens as mockTokens } from '@/__mocks__/keys'
 import { SectionPageLayout } from '@/components/layout/section-page-layout'
@@ -62,7 +62,7 @@ export function TokensTable(): React.ReactNode {
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [editingToken, setEditingToken] = useState<Token | null>(null)
   const [deleteTargets, setDeleteTargets] = useState<Token[]>([])
-  const { copy } = useCopyLink({ successMessage: '已複製密鑰' })
+  const [, copy] = useCopy({ successMessage: '已複製密鑰' })
 
   const columns = getTokenColumns({
     onEdit: (token) => {
