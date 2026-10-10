@@ -2,183 +2,87 @@
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@workspace/ui/components/chart'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/tabs'
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Label,
-  LabelList,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { Bar, BarChart, CartesianGrid, LabelList, Line, LineChart, XAxis, YAxis } from 'recharts'
 
-import { dailyModelConsumption, modelCallCounts, models } from '@/__mocks__/dashboard'
 import { SectionCard } from '@/components/ui/section-card'
 
 import type { ChartConfig } from '@workspace/ui/components/chart'
+import type { DailyActivity, InviterRank } from './types'
 
 const chartConfig: ChartConfig = {
-  calls: { label: '調用次數' },
-  ...Object.fromEntries(models.map(model => [model.key, { label: model.name, color: model.color }])),
+  registrations: { label: '新註冊', color: 'var(--chart-2)' },
+  redemptions: { label: '核銷', color: 'var(--chart-1)' },
+  logins: { label: '登入', color: 'var(--chart-3)' },
+  count: { label: '邀請人數', color: 'var(--chart-2)' },
 }
 
 const chartClassName = 'aspect-auto h-64 w-full'
 
-function formatCount(value: unknown): string {
-  return typeof value === 'number' ? value.toLocaleString('en-US') : String(value)
+interface ChartsCardProps {
+  activity: DailyActivity[]
+  inviters: InviterRank[]
 }
 
-// Rendered outside Recharts: its legend keeps the height measured at the
-// initial 320px width, leaving a gap once the container grows
-function ChartLegend(): React.ReactNode {
-  return (
-    <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs">
-      {models.map(model => (
-        <li key={model.key} className="flex items-center gap-1.5">
-          <span aria-hidden className="size-2 shrink-0 rounded-[2px]" style={{ backgroundColor: model.color }} />
-          {model.name}
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-export function ChartsCard(): React.ReactNode {
-  const totalCalls = modelCallCounts.reduce((sum, item) => sum + item.calls, 0)
+export function ChartsCard({ activity, inviters }: ChartsCardProps): React.ReactNode {
+  const lineTabs = [
+    { value: 'redemptions', label: '核銷走勢' },
+    { value: 'logins', label: '登入走勢' },
+  ]
 
   const tabs = [
     {
-      value: 'consumption',
-      label: '消耗分布',
+      value: 'registrations',
+      label: '註冊走勢',
       content: (
-        <>
-          <ChartContainer config={chartConfig} className={chartClassName}>
-            <BarChart accessibilityLayer data={dailyModelConsumption} margin={{ left: 0, right: 8 }}>
-              <CartesianGrid vertical={false} />
-              <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-              <YAxis tickLine={false} axisLine={false} width={40} tickFormatter={value => `$${value}`} />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              {models.map((model, index) => (
-                <Bar
-                  key={model.key}
-                  dataKey={model.key}
-                  stackId="consumption"
-                  fill={`var(--color-${model.key})`}
-                  radius={index === models.length - 1 ? [4, 4, 0, 0] : 0}
-                />
-              ))}
-            </BarChart>
-          </ChartContainer>
-          <ChartLegend />
-        </>
-      ),
-    },
-    {
-      value: 'trend',
-      label: '消耗趨勢',
-      content: (
-        <>
-          <ChartContainer config={chartConfig} className={chartClassName}>
-            <LineChart accessibilityLayer data={dailyModelConsumption} margin={{ left: 0, right: 12 }}>
-              <CartesianGrid vertical={false} />
-              <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-              <YAxis tickLine={false} axisLine={false} width={40} tickFormatter={value => `$${value}`} />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
-              {models.map(model => (
-                <Line
-                  key={model.key}
-                  dataKey={model.key}
-                  type="monotone"
-                  stroke={`var(--color-${model.key})`}
-                  strokeWidth={2}
-                  dot={false}
-                />
-              ))}
-            </LineChart>
-          </ChartContainer>
-          <ChartLegend />
-        </>
-      ),
-    },
-    {
-      value: 'calls',
-      label: '調用次數分布',
-      content: (
-        <>
-          <ChartContainer config={chartConfig} className={chartClassName}>
-            <PieChart accessibilityLayer>
-              <ChartTooltip cursor={false} content={<ChartTooltipContent nameKey="model" hideLabel />} />
-              <Pie
-                data={modelCallCounts}
-                dataKey="calls"
-                nameKey="model"
-                innerRadius="55%"
-                outerRadius="80%"
-                paddingAngle={2}
-                stroke="var(--background)"
-              >
-                <Label
-                  content={({ viewBox }): React.ReactElement | null => {
-                    if (!viewBox || !('cx' in viewBox) || !('cy' in viewBox))
-                      return null
-                    return (
-                      <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                        <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-xl font-semibold">
-                          {formatCount(totalCalls)}
-                        </tspan>
-                        <tspan x={viewBox.cx} y={(viewBox.cy ?? 0) + 20} className="fill-muted-foreground">
-                          總調用次數
-                        </tspan>
-                      </text>
-                    )
-                  }}
-                />
-              </Pie>
-            </PieChart>
-          </ChartContainer>
-          <ChartLegend />
-        </>
-      ),
-    },
-    {
-      value: 'ranking',
-      label: '調用次數排行',
-      content: (
-        <ChartContainer config={chartConfig} className="aspect-auto h-72 w-full">
-          <BarChart accessibilityLayer data={modelCallCounts} layout="vertical" margin={{ left: 0, right: 56 }}>
-            <CartesianGrid horizontal={false} />
-            <XAxis type="number" dataKey="calls" hide />
-            <YAxis
-              type="category"
-              dataKey="model"
-              tickLine={false}
-              axisLine={false}
-              width={104}
-              tickFormatter={key => models.find(model => model.key === key)?.name ?? key}
-            />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent nameKey="model" hideLabel />} />
-            <Bar dataKey="calls" radius={4} barSize={28}>
-              <LabelList
-                dataKey="calls"
-                position="right"
-                offset={8}
-                className="fill-foreground"
-                fontSize={12}
-                formatter={formatCount}
-              />
-            </Bar>
+        <ChartContainer config={chartConfig} className={chartClassName}>
+          <BarChart accessibilityLayer data={activity} margin={{ left: 0, right: 8 }}>
+            <CartesianGrid vertical={false} />
+            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} minTickGap={16} />
+            <YAxis tickLine={false} axisLine={false} width={32} allowDecimals={false} />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <Bar dataKey="registrations" fill="var(--color-registrations)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ChartContainer>
       ),
     },
+    ...lineTabs.map(({ value, label }) => ({
+      value,
+      label,
+      content: (
+        <ChartContainer config={chartConfig} className={chartClassName}>
+          <LineChart accessibilityLayer data={activity} margin={{ left: 0, right: 12 }}>
+            <CartesianGrid vertical={false} />
+            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} minTickGap={16} />
+            <YAxis tickLine={false} axisLine={false} width={32} allowDecimals={false} />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
+            <Line dataKey={value} type="monotone" stroke={`var(--color-${value})`} strokeWidth={2} dot={false} />
+          </LineChart>
+        </ChartContainer>
+      ),
+    })),
+    {
+      value: 'inviters',
+      label: '邀請排行',
+      content: inviters.length > 0
+        ? (
+            <ChartContainer config={chartConfig} className={chartClassName}>
+              <BarChart accessibilityLayer data={inviters} layout="vertical" margin={{ left: 0, right: 40 }}>
+                <CartesianGrid horizontal={false} />
+                <XAxis type="number" dataKey="count" hide />
+                <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} width={104} />
+                <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                <Bar dataKey="count" fill="var(--color-count)" radius={4} barSize={28}>
+                  <LabelList dataKey="count" position="right" offset={8} className="fill-foreground" fontSize={12} />
+                </Bar>
+              </BarChart>
+            </ChartContainer>
+          )
+        : <p className="flex h-64 items-center justify-center text-sm text-muted-foreground">還沒有人透過邀請註冊</p>,
+    },
   ]
 
   return (
-    <SectionCard title="模型數據分析" description="近 7 天各模型的額度消耗（USD）與調用次數" className="min-w-0">
+    <SectionCard title="使用者活動" description={`近 ${activity.length} 天的註冊、核銷與登入次數`} className="min-w-0">
       <Tabs defaultValue={tabs[0].value} className="gap-4">
         <TabsList className="grid w-full grid-cols-2 group-data-horizontal/tabs:h-auto sm:inline-flex sm:w-fit sm:group-data-horizontal/tabs:h-8">
           {tabs.map(tab => (

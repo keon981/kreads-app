@@ -1,7 +1,4 @@
-export interface ActionState {
-  message?: string
-  status?: number
-}
+import type { ActionState } from '@workspace/server/types/action'
 
 export interface IssueFormState extends ActionState {
   content?: string

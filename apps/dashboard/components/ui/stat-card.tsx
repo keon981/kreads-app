@@ -4,14 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { ChartContainer } from '@workspace/ui/components/chart'
 import { Area, AreaChart } from 'recharts'
 
-import type { StatTrendPoint } from '@/types/stat'
-
 interface StatCardProps {
   label: string
   value: string
   description?: string
   icon?: React.ReactNode
-  trend?: StatTrendPoint[]
+  trend?: { value: number }[]
   className?: string
 }
 

@@ -21,21 +21,26 @@ import {
   useSidebar,
 } from '@workspace/ui/components/sidebar'
 
-import { currentUser } from '@/__mocks__/user'
 import { UserMenuContent, UserSummary } from '@/components/layout/user-menu'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { getActiveNavItem, navGroups } from '@/configs/nav-config'
 import { paths } from '@/configs/path-config'
 import { env } from '@/lib/env'
 
+import type { SessionUser } from '@/types/user'
+
 // packages/ui sidebar is tuned for apps/web (centered icon rail); restore a left-aligned list here
 const menuButtonClassName = 'justify-start px-2 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:*:not-first:hidden'
 
-interface AppSidebarBodyProps {
+interface AppSidebarProps {
+  user: SessionUser
+}
+
+interface AppSidebarBodyProps extends AppSidebarProps {
   isMobile?: boolean
 }
 
-function AppSidebarBody({ isMobile = false }: AppSidebarBodyProps): React.ReactNode {
+function AppSidebarBody({ user, isMobile = false }: AppSidebarBodyProps): React.ReactNode {
   const pathname = usePathname()
   const activeItem = getActiveNavItem(pathname)
   const { setOpenMobile } = useSidebar()
@@ -100,11 +105,11 @@ function AppSidebarBody({ isMobile = false }: AppSidebarBodyProps): React.ReactN
                   />
                 )}
               >
-                <UserAvatar user={currentUser} className="size-8" />
-                <UserSummary user={currentUser} />
+                <UserAvatar user={user} className="size-8" />
+                <UserSummary user={user} />
                 <RiArrowUpDownLine className="ml-auto size-4!" />
               </DropdownMenuTrigger>
-              <UserMenuContent side={isMobile ? 'top' : 'right'} align="end" sideOffset={8} />
+              <UserMenuContent user={user} side={isMobile ? 'top' : 'right'} align="end" sideOffset={8} />
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -113,7 +118,7 @@ function AppSidebarBody({ isMobile = false }: AppSidebarBodyProps): React.ReactN
   )
 }
 
-export function AppSidebar(): React.ReactNode {
+export function AppSidebar({ user }: AppSidebarProps): React.ReactNode {
   const { isMobile, openMobile, setOpenMobile } = useSidebar()
 
   // packages/ui Sidebar is desktop-only (`hidden md:block`), so mobile uses its own Sheet
@@ -126,7 +131,7 @@ export function AppSidebar(): React.ReactNode {
             <SheetDescription>主選單</SheetDescription>
           </SheetHeader>
           <div className="flex h-full flex-col">
-            <AppSidebarBody isMobile />
+            <AppSidebarBody user={user} isMobile />
           </div>
         </SheetContent>
       </Sheet>
@@ -135,7 +140,7 @@ export function AppSidebar(): React.ReactNode {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <AppSidebarBody />
+      <AppSidebarBody user={user} />
       <SidebarRail />
     </Sidebar>
   )

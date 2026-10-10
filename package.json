@@ -12,8 +12,8 @@
     "lint": "vp run -r lint",
     "lint:fix": "vp run -r lint:fix",
     "typecheck": "vp run -r typecheck",
-    "drizzle:generate": "vp run -F @workspace/db drizzle:generate",
-    "drizzle:migrate": "vp run -F @workspace/db drizzle:migrate"
+    "drizzle:generate": "vp run -F @workspace/server drizzle:generate",
+    "drizzle:migrate": "vp run -F @workspace/server drizzle:migrate"
   },
   "devDependencies": {
     "@workspace/typescript-config": "workspace:*"

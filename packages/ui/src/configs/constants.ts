@@ -7,7 +7,10 @@ const SECONDS = {
 
 const MOBILE_QUERY = '(max-width: 767px)'
 
+const TIME_ZONE = 'Asia/Taipei'
+
 export {
   MOBILE_QUERY,
   SECONDS,
+  TIME_ZONE,
 }

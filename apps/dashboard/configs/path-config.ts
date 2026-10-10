@@ -1,5 +1,7 @@
 export const paths = {
+  signIn: '/sign-in',
   dashboard: '/dashboard',
-  keys: '/keys',
+  users: '/users',
+  invites: '/invites',
   profile: '/profile',
 }

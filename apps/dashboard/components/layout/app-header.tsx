@@ -17,12 +17,17 @@ import { Separator } from '@workspace/ui/components/separator'
 import { SidebarTrigger } from '@workspace/ui/components/sidebar'
 import { useTheme } from 'next-themes'
 
-import { currentUser } from '@/__mocks__/user'
 import { UserMenuContent } from '@/components/layout/user-menu'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { getActiveNavItem, navGroups } from '@/configs/nav-config'
 
-export function AppHeader(): React.ReactNode {
+import type { SessionUser } from '@/types/user'
+
+interface AppHeaderProps {
+  user: SessionUser
+}
+
+export function AppHeader({ user }: AppHeaderProps): React.ReactNode {
   const pathname = usePathname()
   const { resolvedTheme, setTheme } = useTheme()
   const activeItem = getActiveNavItem(pathname)
@@ -69,9 +74,9 @@ export function AppHeader(): React.ReactNode {
           <DropdownMenuTrigger
             render={<Button variant="ghost" size="icon" className="rounded-full" aria-label="使用者選單" />}
           >
-            <UserAvatar user={currentUser} className="size-7" />
+            <UserAvatar user={user} className="size-7" />
           </DropdownMenuTrigger>
-          <UserMenuContent align="end" sideOffset={8} />
+          <UserMenuContent user={user} align="end" sideOffset={8} />
         </DropdownMenu>
       </div>
     </header>

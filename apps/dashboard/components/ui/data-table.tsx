@@ -23,9 +23,12 @@ import {
   RiArrowRightSLine,
   RiArrowUpDownLine,
   RiArrowUpLine,
+  RiRefreshLine,
+  RiSearchLine,
 } from '@remixicon/react'
 import { Button } from '@workspace/ui/components/button'
 import { Checkbox } from '@workspace/ui/components/checkbox'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@workspace/ui/components/input-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select'
 import {
   Table,
@@ -190,12 +193,16 @@ export function DataTableSelectCell<TData extends RowData>({
 
 interface DataTablePaginationProps<TData extends RowData> {
   table: DataTableInstance<TData>
-  pageSizeOptions: OptionItem<number>[]
+  pageSizeOptions?: OptionItem<number>[]
 }
 
 export function DataTablePagination<TData extends RowData>({
   table,
-  pageSizeOptions,
+  pageSizeOptions = [
+    { label: '10 筆／頁', value: 10 },
+    { label: '20 筆／頁', value: 20 },
+    { label: '50 筆／頁', value: 50 },
+  ],
 }: DataTablePaginationProps<TData>): React.ReactNode {
   const { pageIndex, pageSize } = table.state.pagination
   const pageCount = Math.max(table.getPageCount(), 1)
@@ -205,11 +212,16 @@ export function DataTablePagination<TData extends RowData>({
   return (
     <div className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
       <p>
-        已選擇
-        {' '}
-        <span className="font-medium text-foreground tabular-nums">{selectedCount}</span>
-        {' '}
-        項，共
+        {selectedCount > 0 && (
+          <>
+            已選擇
+            {' '}
+            <span className="font-medium text-foreground tabular-nums">{selectedCount}</span>
+            {' '}
+            項，
+          </>
+        )}
+        共
         {' '}
         <span className="font-medium text-foreground tabular-nums">{filteredCount}</span>
         {' '}
@@ -269,5 +281,92 @@ export function DataTablePagination<TData extends RowData>({
         </div>
       </div>
     </div>
+  )
+}
+
+interface DataTableFilterFormProps extends Omit<React.ComponentProps<'form'>, 'onReset'> {
+  onReset: () => void
+}
+
+export function DataTableFilterForm({
+  className,
+  children,
+  onReset,
+  ...props
+}: DataTableFilterFormProps): React.ReactNode {
+  return (
+    <form
+      role="search"
+      className={cn('grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-center', className)}
+      {...props}
+    >
+      {children}
+      <div className="flex gap-2">
+        <Button type="submit" className="flex-1 lg:flex-none">
+          <RiSearchLine data-icon="inline-start" />
+          查詢
+        </Button>
+        <Button type="button" variant="outline" className="flex-1 lg:flex-none" onClick={onReset}>
+          <RiRefreshLine data-icon="inline-start" />
+          重置
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+interface DataTableTextFilterProps extends Omit<React.ComponentProps<typeof InputGroupInput>, 'onChange'> {
+  label: string
+  icon: React.ReactNode
+  onValueChange: (value: string) => void
+}
+
+export function DataTableTextFilter({ label, icon, onValueChange, ...props }: DataTableTextFilterProps): React.ReactNode {
+  return (
+    <InputGroup className="lg:w-56">
+      <InputGroupAddon>{icon}</InputGroupAddon>
+      <InputGroupInput
+        aria-label={label}
+        placeholder={label}
+        onChange={event => onValueChange(event.target.value)}
+        {...props}
+      />
+    </InputGroup>
+  )
+}
+
+interface DataTableSelectFilterProps<TValue extends string> {
+  label: string
+  options: OptionItem<TValue>[]
+  value: TValue
+  onValueChange: (value: TValue) => void
+}
+
+export function DataTableSelectFilter<TValue extends string>({
+  label,
+  options,
+  value,
+  onValueChange,
+}: DataTableSelectFilterProps<TValue>): React.ReactNode {
+  return (
+    <Select
+      items={options}
+      value={value}
+      onValueChange={(next) => {
+        if (next !== null)
+          onValueChange(next)
+      }}
+    >
+      <SelectTrigger aria-label={label} className="w-full lg:w-36">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map(option => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }

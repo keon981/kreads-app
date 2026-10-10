@@ -21,7 +21,7 @@ import { Spinner } from '@workspace/ui/components/spinner'
 import { completeSignUpAction } from '@/app/(blank)/(auth)/sign-up/action'
 import { safeNext, signInPath } from '@/utils/navigation'
 
-import type { ActionState } from '@/types/action'
+import type { ActionState } from '@workspace/server/types/action'
 
 const initialState: ActionState = {
   message: '',

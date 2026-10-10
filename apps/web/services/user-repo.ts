@@ -4,7 +4,7 @@ import { HttpStatusCode } from '@/configs/constants'
 import { createOctokit } from '@/lib/octokit'
 import { isRequestError } from '@/utils/toolkit'
 
-import type { ActionState } from '@/types/action'
+import type { ActionState } from '@workspace/server/types/action'
 import type { UserRepo } from '@/types/user'
 
 import 'server-only'

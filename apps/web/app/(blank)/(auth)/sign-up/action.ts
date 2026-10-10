@@ -9,7 +9,7 @@ import { signUpPath } from '@/utils/navigation'
 import { getFormDataValue } from '@/utils/toolkit'
 import { isUserActive } from '@/utils/user'
 
-import type { ActionState } from '@/types/action'
+import type { ActionState } from '@workspace/server/types/action'
 
 export async function completeSignUpAction(
   _prevState: ActionState,

@@ -1,9 +1,10 @@
 import {
   RiComputerLine,
+  RiCoupon3Line,
   RiDashboard3Line,
-  RiKey2Line,
   RiMoonLine,
   RiSunLine,
+  RiTeamLine,
   RiUserSettingsLine,
 } from '@remixicon/react'
 
@@ -26,8 +27,14 @@ export const navGroups: NavGroup[] = [
   {
     label: '控制台',
     items: [
-      { title: '數據看板', href: paths.dashboard, icon: RiDashboard3Line },
-      { title: '令牌管理', href: paths.keys, icon: RiKey2Line },
+      { title: '儀表板', href: paths.dashboard, icon: RiDashboard3Line },
+    ],
+  },
+  {
+    label: '管理',
+    items: [
+      { title: '使用者管理', href: paths.users, icon: RiTeamLine },
+      { title: '邀請碼管理', href: paths.invites, icon: RiCoupon3Line },
     ],
   },
   {

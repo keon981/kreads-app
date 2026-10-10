@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 
+import { useTransition } from 'react'
+
 import { RiLogoutBoxRLine, RiPaletteLine, RiUserSettingsLine } from '@remixicon/react'
 import {
   DropdownMenuContent,
@@ -17,21 +19,21 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 import { useTheme } from 'next-themes'
 
-import { currentUser } from '@/__mocks__/user'
+import { signOutAction } from '@/app/server/actions/auth'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { themeOptions } from '@/configs/nav-config'
 import { paths } from '@/configs/path-config'
 
-import type { CurrentUser } from '@/types/user'
+import type { SessionUser } from '@/types/user'
 
 interface UserSummaryProps {
-  user: CurrentUser
+  user: Pick<SessionUser, 'name' | 'email'>
 }
 
 export function UserSummary({ user }: UserSummaryProps): React.ReactNode {
   return (
     <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
-      <span className="truncate font-medium">{user.displayName}</span>
+      <span className="truncate font-medium">{user.name}</span>
       <span className="truncate text-xs text-muted-foreground">{user.email}</span>
     </div>
   )
@@ -40,17 +42,24 @@ export function UserSummary({ user }: UserSummaryProps): React.ReactNode {
 interface UserMenuContentProps extends Pick<
   React.ComponentProps<typeof DropdownMenuContent>,
   'side' | 'align' | 'sideOffset'
-> {}
+> {
+  user: Pick<SessionUser, 'name' | 'email' | 'image'>
+}
 
-export function UserMenuContent(props: UserMenuContentProps): React.ReactNode {
+export function UserMenuContent({ user, ...props }: UserMenuContentProps): React.ReactNode {
   const { theme, setTheme } = useTheme()
+  const [isPending, startTransition] = useTransition()
+
+  const handleClick = () => {
+    startTransition(() => signOutAction())
+  }
 
   return (
     <DropdownMenuContent className="min-w-56" {...props}>
       <DropdownMenuGroup>
         <DropdownMenuLabel className="flex items-center gap-2 font-normal">
-          <UserAvatar user={currentUser} className="size-8" />
-          <UserSummary user={currentUser} />
+          <UserAvatar user={user} className="size-8" />
+          <UserSummary user={user} />
         </DropdownMenuLabel>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
@@ -77,7 +86,11 @@ export function UserMenuContent(props: UserMenuContentProps): React.ReactNode {
         </DropdownMenuSub>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
-      <DropdownMenuItem variant="destructive">
+      <DropdownMenuItem
+        variant="destructive"
+        disabled={isPending}
+        onClick={handleClick}
+      >
         <RiLogoutBoxRLine />
         登出
       </DropdownMenuItem>

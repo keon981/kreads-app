@@ -11,8 +11,9 @@ import { createIssueReaction, deleteIssueReaction, fetchIssueReactions } from '@
 import { catchParseWithUserRepoError, fetchUserRepo, parseWithUserRepo } from '@/services/user-repo'
 import { getFormDataValue } from '@/utils/toolkit'
 
+import type { ActionState } from '@workspace/server/types/action'
 import type { ReactionSubject } from '@/services/api/reactions'
-import type { ActionState, IssueFormState, IssueTarget } from '@/types/action'
+import type { IssueFormState, IssueTarget } from '@/types/action'
 
 const PostFormSchema = z.object({
   content: z.string().trim().min(1, '請輸入內容'),
