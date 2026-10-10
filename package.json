@@ -4,8 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "vp run -F web dev",
-    "dev:dashboard": "vp run -F dashboard dev",
+    "dev": "vp run -F './apps/*' --parallel --log labeled dev",
+    "dev:web": "vp run web#dev",
+    "dev:dashboard": "vp run dashboard#dev",
     "storybook": "vp run -F @workspace/ui storybook",
     "build": "vp run -r build",
     "lint": "vp run -r lint",

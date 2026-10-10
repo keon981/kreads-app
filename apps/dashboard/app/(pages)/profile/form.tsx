@@ -6,7 +6,6 @@ import { Button } from '@workspace/ui/components/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@workspace/ui/components/card'
 import {
   Field,
-  FieldContent,
   FieldDescription,
   FieldGroup,
   FieldLabel,
@@ -15,13 +14,28 @@ import {
   FieldSet,
 } from '@workspace/ui/components/field'
 import { Input } from '@workspace/ui/components/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select'
-import { Switch } from '@workspace/ui/components/switch'
 import { toast } from '@workspace/ui/components/toast'
 
-import { languageOptions, notifyMethodOptions } from '@/__mocks__/profile'
+import { SelectField, SwitchField } from '@/components/ui/field'
 
-import type { LanguageCode, NotifyMethod, ProfileSettings } from '@/types/profile'
+import type { OptionItem } from '@/types/option'
+import type { LanguageCode, NotifyMethod, ProfileSettings } from './types'
+
+const languageOptions: OptionItem<LanguageCode>[] = [
+  { value: 'zh-TW', label: '繁體中文' },
+  { value: 'en', label: 'English' },
+  { value: 'ja', label: '日本語' },
+]
+
+const notifyMethodOptions: OptionItem<NotifyMethod>[] = [
+  { value: 'email', label: '電子郵件' },
+  { value: 'webhook', label: 'Webhook' },
+]
+
+const switchFields: { key: 'shouldReceiveAnnouncements' | 'shouldNotifyLowQuota', label: string, description: string }[] = [
+  { key: 'shouldReceiveAnnouncements', label: '接收系統公告', description: '新功能上線、維護排程等公告。' },
+  { key: 'shouldNotifyLowQuota', label: '額度不足通知', description: '餘額低於預警門檻時立即通知。' },
+]
 
 interface ProfileSettingsFormProps {
   defaultSettings: ProfileSettings
@@ -33,18 +47,6 @@ export function ProfileSettingsForm({ defaultSettings }: ProfileSettingsFormProp
 
   function setSettingsField<K extends keyof ProfileSettings>(key: K, value: ProfileSettings[K]): void {
     setSettings(prev => ({ ...prev, [key]: value }))
-  }
-
-  function handleLanguageChange(value: LanguageCode | null): void {
-    if (value) {
-      setSettingsField('language', value)
-    }
-  }
-
-  function handleNotifyMethodChange(value: NotifyMethod | null): void {
-    if (value) {
-      setSettingsField('notifyMethod', value)
-    }
   }
 
   function handleThresholdChange(event: React.ChangeEvent<HTMLInputElement>): void {
@@ -109,21 +111,13 @@ export function ProfileSettingsForm({ defaultSettings }: ProfileSettingsFormProp
                     </Button>
                   </div>
                 </Field>
-                <Field>
-                  <FieldLabel htmlFor="profile-language">語言</FieldLabel>
-                  <Select items={languageOptions} value={settings.language} onValueChange={handleLanguageChange}>
-                    <SelectTrigger id="profile-language" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {languageOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
+                <SelectField
+                  id="profile-language"
+                  label="語言"
+                  options={languageOptions}
+                  value={settings.language}
+                  onValueChange={value => setSettingsField('language', value)}
+                />
               </FieldGroup>
             </FieldSet>
             <FieldSeparator />
@@ -131,21 +125,13 @@ export function ProfileSettingsForm({ defaultSettings }: ProfileSettingsFormProp
               <FieldLegend>通知設定</FieldLegend>
               <FieldDescription>選擇接收通知的方式，以及何時提醒你額度不足。</FieldDescription>
               <FieldGroup className="grid gap-5 sm:grid-cols-2">
-                <Field>
-                  <FieldLabel htmlFor="profile-notify-method">通知方式</FieldLabel>
-                  <Select items={notifyMethodOptions} value={settings.notifyMethod} onValueChange={handleNotifyMethodChange}>
-                    <SelectTrigger id="profile-notify-method" className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {notifyMethodOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
+                <SelectField
+                  id="profile-notify-method"
+                  label="通知方式"
+                  options={notifyMethodOptions}
+                  value={settings.notifyMethod}
+                  onValueChange={value => setSettingsField('notifyMethod', value)}
+                />
                 <Field>
                   <FieldLabel htmlFor="profile-quota-threshold">額度預警門檻（USD）</FieldLabel>
                   <Input
@@ -161,28 +147,17 @@ export function ProfileSettingsForm({ defaultSettings }: ProfileSettingsFormProp
                 </Field>
               </FieldGroup>
               <FieldGroup className="gap-3">
-                <Field orientation="horizontal" className="rounded-lg border p-3">
-                  <FieldContent>
-                    <FieldLabel htmlFor="profile-receive-announcements">接收系統公告</FieldLabel>
-                    <FieldDescription>新功能上線、維護排程等公告。</FieldDescription>
-                  </FieldContent>
-                  <Switch
-                    id="profile-receive-announcements"
-                    checked={settings.receiveAnnouncements}
-                    onCheckedChange={checked => setSettingsField('receiveAnnouncements', checked)}
+                {switchFields.map(({ key, label, description }) => (
+                  <SwitchField
+                    key={key}
+                    id={`profile-${key}`}
+                    label={label}
+                    description={description}
+                    checked={settings[key]}
+                    onCheckedChange={checked => setSettingsField(key, checked)}
+                    className="rounded-lg border p-3"
                   />
-                </Field>
-                <Field orientation="horizontal" className="rounded-lg border p-3">
-                  <FieldContent>
-                    <FieldLabel htmlFor="profile-notify-low-quota">額度不足通知</FieldLabel>
-                    <FieldDescription>餘額低於預警門檻時立即通知。</FieldDescription>
-                  </FieldContent>
-                  <Switch
-                    id="profile-notify-low-quota"
-                    checked={settings.notifyLowQuota}
-                    onCheckedChange={checked => setSettingsField('notifyLowQuota', checked)}
-                  />
-                </Field>
+                ))}
               </FieldGroup>
             </FieldSet>
           </FieldGroup>

@@ -7,33 +7,33 @@ import {
   RiUserSettingsLine,
 } from '@remixicon/react'
 
-import { PATHS } from '@/configs/constants'
+import { paths } from '@/configs/path-config'
 
 import type { RemixiconComponentType } from '@remixicon/react'
 
 export interface NavItem {
-  readonly title: string
-  readonly href: string
-  readonly icon: RemixiconComponentType
+  title: string
+  href: string
+  icon: RemixiconComponentType
 }
 
 export interface NavGroup {
-  readonly label: string
-  readonly items: readonly NavItem[]
+  label: string
+  items: NavItem[]
 }
 
-export const navGroups: readonly NavGroup[] = [
+export const navGroups: NavGroup[] = [
   {
     label: '控制台',
     items: [
-      { title: '數據看板', href: PATHS.dashboard, icon: RiDashboard3Line },
-      { title: '令牌管理', href: PATHS.keys, icon: RiKey2Line },
+      { title: '數據看板', href: paths.dashboard, icon: RiDashboard3Line },
+      { title: '令牌管理', href: paths.keys, icon: RiKey2Line },
     ],
   },
   {
     label: '個人管理',
     items: [
-      { title: '個人設定', href: PATHS.profile, icon: RiUserSettingsLine },
+      { title: '個人設定', href: paths.profile, icon: RiUserSettingsLine },
     ],
   },
 ]
@@ -42,7 +42,7 @@ export const themeOptions = [
   { value: 'light', label: '淺色模式', icon: RiSunLine },
   { value: 'dark', label: '深色模式', icon: RiMoonLine },
   { value: 'system', label: '跟隨系統', icon: RiComputerLine },
-] as const
+]
 
 export function getActiveNavItem(pathname: string): NavItem | undefined {
   return navGroups

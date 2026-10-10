@@ -1,7 +1,7 @@
 import { cookies, headers } from 'next/headers'
 import { userAgent } from 'next/server'
 
-import { VIEWPORT_COOKIE } from '@/configs/constants'
+import { VIEWPORT_COOKIE } from '@workspace/ui/lib/constants'
 
 import 'server-only'
 

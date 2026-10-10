@@ -22,12 +22,14 @@ import {
 } from '@workspace/ui/components/sidebar'
 
 import { currentUser } from '@/__mocks__/user'
-import { UserAvatar, UserMenuContent, UserSummary } from '@/components/layout/user-menu'
-import { APP_TITLE, PATHS } from '@/configs/constants'
+import { UserMenuContent, UserSummary } from '@/components/layout/user-menu'
+import { UserAvatar } from '@/components/ui/user-avatar'
 import { getActiveNavItem, navGroups } from '@/configs/nav-config'
+import { paths } from '@/configs/path-config'
+import { env } from '@/lib/env'
 
 // packages/ui sidebar is tuned for apps/web (centered icon rail); restore a left-aligned list here
-const MENU_BUTTON_CLASS = 'justify-start px-2 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:*:not-first:hidden'
+const menuButtonClassName = 'justify-start px-2 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:*:not-first:hidden'
 
 interface AppSidebarBodyProps {
   isMobile?: boolean
@@ -49,13 +51,13 @@ function AppSidebarBody({ isMobile = false }: AppSidebarBodyProps): React.ReactN
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              className={MENU_BUTTON_CLASS}
-              render={<Link href={PATHS.dashboard} onClick={handleNavigate} />}
+              className={menuButtonClassName}
+              render={<Link href={paths.dashboard} onClick={handleNavigate} />}
             >
               <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <RiCommandLine className="size-4!" />
               </div>
-              <span className="font-heading text-base font-semibold">{APP_TITLE}</span>
+              <span className="font-heading text-base font-semibold">{env.NEXT_PUBLIC_APP_TITLE}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -72,7 +74,7 @@ function AppSidebarBody({ isMobile = false }: AppSidebarBodyProps): React.ReactN
                     <SidebarMenuButton
                       tooltip={title}
                       isActive={activeItem?.href === href}
-                      className={`${MENU_BUTTON_CLASS} data-active:bg-sidebar-accent`}
+                      className={`${menuButtonClassName} data-active:bg-sidebar-accent`}
                       render={<Link href={href} onClick={handleNavigate} />}
                     >
                       <Icon />
@@ -94,7 +96,7 @@ function AppSidebarBody({ isMobile = false }: AppSidebarBodyProps): React.ReactN
                 render={(
                   <SidebarMenuButton
                     size="lg"
-                    className={`${MENU_BUTTON_CLASS} data-popup-open:bg-sidebar-accent`}
+                    className={`${menuButtonClassName} data-popup-open:bg-sidebar-accent`}
                   />
                 )}
               >
@@ -120,7 +122,7 @@ export function AppSidebar(): React.ReactNode {
       <Sheet open={openMobile} onOpenChange={setOpenMobile}>
         <SheetContent side="left" showCloseButton={false} className="w-(--sidebar-width) gap-0 bg-sidebar p-0">
           <SheetHeader className="sr-only">
-            <SheetTitle>{APP_TITLE}</SheetTitle>
+            <SheetTitle>{env.NEXT_PUBLIC_APP_TITLE}</SheetTitle>
             <SheetDescription>主選單</SheetDescription>
           </SheetHeader>
           <div className="flex h-full flex-col">

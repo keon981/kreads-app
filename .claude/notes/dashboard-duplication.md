@@ -6,12 +6,11 @@
 
 | dashboard | web | 差異 | 建議 |
 | --- | --- | --- | --- |
-| `components/theme-provider.tsx` | `contexts/theme-provider.tsx` | 內容相同（含 `D` 鍵切換主題）；位置不同，dashboard 照 project-structure 放 `components/` | 抽到 `packages/ui`（需加 `next-themes` 依賴），或兩邊統一放 `components/` |
+| `components/theme-provider.tsx` | `contexts/theme-provider.tsx` | 邏輯相同（含 `D` 鍵切換主題）；位置不同，dashboard 照 project-structure 放 `components/`。dashboard 版另補了回傳型別，`onKeyDown` 改名 `handleKeyDown`（code-standards） | 抽到 `packages/ui`（需加 `next-themes` 依賴），或兩邊統一放 `components/` |
 | `app/server/device.ts` | `app/server/device.ts` | 內容相同（讀 `viewport` cookie＋UA 判斷初始是否為手機） | 抽成共用 server helper（`packages/ui` 不宜放 server-only，可考慮新 package 或 `@workspace/ui/lib/server/*`） |
 | `app/layout.tsx` 的字型與 `DeviceRoot` | `app/layout.tsx` | 字型設定與 `DeviceRoot` 相同；dashboard 沒有 auth 與 SignInDialog | 字型可抽成共用設定 |
 | `configs/constants.ts` 的 `VIEWPORT_COOKIE` re-export | `configs/constants.ts` | 同樣從 `@workspace/ui/lib/constants` re-export | 可直接 import ui，不必 re-export |
-
-| `configs/nav-config.tsx` 的 `themeOptions` | `configs/nav-config.tsx` 的 `themeOptions` | 內容相同（淺色／深色／跟隨系統） | 可抽成共用常數 |
+| `configs/nav-config.tsx` 的 `THEME_OPTIONS` | `configs/nav-config.tsx` 的 `themeOptions` | 內容相同（淺色／深色／跟隨系統）；dashboard 照 code-standards 改成 UPPER_SNAKE_CASE | 可抽成共用常數 |
 | `components/layout/user-menu.tsx` 的外觀切換子選單 | `configs/nav-config.tsx` 的 settings dropdown | 同樣是 `DropdownMenuRadioGroup` 切主題 | 主題切換子選單可抽成共用元件 |
 
 ## 對共用元件的覆寫（沒有改 packages/ui）

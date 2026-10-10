@@ -3,7 +3,6 @@
 import Link from 'next/link'
 
 import { RiLogoutBoxRLine, RiPaletteLine, RiUserSettingsLine } from '@remixicon/react'
-import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar'
 import {
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -19,24 +18,11 @@ import {
 import { useTheme } from 'next-themes'
 
 import { currentUser } from '@/__mocks__/user'
-import { PATHS } from '@/configs/constants'
+import { UserAvatar } from '@/components/ui/user-avatar'
 import { themeOptions } from '@/configs/nav-config'
+import { paths } from '@/configs/path-config'
 
 import type { CurrentUser } from '@/types/user'
-
-interface UserAvatarProps {
-  user: CurrentUser
-  className?: string
-}
-
-export function UserAvatar({ user, className }: UserAvatarProps): React.ReactNode {
-  return (
-    <Avatar className={className}>
-      <AvatarImage src={user.avatarUrl} alt={user.displayName} />
-      <AvatarFallback>{user.displayName.slice(0, 1).toUpperCase()}</AvatarFallback>
-    </Avatar>
-  )
-}
 
 interface UserSummaryProps {
   user: CurrentUser
@@ -69,7 +55,7 @@ export function UserMenuContent(props: UserMenuContentProps): React.ReactNode {
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuItem render={<Link href={PATHS.profile} />}>
+        <DropdownMenuItem render={<Link href={paths.profile} />}>
           <RiUserSettingsLine />
           個人設定
         </DropdownMenuItem>

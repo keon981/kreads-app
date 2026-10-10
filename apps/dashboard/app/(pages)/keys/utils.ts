@@ -1,16 +1,25 @@
-import { DEFAULT_TOKEN_FORM_VALUES } from '@/views/apps/keys/token-config'
+import type { Token, TokenFormValues, TokenStatus } from './types'
 
-import type { Token, TokenFormValues } from '@/types/keys'
+export const tokenStatusLabels: Record<TokenStatus, string> = {
+  enabled: '啟用',
+  disabled: '停用',
+  expired: '已過期',
+  exhausted: '已耗盡',
+}
 
-const quotaFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-})
+const defaultTokenFormValues: TokenFormValues = {
+  name: '',
+  totalQuota: 10,
+  isUnlimited: false,
+  expiresAt: '',
+  isNeverExpires: true,
+  group: 'default',
+  models: '',
+  allowIps: '',
+}
 
 export function formatQuota(value: number): string {
-  return quotaFormatter.format(value)
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
 }
 
 export function getMaskedKey(key: string): string {
@@ -34,12 +43,12 @@ function splitLines(value: string): string[] {
 
 export function getTokenFormValues(token: Token | null): TokenFormValues {
   if (!token) {
-    return DEFAULT_TOKEN_FORM_VALUES
+    return defaultTokenFormValues
   }
 
   return {
     name: token.name,
-    totalQuota: token.totalQuota ?? DEFAULT_TOKEN_FORM_VALUES.totalQuota,
+    totalQuota: token.totalQuota ?? defaultTokenFormValues.totalQuota,
     isUnlimited: token.totalQuota === null,
     expiresAt: token.expiresAt?.slice(0, 10) ?? '',
     isNeverExpires: token.expiresAt === null,
@@ -50,9 +59,9 @@ export function getTokenFormValues(token: Token | null): TokenFormValues {
 }
 
 interface TokenDraft {
-  readonly id: string
-  readonly key: string
-  readonly createdAt: string
+  id: string
+  key: string
+  createdAt: string
 }
 
 export function getTokenFromFormValues(values: TokenFormValues, base: Token | TokenDraft): Token {

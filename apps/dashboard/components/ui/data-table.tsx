@@ -37,11 +37,11 @@ import {
 } from '@workspace/ui/components/table'
 import { cn } from '@workspace/ui/lib/utils'
 
-import type { OptionItem } from '@/types/keys'
+import type { OptionItem } from '@/types/option'
 
 interface DataTableColumnMeta {
-  readonly headerClassName?: string
-  readonly cellClassName?: string
+  headerClassName?: string
+  cellClassName?: string
 }
 
 export const dataTableFeatures = tableFeatures({
@@ -58,11 +58,6 @@ export const dataTableFeatures = tableFeatures({
 })
 
 export type DataTableFeatures = typeof dataTableFeatures
-
-const SORT_ICONS = {
-  asc: RiArrowUpLine,
-  desc: RiArrowDownLine,
-} as const
 
 export type DataTableInstance<TData extends RowData> = ReactTable<DataTableFeatures, TData>
 
@@ -138,7 +133,11 @@ export function DataTableColumnHeader<TData extends RowData, TValue>({
   }
 
   const sortDirection = column.getIsSorted()
-  const SortIcon = sortDirection ? SORT_ICONS[sortDirection] : RiArrowUpDownLine
+  let SortIcon = RiArrowUpDownLine
+  if (sortDirection === 'asc')
+    SortIcon = RiArrowUpLine
+  if (sortDirection === 'desc')
+    SortIcon = RiArrowDownLine
 
   return (
     <Button
@@ -191,7 +190,7 @@ export function DataTableSelectCell<TData extends RowData>({
 
 interface DataTablePaginationProps<TData extends RowData> {
   table: DataTableInstance<TData>
-  pageSizeOptions: readonly OptionItem<number>[]
+  pageSizeOptions: OptionItem<number>[]
 }
 
 export function DataTablePagination<TData extends RowData>({

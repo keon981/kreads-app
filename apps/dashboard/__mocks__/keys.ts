@@ -1,11 +1,12 @@
-import type { OptionItem, Token, TokenStatus } from '@/types/keys'
+import type { Token, TokenStatus } from '@/app/(pages)/keys/types'
+import type { OptionItem } from '@/types/option'
 
-export const tokenGroups: readonly OptionItem[] = [
+export const tokenGroups: OptionItem[] = [
   { label: '預設分組', value: 'default' },
   { label: 'VIP', value: 'vip' },
   { label: 'SVIP', value: 'svip' },
   { label: '內部測試', value: 'internal' },
-] as const
+]
 
 export const tokenModels = [
   'gpt-4o',
@@ -13,19 +14,19 @@ export const tokenModels = [
   'claude-sonnet-4',
   'gemini-2.5-pro',
   'deepseek-v3',
-] as const
+]
 
 interface TokenSeed {
-  readonly name: string
-  readonly status: TokenStatus
-  readonly totalQuota: number | null
-  readonly usedRatio: number
-  readonly group: string
-  readonly createdAt: string
-  readonly expiresAt: string | null
+  name: string
+  status: TokenStatus
+  totalQuota: number | null
+  usedRatio: number
+  group: string
+  createdAt: string
+  expiresAt: string | null
 }
 
-const tokenSeeds: readonly TokenSeed[] = [
+const tokenSeeds: TokenSeed[] = [
   { name: '正式環境主令牌', status: 'enabled', totalQuota: 500, usedRatio: 0.42, group: 'svip', createdAt: '2026-01-05T02:14:00.000Z', expiresAt: null },
   { name: '測試環境', status: 'enabled', totalQuota: 50, usedRatio: 0.18, group: 'internal', createdAt: '2026-01-12T08:30:00.000Z', expiresAt: '2026-12-31T15:59:59.000Z' },
   { name: '客服機器人', status: 'enabled', totalQuota: null, usedRatio: 0, group: 'vip', createdAt: '2026-01-20T03:45:00.000Z', expiresAt: null },
@@ -58,23 +59,21 @@ const tokenSeeds: readonly TokenSeed[] = [
   { name: '新專案 Alpha', status: 'enabled', totalQuota: 100, usedRatio: 0.03, group: 'default', createdAt: '2026-09-28T09:20:00.000Z', expiresAt: null },
 ]
 
-const KEY_CHARSET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-const KEY_LENGTH = 48
-
 // Deterministic pseudo-random key so server and client renders match
 function getMockKey(seed: number): string {
   let state = seed * 9301 + 49297
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   let key = 'sk-'
 
-  for (let index = 0; index < KEY_LENGTH; index += 1) {
+  for (let index = 0; index < 48; index += 1) {
     state = (state * 9301 + 49297) % 233280
-    key += KEY_CHARSET[state % KEY_CHARSET.length]
+    key += charset[state % charset.length]
   }
 
   return key
 }
 
-function getMockModels(index: number): readonly string[] {
+function getMockModels(index: number): string[] {
   if (index % 3 === 0) {
     return []
   }
@@ -82,7 +81,7 @@ function getMockModels(index: number): readonly string[] {
   return tokenModels.filter((_, modelIndex) => (modelIndex + index) % 2 === 0)
 }
 
-export const tokens: readonly Token[] = tokenSeeds.map((seed, index) => ({
+export const tokens: Token[] = tokenSeeds.map((seed, index) => ({
   id: `token-${String(index + 1).padStart(3, '0')}`,
   name: seed.name,
   key: getMockKey(index + 1),

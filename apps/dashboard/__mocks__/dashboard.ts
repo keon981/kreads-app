@@ -19,9 +19,9 @@ import type {
   ServiceHealth,
   ServiceStatus,
   StatGroup,
-} from '@/types/dashboard'
+} from '@/app/(pages)/dashboard/types'
 
-export const statGroups: readonly StatGroup[] = [
+export const statGroups: StatGroup[] = [
   {
     id: 'account',
     title: '帳戶數據',
@@ -110,16 +110,16 @@ export const statGroups: readonly StatGroup[] = [
       },
     ],
   },
-] as const
+]
 
-export const models: readonly ModelInfo[] = [
+export const models: ModelInfo[] = [
   { key: 'gpt4o', name: 'gpt-4o', color: 'var(--chart-2)' },
   { key: 'claudeSonnet', name: 'claude-sonnet', color: 'var(--chart-4)' },
   { key: 'geminiPro', name: 'gemini-pro', color: 'var(--chart-1)' },
   { key: 'deepseekChat', name: 'deepseek-chat', color: 'var(--chart-3)' },
-] as const
+]
 
-export const dailyModelConsumption: readonly DailyModelConsumption[] = [
+export const dailyModelConsumption: DailyModelConsumption[] = [
   { date: '10/04', gpt4o: 4.2, claudeSonnet: 3.1, geminiPro: 1.4, deepseekChat: 1.1 },
   { date: '10/05', gpt4o: 4.8, claudeSonnet: 3.6, geminiPro: 1.6, deepseekChat: 1.2 },
   { date: '10/06', gpt4o: 4.1, claudeSonnet: 3.9, geminiPro: 1.5, deepseekChat: 1.1 },
@@ -127,22 +127,22 @@ export const dailyModelConsumption: readonly DailyModelConsumption[] = [
   { date: '10/08', gpt4o: 5.6, claudeSonnet: 4.4, geminiPro: 1.9, deepseekChat: 1.5 },
   { date: '10/09', gpt4o: 4.9, claudeSonnet: 4.0, geminiPro: 1.8, deepseekChat: 1.4 },
   { date: '10/10', gpt4o: 6.4, claudeSonnet: 5.1, geminiPro: 2.6, deepseekChat: 2.1 },
-] as const
+]
 
-export const modelCallCounts: readonly ModelCallCount[] = [
+export const modelCallCounts: ModelCallCount[] = [
   { model: 'gpt4o', calls: 48210, fill: 'var(--color-gpt4o)' },
   { model: 'claudeSonnet', calls: 39580, fill: 'var(--color-claudeSonnet)' },
   { model: 'geminiPro', calls: 22340, fill: 'var(--color-geminiPro)' },
   { model: 'deepseekChat', calls: 18320, fill: 'var(--color-deepseekChat)' },
-] as const
+]
 
-export const apiEndpoints: readonly ApiEndpoint[] = [
+export const apiEndpoints: ApiEndpoint[] = [
   { id: 'primary', name: '主要線路', url: 'https://api.kreads.dev/v1', latencyMs: 42, latencyLevel: 'fast' },
   { id: 'asia', name: '亞洲加速', url: 'https://asia.api.kreads.dev/v1', latencyMs: 118, latencyLevel: 'normal' },
   { id: 'backup', name: '備用線路', url: 'https://backup.api.kreads.dev/v1', latencyMs: 286, latencyLevel: 'slow' },
-] as const
+]
 
-export const announcements: readonly Announcement[] = [
+export const announcements: Announcement[] = [
   {
     id: 'claude-sonnet',
     title: '新增 claude-sonnet 模型',
@@ -164,9 +164,9 @@ export const announcements: readonly Announcement[] = [
     date: '2026-10-01',
     type: 'info',
   },
-] as const
+]
 
-export const faqItems: readonly FaqItem[] = [
+export const faqItems: FaqItem[] = [
   {
     id: 'balance',
     question: '餘額不足時會發生什麼事？',
@@ -187,9 +187,9 @@ export const faqItems: readonly FaqItem[] = [
     question: '請求被限流怎麼辦？',
     answer: '可在令牌管理中調整單一令牌的 RPM 上限，或聯繫管理員提高分組配額。',
   },
-] as const
+]
 
-function getServiceHistory(degradedDays: readonly number[], outageDays: readonly number[] = []): readonly ServiceHealth[] {
+function getServiceHistory(degradedDays: number[], outageDays: number[] = []): ServiceHealth[] {
   return Array.from({ length: 30 }, (_, index): ServiceHealth => {
     if (outageDays.includes(index))
       return 'outage'
@@ -199,9 +199,9 @@ function getServiceHistory(degradedDays: readonly number[], outageDays: readonly
   })
 }
 
-export const serviceStatuses: readonly ServiceStatus[] = [
+export const serviceStatuses: ServiceStatus[] = [
   { id: 'api', name: 'API 閘道', status: 'operational', uptime: '99.98%', history: getServiceHistory([12]) },
   { id: 'openai', name: 'OpenAI 上游', status: 'operational', uptime: '99.91%', history: getServiceHistory([4, 21]) },
   { id: 'anthropic', name: 'Anthropic 上游', status: 'degraded', uptime: '99.42%', history: getServiceHistory([17, 28, 29], [9]) },
   { id: 'google', name: 'Google 上游', status: 'operational', uptime: '100%', history: getServiceHistory([]) },
-] as const
+]

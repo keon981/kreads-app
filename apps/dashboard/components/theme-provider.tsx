@@ -7,7 +7,7 @@ import { ThemeProvider as NextThemesProvider, useTheme } from 'next-themes'
 function ThemeProvider({
   children,
   ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
+}: React.ComponentProps<typeof NextThemesProvider>): React.ReactNode {
   return (
     <NextThemesProvider
       attribute="class"
@@ -22,7 +22,7 @@ function ThemeProvider({
   )
 }
 
-function isTypingTarget(target: EventTarget | null) {
+function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) {
     return false
   }
@@ -35,11 +35,11 @@ function isTypingTarget(target: EventTarget | null) {
   )
 }
 
-function ThemeHotkey() {
+function ThemeHotkey(): null {
   const { resolvedTheme, setTheme } = useTheme()
 
   React.useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
+    function handleKeyDown(event: KeyboardEvent): void {
       if (event.defaultPrevented || event.repeat) {
         return
       }
@@ -59,10 +59,10 @@ function ThemeHotkey() {
       setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
     }
 
-    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keydown', handleKeyDown)
     }
   }, [resolvedTheme, setTheme])
 

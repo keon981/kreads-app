@@ -22,7 +22,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 | Workspace | 套件名稱 | 內容 |
 | --- | --- | --- |
-| `apps/web` | `web` | 主站（Next.js） |
+| `apps/web` | `web` | 主站（Next.js，port 3000） |
+| `apps/dashboard` | `dashboard` | 控制台（Next.js，port 3001），版面參考 New API |
 | `packages/ui` | `@workspace/ui` | shadcn 元件、通用 hooks、`cn`（re-export 自 shadcn 的 `cn` 套件）、`formatDateTime`、UI 常數、`globals.css`；Storybook 設定在 `.storybook/`，stories 放在 `stories/`（不放進 `src/`） |
 | `packages/db` | `@workspace/db` | Drizzle schema、client、migrations、DB 腳本 |
 | `packages/eslint-config` | `@workspace/eslint-config` | antfu 共用設定 |
@@ -30,13 +31,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - 套件：`vp install`；加到指定 workspace：`vp add <pkg> --filter <套件名稱>`
 - 根目錄 scripts 一律 `vp run <script>`（見根目錄 `package.json`）：
-  - `dev`：只跑 `web`
+  - `dev`：同時跑 `apps/*` 底下所有 App（`--parallel`，輸出前綴 `[套件#dev]`）
+  - `dev:<套件名稱>`：只跑單一 App，例如 `dev:web`、`dev:dashboard`；新增 App 時一併加上
   - `storybook`：在 `@workspace/ui` 啟動 Storybook（http://localhost:6006）
   - `build`、`lint`、`lint:fix`、`typecheck`：跑所有 workspace
   - `drizzle:generate`、`drizzle:migrate`：在 `@workspace/db` 執行，需要 `packages/db/.env` 的 `DATABASE_URL`
-- 只跑單一 workspace：`vp run -F <套件名稱> <script>`，例如 `vp run -F web build`
+- 只跑單一 workspace：`vp run <套件名稱>#<script>`（或 `vp run -F <套件名稱> <script>`），例如 `vp run web#build`
 - 各 App 的 `build` script 必須是原生指令（`next build`），不能寫成 `vp …`：Vercel 只會在 Root Directory 執行 App 的 script，而且沒有 `vp`
-- 改 `packages/ui` 時：`vp run dev` 看主站實際畫面，`vp run storybook` 看單一元件的各種變體
+- 改 `packages/ui` 時：`vp run dev` 看兩個 App 的實際畫面，`vp run storybook` 看單一元件的各種變體
 - shadcn：在 `apps/web` 執行 `vp dlx shadcn@latest add <元件>`（`apps/web` 不裝 `shadcn`），元件會裝到 `packages/ui/src/components`；不依賴主站的元件、hooks、工具函式放 `packages/ui`，業務相關的（例如 `issue-item`、`use-auth-guard`）留在 `apps/web`
 
 ## Review Checklist

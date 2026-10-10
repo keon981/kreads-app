@@ -4,39 +4,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { ChartContainer } from '@workspace/ui/components/chart'
 import { Area, AreaChart } from 'recharts'
 
-import type { RemixiconComponentType } from '@remixicon/react'
-import type { ChartConfig } from '@workspace/ui/components/chart'
-
-export interface StatTrendPoint {
-  readonly value: number
-}
+import type { StatTrendPoint } from '@/types/stat'
 
 interface StatCardProps {
   label: string
   value: string
   description?: string
-  icon?: RemixiconComponentType
-  trend?: readonly StatTrendPoint[]
+  icon?: React.ReactNode
+  trend?: StatTrendPoint[]
   className?: string
 }
-
-const trendChartConfig = {
-  value: { label: 'Value', color: 'var(--chart-2)' },
-} satisfies ChartConfig
 
 export function StatCard({
   label,
   value,
   description,
-  icon: Icon,
+  icon,
   trend,
   className,
 }: StatCardProps): React.ReactNode {
   return (
     <Card size="sm" className={className}>
       <CardHeader>
-        <CardDescription className="flex items-center gap-2">
-          {Icon && <Icon className="size-4" />}
+        <CardDescription className="flex items-center gap-2 [&_svg]:size-4">
+          {icon}
           {label}
         </CardDescription>
       </CardHeader>
@@ -48,8 +39,11 @@ export function StatCard({
           )}
         </div>
         {trend && trend.length > 0 && (
-          <ChartContainer config={trendChartConfig} className="aspect-auto h-10 w-24 shrink-0">
-            <AreaChart data={[...trend]} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
+          <ChartContainer
+            config={{ value: { label: 'Value', color: 'var(--chart-2)' } }}
+            className="aspect-auto h-10 w-24 shrink-0"
+          >
+            <AreaChart data={trend} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
               <Area
                 dataKey="value"
                 type="monotone"

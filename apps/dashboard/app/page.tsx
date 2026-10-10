@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 
-import { PATHS } from '@/configs/constants'
+import { paths } from '@/configs/path-config'
 
 export default function Home(): never {
-  redirect(PATHS.dashboard)
+  redirect(paths.dashboard)
 }

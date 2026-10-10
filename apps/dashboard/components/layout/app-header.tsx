@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 
-import { RiSearchLine } from '@remixicon/react'
+import { RiMoonLine, RiSearchLine, RiSunLine } from '@remixicon/react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,14 +15,16 @@ import { DropdownMenu, DropdownMenuTrigger } from '@workspace/ui/components/drop
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@workspace/ui/components/input-group'
 import { Separator } from '@workspace/ui/components/separator'
 import { SidebarTrigger } from '@workspace/ui/components/sidebar'
+import { useTheme } from 'next-themes'
 
 import { currentUser } from '@/__mocks__/user'
-import { ThemeSwitch } from '@/components/layout/theme-switch'
-import { UserAvatar, UserMenuContent } from '@/components/layout/user-menu'
+import { UserMenuContent } from '@/components/layout/user-menu'
+import { UserAvatar } from '@/components/ui/user-avatar'
 import { getActiveNavItem, navGroups } from '@/configs/nav-config'
 
 export function AppHeader(): React.ReactNode {
   const pathname = usePathname()
+  const { resolvedTheme, setTheme } = useTheme()
   const activeItem = getActiveNavItem(pathname)
   const activeGroup = navGroups.find(group => group.items.some(item => item.href === activeItem?.href))
 
@@ -54,7 +56,15 @@ export function AppHeader(): React.ReactNode {
           </InputGroupAddon>
           <InputGroupInput placeholder="搜尋…" aria-label="搜尋" />
         </InputGroup>
-        <ThemeSwitch />
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="切換主題"
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+        >
+          <RiSunLine className="dark:hidden" />
+          <RiMoonLine className="hidden dark:block" />
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={<Button variant="ghost" size="icon" className="rounded-full" aria-label="使用者選單" />}

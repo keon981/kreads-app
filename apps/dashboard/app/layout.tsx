@@ -9,7 +9,7 @@ import { cn } from '@workspace/ui/lib/utils'
 
 import { getInitialIsMobile } from '@/app/server/device'
 import { Providers } from '@/components/providers'
-import { APP_TITLE } from '@/configs/constants'
+import { env } from '@/lib/env'
 
 import '@workspace/ui/globals.css'
 
@@ -23,14 +23,14 @@ const fontMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: APP_TITLE,
+  title: env.NEXT_PUBLIC_APP_TITLE,
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>): React.ReactNode {
+}): React.ReactNode {
   return (
     <html
       lang="zh-Hant"

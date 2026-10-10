@@ -7,4 +7,4 @@ export const currentUser: CurrentUser = {
   email: 'keon@example.com',
   role: '管理員',
   group: 'default',
-} as const
+}
