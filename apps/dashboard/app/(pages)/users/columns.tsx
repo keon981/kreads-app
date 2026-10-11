@@ -5,6 +5,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 
 import {
   RiDeleteBinLine,
+  RiEditLine,
   RiForbidLine,
   RiLogoutCircleRLine,
   RiMore2Line,
@@ -21,25 +22,23 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 import { formatDateTime } from '@workspace/ui/lib/format'
 
-import { DataTableColumnHeader } from '@/components/ui/data-table'
+import { DataTableColumnHeader } from '@/components/blocks/data-table'
 import { UserAvatar } from '@/components/ui/user-avatar'
 
-import type { DataTableFeatures } from '@/components/ui/data-table'
-import type { UserActionType, UserRow, UserStatus } from '@/types/user'
+import { userStatusLabels } from './data'
 
-export const userStatusLabels: Record<UserStatus, string> = {
-  active: '正常',
-  banned: '停權',
-}
+import type { DataTableFeatures } from '@/components/blocks/data-table'
+import type { UserActionType, UserRow } from '@/types/user'
 
 interface UserColumnsOptions {
   isAdmin: boolean
+  onEdit: (user: UserRow) => void
   onAction: (type: UserActionType, user: UserRow) => void
 }
 
 const columnHelper = createColumnHelper<DataTableFeatures, UserRow>()
 
-export function getUserColumns({ isAdmin, onAction }: UserColumnsOptions): ColumnDef<DataTableFeatures, UserRow>[] {
+export function getUserColumns({ isAdmin, onEdit, onAction }: UserColumnsOptions): ColumnDef<DataTableFeatures, UserRow>[] {
   const columns = columnHelper.columns([
     columnHelper.accessor('name', {
       header: ({ column }) => <DataTableColumnHeader column={column} title="名稱" />,
@@ -51,6 +50,7 @@ export function getUserColumns({ isAdmin, onAction }: UserColumnsOptions): Colum
       ),
       filterFn: 'includesString',
       sortFn: 'text',
+      meta: { label: '名稱', cardSlot: 'title' },
     }),
     columnHelper.accessor(row => row.username ?? '', {
       id: 'username',
@@ -58,15 +58,17 @@ export function getUserColumns({ isAdmin, onAction }: UserColumnsOptions): Colum
       cell: ({ row }) => <span className="text-muted-foreground">{row.original.username ?? '未完成註冊'}</span>,
       filterFn: 'includesString',
       enableSorting: false,
+      meta: { cardSlot: 'subtitle' },
     }),
     columnHelper.accessor(row => row.email ?? '', {
       id: 'email',
       header: 'Email',
       cell: ({ row }) => <span className="text-muted-foreground">{row.original.email}</span>,
       enableSorting: false,
+      meta: { cardSlot: 'primary' },
     }),
     columnHelper.accessor('status', {
-      header: '狀態',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="狀態" />,
       cell: ({ row }) => (
         <Badge
           variant="secondary"
@@ -78,7 +80,15 @@ export function getUserColumns({ isAdmin, onAction }: UserColumnsOptions): Colum
         </Badge>
       ),
       filterFn: 'equalsString',
-      enableSorting: false,
+      sortFn: 'text',
+      meta: { label: '狀態', cardSlot: 'badge' },
+    }),
+    columnHelper.accessor('role', {
+      header: ({ column }) => <DataTableColumnHeader column={column} title="分組" />,
+      cell: ({ row }) => <Badge variant="secondary">{row.original.role}</Badge>,
+      filterFn: 'equalsString',
+      sortFn: 'text',
+      meta: { label: '分組' },
     }),
     columnHelper.accessor('createdAt', {
       header: ({ column }) => <DataTableColumnHeader column={column} title="建立時間" />,
@@ -86,6 +96,7 @@ export function getUserColumns({ isAdmin, onAction }: UserColumnsOptions): Colum
         <span className="text-muted-foreground tabular-nums">{formatDateTime(row.original.createdAt)}</span>
       ),
       sortFn: 'basic',
+      meta: { label: '建立時間' },
     }),
     columnHelper.display({
       id: 'actions',
@@ -95,31 +106,36 @@ export function getUserColumns({ isAdmin, onAction }: UserColumnsOptions): Colum
         const isBanned = user.status === 'banned'
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={<Button variant="ghost" size="icon-sm" aria-label={`${user.name} 的更多操作`} />}
-            >
-              <RiMore2Line />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-auto min-w-40">
-              <DropdownMenuItem onClick={() => onAction(isBanned ? 'unban' : 'ban', user)}>
-                {isBanned ? <RiShieldCheckLine /> : <RiForbidLine />}
-                {isBanned ? '解除停權' : '停權'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onAction('revoke', user)}>
-                <RiLogoutCircleRLine />
-                撤銷登入
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={() => onAction('remove', user)}>
-                <RiDeleteBinLine />
-                刪除
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center justify-end gap-1">
+            <Button variant="ghost" size="icon-sm" aria-label={`編輯 ${user.name}`} onClick={() => onEdit(user)}>
+              <RiEditLine />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={<Button variant="ghost" size="icon-sm" aria-label={`${user.name} 的更多操作`} />}
+              >
+                <RiMore2Line />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-auto min-w-40">
+                <DropdownMenuItem onClick={() => onAction(isBanned ? 'unban' : 'ban', user)}>
+                  {isBanned ? <RiShieldCheckLine /> : <RiForbidLine />}
+                  {isBanned ? '解除停權' : '停權'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onAction('revoke', user)}>
+                  <RiLogoutCircleRLine />
+                  撤銷登入
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onClick={() => onAction('remove', user)}>
+                  <RiDeleteBinLine />
+                  刪除
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )
       },
-      meta: { headerClassName: 'w-16 text-right', cellClassName: 'w-16 text-right' },
+      meta: { cardSlot: 'actions', headerClassName: 'w-24 text-right', cellClassName: 'w-24 text-right' },
     }),
   ])
 

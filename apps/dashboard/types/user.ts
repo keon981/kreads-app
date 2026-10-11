@@ -8,6 +8,12 @@ export type UserStatus = 'active' | 'banned'
 
 export type UserStatusFilter = UserStatus | 'all'
 
+export const AssignableRoleSchema = z.enum(['user', 'admin'])
+
+export type AssignableRole = z.infer<typeof AssignableRoleSchema>
+
+export type AssignableRoleFilter = AssignableRole | 'all'
+
 export interface UserRow {
   /** Admin only */
   id?: string
@@ -16,14 +22,9 @@ export interface UserRow {
   name: string
   username: string | null
   image: string | null
+  role: AssignableRole
   status: UserStatus
   createdAt: Date
-}
-
-export interface UserFilterValues {
-  name: string
-  username: string
-  status: UserStatusFilter
 }
 
 export const UserActionTypeSchema = z.enum(['ban', 'unban', 'revoke', 'remove'])

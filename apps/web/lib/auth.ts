@@ -4,6 +4,7 @@ import { cache } from 'react'
 
 import { createAuthOptions } from '@workspace/server/auth/options'
 import { SECONDS } from '@workspace/ui/configs/constants'
+import { APIError, createAuthMiddleware } from 'better-auth/api'
 import { betterAuth } from 'better-auth/minimal'
 
 import { GITHUB_TOKEN_HEADER } from '@/configs/constants'
@@ -41,6 +42,15 @@ export const auth = betterAuth({
     cookies: {
       account_data: { attributes: { maxAge: SECONDS.week } },
     },
+  },
+  hooks: {
+    // Site users can hold the admin role, and this app shares its database with the dashboard,
+    // so the admin plugin only enforces bans here and its endpoints stay closed
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path.startsWith('/admin/')) {
+        throw new APIError('FORBIDDEN', { message: '無法執行操作' })
+      }
+    }),
   },
 })
 

@@ -12,6 +12,7 @@ import { Spinner } from '@workspace/ui/components/spinner'
 import { SectionCard } from '@/components/ui/section-card'
 
 import { changeEmailAction, changePasswordAction } from './action'
+import { passwordFields } from './data'
 
 import type { ActionState } from '@workspace/server/types/action'
 
@@ -57,12 +58,6 @@ interface AccountSettingsProps {
 }
 
 export function AccountSettings({ email, isViewer }: AccountSettingsProps): React.ReactNode {
-  const passwordFields = [
-    { name: 'current_password', label: '目前密碼', autoComplete: 'current-password' },
-    { name: 'new_password', label: '新密碼', autoComplete: 'new-password' },
-    { name: 'confirm_password', label: '確認新密碼', autoComplete: 'new-password' },
-  ]
-
   return (
     <>
       {isViewer && (

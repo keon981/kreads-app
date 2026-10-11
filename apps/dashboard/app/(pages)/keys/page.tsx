@@ -4,7 +4,7 @@ import { fetchInvites } from '@/app/server/db/invites'
 import { verifySession } from '@/app/server/session'
 import { SectionPageLayout } from '@/components/layout/section-page-layout'
 
-import { CreateInviteDialog } from './create-dialog'
+import { CreateInviteButton } from './create-button'
 import { InvitesTable } from './table'
 
 export default async function InvitesPage(): Promise<React.ReactNode> {
@@ -14,8 +14,9 @@ export default async function InvitesPage(): Promise<React.ReactNode> {
 
   return (
     <SectionPageLayout
+      fill
       title="邀請碼"
-      actions={isAdmin && <CreateInviteDialog />}
+      actions={isAdmin && <CreateInviteButton />}
     >
       <InvitesTable invites={invites} isAdmin={isAdmin} />
     </SectionPageLayout>

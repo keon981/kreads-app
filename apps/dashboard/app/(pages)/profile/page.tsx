@@ -1,9 +1,8 @@
-import { RiCalendarLine, RiComputerLine, RiLoginCircleLine, RiMailLine } from '@remixicon/react'
+import { RiMailLine } from '@remixicon/react'
 import { hasRole } from '@workspace/server/auth/access'
 import { Badge } from '@workspace/ui/components/badge'
 import { Card, CardContent } from '@workspace/ui/components/card'
 import { Separator } from '@workspace/ui/components/separator'
-import { formatDateTime } from '@workspace/ui/lib/format'
 
 import { fetchSessionSummary } from '@/app/server/db/users'
 import { verifySession } from '@/app/server/session'
@@ -11,6 +10,7 @@ import { SectionPageLayout } from '@/components/layout/section-page-layout'
 import { StatCard } from '@/components/ui/stat-card'
 import { UserAvatar } from '@/components/ui/user-avatar'
 
+import { getProfileStats } from './data'
 import { AccountSettings } from './form'
 
 export default async function ProfilePage(): Promise<React.ReactNode> {
@@ -18,11 +18,7 @@ export default async function ProfilePage(): Promise<React.ReactNode> {
   const { activeSessions, lastSignInAt } = await fetchSessionSummary(user.id)
   const isViewer = hasRole(user.role, 'viewer')
 
-  const stats = [
-    { key: 'last-sign-in', label: '最近登入', value: lastSignInAt ? formatDateTime(lastSignInAt) : '—', icon: <RiLoginCircleLine /> },
-    { key: 'sessions', label: '登入中的裝置', value: `${activeSessions} 台`, icon: <RiComputerLine /> },
-    { key: 'created', label: '帳號建立', value: formatDateTime(user.createdAt), icon: <RiCalendarLine /> },
-  ]
+  const stats = getProfileStats({ lastSignInAt, activeSessions, createdAt: user.createdAt })
 
   return (
     <SectionPageLayout
@@ -50,8 +46,8 @@ export default async function ProfilePage(): Promise<React.ReactNode> {
           </div>
           <Separator />
           <div className="grid gap-4 sm:grid-cols-3">
-            {stats.map(({ key, ...stat }) => (
-              <StatCard key={key} {...stat} />
+            {stats.map(({ id, ...stat }) => (
+              <StatCard key={id} {...stat} />
             ))}
           </div>
         </CardContent>

@@ -1,8 +1,9 @@
+import { hasRole } from '@workspace/server/auth/access'
 import { db } from '@workspace/server/db/client'
 import { account, session, user } from '@workspace/server/db/schema/auth-schema'
 import { and, count, desc, eq, exists, gt, max } from 'drizzle-orm'
 
-import type { UserRow, UserStatus } from '@/types/user'
+import type { AssignableRole, UserRow, UserStatus } from '@/types/user'
 
 import 'server-only'
 
@@ -15,9 +16,14 @@ const viewerFields = {
   name: user.name,
   username: user.username,
   image: user.image,
+  role: user.role,
   banned: user.banned,
   banExpires: user.banExpires,
   createdAt: user.createdAt,
+}
+
+export function toAssignableRole(role: string | null): AssignableRole {
+  return hasRole(role, 'admin') ? 'admin' : 'user'
 }
 
 function getUserStatus({ banned, banExpires }: { banned: boolean | null, banExpires: Date | null }): UserStatus {
@@ -30,7 +36,11 @@ export async function fetchUsers(isAdmin: boolean): Promise<UserRow[]> {
     ? await db.select({ ...viewerFields, id: user.id, email: user.email }).from(user).where(isGithubUser).orderBy(desc(user.createdAt))
     : await db.select(viewerFields).from(user).where(isGithubUser).orderBy(desc(user.createdAt))
 
-  return rows.map(({ banned, banExpires, ...row }) => ({ ...row, status: getUserStatus({ banned, banExpires }) }))
+  return rows.map(({ banned, banExpires, role, ...row }) => ({
+    ...row,
+    role: toAssignableRole(role),
+    status: getUserStatus({ banned, banExpires }),
+  }))
 }
 
 export async function isManagedUser(userId: string): Promise<boolean> {
