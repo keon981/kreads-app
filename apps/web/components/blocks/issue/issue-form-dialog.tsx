@@ -1,10 +1,24 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 
-import { RiCloseLine } from '@remixicon/react'
+import {
+  RiBold,
+  RiCloseLine,
+  RiFileCopyLine,
+  RiItalic,
+  RiScissorsCutLine,
+  RiStrikethrough,
+  RiUnderline,
+} from '@remixicon/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar'
 import { Button } from '@workspace/ui/components/button'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@workspace/ui/components/context-menu'
 import {
   Dialog,
   DialogClose,
@@ -13,8 +27,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@workspace/ui/components/dialog'
+import {
+  MarkdownEditor,
+  MarkdownEditorClipboardItem,
+  MarkdownEditorContent,
+  MarkdownEditorMarkItem,
+  useMarkdownEditor,
+} from '@workspace/ui/components/markdown-editor'
 import { Spinner } from '@workspace/ui/components/spinner'
-import { Textarea } from '@workspace/ui/components/textarea'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
 
 import { CancelAlertDialog } from '@/components/blocks/confirm-dialog'
@@ -37,6 +57,60 @@ interface IssueFormDialogProps {
   children?: React.ReactNode
 }
 
+interface IssueContentEditorProps {
+  defaultValue?: string
+  placeholder?: string
+  onDirtyChange: (isDirty: boolean) => void
+}
+
+function IssueContentEditor({ defaultValue, placeholder, onDirtyChange }: IssueContentEditorProps): React.ReactNode {
+  const { editor, value, isDirty } = useMarkdownEditor({ defaultValue, placeholder })
+
+  useEffect(() => {
+    onDirtyChange(isDirty)
+  }, [isDirty, onDirtyChange])
+
+  return (
+    <>
+      <MarkdownEditor editor={editor}>
+        <ContextMenu>
+          <ContextMenuTrigger>
+            <MarkdownEditorContent className="md:text-base" />
+          </ContextMenuTrigger>
+          <ContextMenuContent className="w-36">
+            <MarkdownEditorMarkItem mark="bold">
+              <RiBold />
+              粗體
+            </MarkdownEditorMarkItem>
+            <MarkdownEditorMarkItem mark="italic">
+              <RiItalic />
+              斜體
+            </MarkdownEditorMarkItem>
+            <MarkdownEditorMarkItem mark="underline">
+              <RiUnderline />
+              底線
+            </MarkdownEditorMarkItem>
+            <MarkdownEditorMarkItem mark="strike">
+              <RiStrikethrough />
+              刪除線
+            </MarkdownEditorMarkItem>
+            <ContextMenuSeparator />
+            <MarkdownEditorClipboardItem command="copy">
+              <RiFileCopyLine />
+              複製
+            </MarkdownEditorClipboardItem>
+            <MarkdownEditorClipboardItem command="cut">
+              <RiScissorsCutLine />
+              剪下
+            </MarkdownEditorClipboardItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      </MarkdownEditor>
+      <input type="hidden" name="content" value={value} />
+    </>
+  )
+}
+
 function IssueFormDialog({
   onSubmit,
   title,
@@ -54,17 +128,14 @@ function IssueFormDialog({
   const { dialogProps: alertDialogProps, trigger: triggerAlert, dismiss: dismissAlert } = useDialog()
   const { open, onOpenChange } = dialogProps ?? innerDialogProps
 
-  const initialContent = defaultValues?.content ?? ''
-  const [draft, setDraft] = useState<string | null>(null)
-  const content = draft ?? initialContent
-  const isDirty = draft !== null && draft !== initialContent
+  const [isDirty, setIsDirty] = useState(false)
 
   // form
   const [state, formAction, isPending] = useActionState(
     async (prevState: IssueFormState, formData: FormData) => {
       const nextState = await onSubmit?.(prevState, formData) ?? prevState
       if (!nextState.message) {
-        setDraft(null)
+        setIsDirty(false)
         onOpenChange?.(false)
       }
       return nextState
@@ -81,7 +152,7 @@ function IssueFormDialog({
   }
 
   const handleDiscard = () => {
-    setDraft(null)
+    setIsDirty(false)
     dismissAlert()
     onOpenChange?.(false)
   }
@@ -123,12 +194,10 @@ function IssueFormDialog({
                 {/* post */}
                 <div className="flex-1">
                   <h4 className="font-bold text-foreground text-base">{name}</h4>
-                  <Textarea
+                  <IssueContentEditor
+                    defaultValue={defaultValues?.content}
                     placeholder={placeholder}
-                    value={content}
-                    onChange={e => setDraft(e.target.value)}
-                    name="content"
-                    className="px-0 bg-transparent! border-0 focus-visible:ring-0 focus-visible:border-0 resize-none md:text-base"
+                    onDirtyChange={setIsDirty}
                   />
                 </div>
               </section>
