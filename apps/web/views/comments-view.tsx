@@ -71,6 +71,7 @@ export async function IssueDetailView({ user, issueNumber }: IssueDetailViewProp
           target={{ repoName, issueNumber }}
           isOwner={isOwner}
           editTitle="編輯貼文"
+          isRefreshable
           reaction={{ reactionCount: issue.reactionCount, isReacted: issue.isReacted }}
           reply={{ action: createCommentAction, count: issue.commentCount }}
           updateAction={updatePostAction}

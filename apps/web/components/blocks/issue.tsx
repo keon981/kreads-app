@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 import { useActionState, useState, useTransition } from 'react'
 
@@ -379,6 +380,7 @@ function PostItem({
   onDelete,
   onSubmit,
   onCopyLink,
+  className,
   ...props
 }: {
   post: Issue
@@ -405,6 +407,8 @@ function PostItem({
   // auth
   const onAuthGuardClick = useAuthGuard(triggerChatDialog)
 
+  const router = useRouter()
+
   const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
 
   const handleCopyLink = () => {
@@ -421,8 +425,20 @@ function PostItem({
     dismissDeleteDialog()
   }
 
+  const handleNavigate = (e: React.MouseEvent<HTMLDivElement>): void => {
+    // Clicks inside portals (dialog, dropdown, hover card) still bubble through the React tree
+    if (!href || !(e.target instanceof Element) || !e.currentTarget.contains(e.target)) return
+    if (e.target.closest('a, button')) return
+    if (window.getSelection()?.toString()) return
+    router.push(href)
+  }
+
   return (
-    <IssueItem {...props}>
+    <IssueItem
+      className={cn(href && 'cursor-pointer', className)}
+      onClick={handleNavigate}
+      {...props}
+    >
       <IssueItemMedia src={post.author?.avatarUrl} login={post.author?.login} />
       <IssueItemContent>
         <IssueItemTitle>
@@ -505,6 +521,7 @@ function CommentItem({
   target,
   isOwner = false,
   editTitle = '編輯留言',
+  isRefreshable = false,
   reaction,
   reply,
   updateAction,
@@ -517,6 +534,7 @@ function CommentItem({
   target: IssueTarget
   isOwner?: boolean
   editTitle?: string
+  isRefreshable?: boolean
   reaction?: React.ComponentProps<typeof IssueReactionButton>['reaction']
   reply?: {
     action: IssueFormAction
@@ -534,8 +552,11 @@ function CommentItem({
   } = useDialog()
   const { dialogProps: replyDialogProps, trigger: triggerReplyDialog } = useDialog()
   const [isPending, startTransition] = useTransition()
+  const [isRefreshing, startRefresh] = useTransition()
 
   const onAuthGuardClick = useAuthGuard(triggerReplyDialog)
+
+  const router = useRouter()
 
   const authorName = issue.author?.login ?? 'ghost'
 
@@ -554,8 +575,24 @@ function CommentItem({
     dismissDeleteDialog()
   }
 
+  const handleRefresh = () => {
+    startRefresh(() => router.refresh())
+  }
+
+  const timeElement = (
+    <time className="text-muted-foreground font-normal text-sm shrink-0" dateTime={issue.createdAt}>
+      {formatDateTime(issue.createdAt, { withTime: false })}
+    </time>
+  )
+
   return (
     <IssueItem className={cn('flex-col items-start gap-2.5', className)} {...props}>
+      {isRefreshing && (
+        <div className="flex w-full justify-center py-2">
+          <Spinner className="size-5" />
+        </div>
+      )}
+
       {/* Header: avatar, name/time, menu */}
       <IssueItemHeader>
         <div className="flex items-center gap-2.5 min-w-0">
@@ -566,9 +603,18 @@ function CommentItem({
           />
           <div className="flex items-center gap-1.5 min-w-0">
             <IssueUser login={issue.author?.login} avatarUrl={issue.author?.avatarUrl} className="text-base" />
-            <time className="text-muted-foreground font-normal text-sm shrink-0" dateTime={issue.createdAt}>
-              {formatDateTime(issue.createdAt, { withTime: false })}
-            </time>
+            {isRefreshable
+              ? (
+                  <button
+                    type="button"
+                    className="shrink-0 cursor-pointer transition-opacity hover:opacity-60"
+                    disabled={isRefreshing}
+                    onClick={handleRefresh}
+                  >
+                    {timeElement}
+                  </button>
+                )
+              : timeElement}
           </div>
         </div>
         <IssueDropdownMenu
