@@ -6,7 +6,7 @@ export const inviteCode = pgTable('invite_code', {
   id: text('id').primaryKey(),
   code: text('code').notNull().unique(),
   note: text('note'),
-  redeemedBy: text('redeemed_by').references(() => user.id),
+  redeemedBy: text('redeemed_by').references(() => user.id, { onDelete: 'set null' }),
   redeemedAt: timestamp('redeemed_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })

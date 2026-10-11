@@ -9,7 +9,8 @@ import { createIssueComment, deleteIssueComment, updateIssueComment } from '@/se
 import { catchParseWithUserRepoError, parseWithUserRepo } from '@/services/user-repo'
 import { getFormDataValue } from '@/utils/toolkit'
 
-import type { ActionState, IssueFormState, IssueTarget } from '@/types/action'
+import type { ActionState } from '@workspace/server/types/action'
+import type { IssueFormState, IssueTarget } from '@/types/action'
 
 const ContentSchema = z.string().trim().min(1, '請輸入內容')
 

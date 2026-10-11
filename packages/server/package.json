@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/db",
+  "name": "@workspace/server",
   "version": "0.0.0",
   "type": "module",
   "private": true,
@@ -11,7 +11,9 @@
     "drizzle:migrate": "vpx drizzle-kit migrate"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.7.3",
     "@neondatabase/serverless": "^1.1.0",
+    "better-auth": "^1.7.3",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^1.0.0-rc.4"
   },
@@ -24,7 +26,9 @@
     "typescript": "^5"
   },
   "exports": {
-    "./client": "./src/client.ts",
-    "./schema/*": "./src/schema/*.ts"
+    "./auth/*": "./src/auth/*.ts",
+    "./db/client": "./src/db/client.ts",
+    "./db/schema/*": "./src/db/schema/*.ts",
+    "./types/*": "./src/types/*.ts"
   }
 }

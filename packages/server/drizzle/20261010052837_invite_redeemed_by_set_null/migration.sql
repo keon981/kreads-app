@@ -1,0 +1,1 @@
+ALTER TABLE "invite_code" DROP CONSTRAINT "invite_code_redeemed_by_user_id_fkey", ADD CONSTRAINT "invite_code_redeemed_by_user_id_fkey" FOREIGN KEY ("redeemed_by") REFERENCES "user"("id") ON DELETE SET NULL;

@@ -1,6 +1,4 @@
-import type { auth } from '@/lib/auth'
-
-export type AuthSession = typeof auth.$Infer.Session
+import type { AuthSession } from '@workspace/server/auth/options'
 
 export type VerifiedSession
   = | { status: 'signed-out', session: null }

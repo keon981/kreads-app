@@ -31,6 +31,7 @@ import { toast } from '@workspace/ui/components/toast'
 import { useCopy } from '@workspace/ui/hooks/use-copy'
 import { useDebouncedMutation } from '@workspace/ui/hooks/use-debounced-mutation'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
+import { formatDateTime } from '@workspace/ui/lib/format'
 import { cn } from '@workspace/ui/lib/utils'
 
 import { toggleReactionAction } from '@/app/server/actions/posts'
@@ -52,24 +53,10 @@ import { chatHref } from '@/utils/navigation'
 
 import { CancelAlertDialog, DeleteAlertDialog } from './confirm-dialog'
 
+import type { ActionState } from '@workspace/server/types/action'
 import type { UseDialogReturn } from '@workspace/ui/hooks/use-dialog'
-import type { ActionState, IssueDeleteAction, IssueFormAction, IssueFormState, IssueTarget } from '@/types/action'
+import type { IssueDeleteAction, IssueFormAction, IssueFormState, IssueTarget } from '@/types/action'
 import type { Issue, IssueComment } from '@/types/issue'
-
-// fr-CA 輸出 YYYY-MM-DD；固定時區避免 SSR 與 client 日期不一致
-const dateFormatter = new Intl.DateTimeFormat('fr-CA', {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  timeZone: 'Asia/Taipei',
-})
-
-function formatDateTime(value: string | number | Date): string {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-
-  return dateFormatter.format(date)
-}
 
 type IssueItemButtonProps = React.ComponentProps<typeof IssueItemButton>
 type DropdownMenuItemOnClick = React.ComponentProps<typeof DropdownMenuItem>['onClick']
@@ -458,7 +445,7 @@ function PostItem({
           <div className="flex flex-1 min-w-0 items-center gap-1.5">
             <IssueUser login={post.author?.login} avatarUrl={post.author?.avatarUrl} />
             <time className="text-muted-foreground font-normal shrink-0" dateTime={post.createdAt}>
-              {formatDateTime(post.createdAt)}
+              {formatDateTime(post.createdAt, { withTime: false })}
             </time>
           </div>
           <IssueDropdownMenu
@@ -483,32 +470,32 @@ function PostItem({
           {/* chat */}
           {onSubmit
             ? (
-              <IssueFormDialog
-                onSubmit={onSubmit}
-                title="新貼文"
-                placeholder="有什麼新鮮事？"
-                dialogProps={chatDialogProps}
-                defaultValues={{ repoName, issueNumber: post.number }}
-              >
-                <DialogTrigger
-                  render={<IssueItemButton size="lg" />}
-                  onClick={onAuthGuardClick}
+                <IssueFormDialog
+                  onSubmit={onSubmit}
+                  title="新貼文"
+                  placeholder="有什麼新鮮事？"
+                  dialogProps={chatDialogProps}
+                  defaultValues={{ repoName, issueNumber: post.number }}
+                >
+                  <DialogTrigger
+                    render={<IssueItemButton size="lg" />}
+                    onClick={onAuthGuardClick}
+                  >
+                    <RiChat1Line />
+                    {post.commentCount > 0 && post.commentCount}
+                  </DialogTrigger>
+                </IssueFormDialog>
+              )
+            : (
+                <IssueItemButton
+                  size="lg"
+                  nativeButton={false}
+                  render={<Link href={href ?? ''} />}
                 >
                   <RiChat1Line />
                   {post.commentCount > 0 && post.commentCount}
-                </DialogTrigger>
-              </IssueFormDialog>
-            )
-            : (
-              <IssueItemButton
-                size="lg"
-                nativeButton={false}
-                render={<Link href={href ?? ''} />}
-              >
-                <RiChat1Line />
-                {post.commentCount > 0 && post.commentCount}
-              </IssueItemButton>
-            )}
+                </IssueItemButton>
+              )}
 
           {/* share */}
           <IssueItemButton onClick={handleCopyLink}>
@@ -594,7 +581,7 @@ function CommentItem({
 
   const timeElement = (
     <time className="text-muted-foreground font-normal text-sm shrink-0" dateTime={issue.createdAt}>
-      {formatDateTime(issue.createdAt)}
+      {formatDateTime(issue.createdAt, { withTime: false })}
     </time>
   )
 
@@ -618,15 +605,15 @@ function CommentItem({
             <IssueUser login={issue.author?.login} avatarUrl={issue.author?.avatarUrl} className="text-base" />
             {isRefreshable
               ? (
-                <button
-                  type="button"
-                  className="shrink-0 cursor-pointer transition-opacity hover:opacity-60"
-                  disabled={isRefreshing}
-                  onClick={handleRefresh}
-                >
-                  {timeElement}
-                </button>
-              )
+                  <button
+                    type="button"
+                    className="shrink-0 cursor-pointer transition-opacity hover:opacity-60"
+                    disabled={isRefreshing}
+                    onClick={handleRefresh}
+                  >
+                    {timeElement}
+                  </button>
+                )
               : timeElement}
           </div>
         </div>
