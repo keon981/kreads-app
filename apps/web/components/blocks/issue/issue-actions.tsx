@@ -39,6 +39,8 @@ import type { IssueFormDialogProps } from './issue-form-dialog'
 type IssueItemButtonProps = React.ComponentProps<typeof IssueItemButton>
 type DropdownMenuItemOnClick = React.ComponentProps<typeof DropdownMenuItem>['onClick']
 
+const isShow = (count?: number) => count ? 'block' : 'hidden'
+
 function IssueReactionButton({ target, reaction }: {
   target: IssueTarget
   reaction?: {
@@ -79,9 +81,9 @@ function IssueReactionButton({ target, reaction }: {
   return (
     <IssueItemButton size="lg" onClick={onAuthGuardClick}>
       {isReacted
-        ? <RiHeartFill className="size-5 text-destructive" />
-        : <RiHeartLine className="size-5" />}
-      {reactionCount}
+        ? <RiHeartFill className="text-destructive" />
+        : <RiHeartLine />}
+      <span className={isShow(reactionCount)}>{reactionCount}</span>
     </IssueItemButton>
   )
 }
@@ -100,7 +102,7 @@ function IssueReplyButton({
         onClick={onAuthGuardClick}
       >
         <RiChat1Line />
-        {!!count && count}
+        <span className={isShow(count)}>{count}</span>
       </DialogTrigger>
     </IssueFormDialog>
   )

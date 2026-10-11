@@ -162,16 +162,17 @@ function IssueItemArticle({ html, className, children, ...props }: React.Compone
   return <div {...articleProps} dangerouslySetInnerHTML={{ __html: html }} />
 }
 
-function IssueItemFooter({ ...props }: React.ComponentProps<typeof ButtonGroup>) {
-  return <ButtonGroup className="px-0 gap-0.5!" {...props} />
+function IssueItemFooter({ className, ...props }: React.ComponentProps<typeof ButtonGroup>) {
+  return <ButtonGroup className={cn('-ms-2 px-0 gap-0!', className)} {...props} />
 }
 
-function IssueItemButton({ ...props }: ButtonProps) {
+function IssueItemButton({ className, ...props }: ButtonProps) {
   return (
-    <ButtonGroup>
+    <ButtonGroup className="rounded-full overflow-hidden">
       <Button
         variant="ghost"
-        size="icon-lg"
+        size="lg"
+        className={cn('gap-1 rounded-full! [&_svg:not([class*="size-"])]:size-5 hover:bg-muted', className)}
         {...props}
       />
     </ButtonGroup>

@@ -194,11 +194,13 @@ function IssueFormDialog({
                 {/* post */}
                 <div className="flex-1">
                   <h4 className="font-bold text-foreground text-base">{name}</h4>
-                  <IssueContentEditor
-                    defaultValue={defaultValues?.content}
-                    placeholder={placeholder}
-                    onDirtyChange={setIsDirty}
-                  />
+                  <div className="mt-1.5">
+                    <IssueContentEditor
+                      defaultValue={defaultValues?.content}
+                      placeholder={placeholder}
+                      onDirtyChange={setIsDirty}
+                    />
+                  </div>
                 </div>
               </section>
               <section className="mt-2.5 ps-2 flex items-center gap-x-5 opacity-40">
