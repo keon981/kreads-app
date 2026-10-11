@@ -76,6 +76,7 @@ export async function GET(request: NextRequest) {
       username,
       inviteCode: generateInviteCode(),
       invitedBy: redeemed.invitedBy,
+      role: redeemed.role,
     })
     .where(eq(user.id, session.user.id))
 

@@ -4,6 +4,7 @@ interface SectionPageLayoutProps {
   title: string
   description?: string
   actions?: React.ReactNode
+  fill?: boolean
   className?: string
   children: React.ReactNode
 }
@@ -12,11 +13,18 @@ export function SectionPageLayout({
   title,
   description,
   actions,
+  fill = false,
   className,
   children,
 }: SectionPageLayoutProps): React.ReactNode {
   return (
-    <div className={cn('flex w-full flex-1 flex-col gap-6 p-4 md:p-6', className)}>
+    <div
+      className={cn(
+        'flex w-full flex-1 flex-col gap-6 p-4 md:p-6',
+        fill && 'h-[calc(100svh-var(--header-height))] min-h-0 flex-none',
+        className,
+      )}
+    >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <hgroup className="flex flex-col gap-1">
           <h1 className="font-heading text-2xl font-semibold tracking-tight">{title}</h1>

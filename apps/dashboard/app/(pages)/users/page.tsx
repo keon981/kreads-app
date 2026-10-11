@@ -12,7 +12,7 @@ export default async function UsersPage(): Promise<React.ReactNode> {
   const users = await fetchUsers(isAdmin)
 
   return (
-    <SectionPageLayout title="使用者管理" description="檢視主站使用者，管理停權狀態與登入裝置。">
+    <SectionPageLayout fill title="使用者管理" description="檢視主站使用者，管理分組、停權狀態與登入裝置。">
       <UsersTable users={users} isAdmin={isAdmin} />
     </SectionPageLayout>
   )

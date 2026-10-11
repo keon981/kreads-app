@@ -15,34 +15,35 @@ import {
   sortFn_text,
   tableFeatures,
 } from '@tanstack/react-table'
-import type { Column, ReactTable, Row, RowData, Table as TableInstance } from '@tanstack/react-table'
+import type { ReactTable, RowData } from '@tanstack/react-table'
 
 import {
-  RiArrowDownLine,
   RiArrowLeftSLine,
   RiArrowRightSLine,
-  RiArrowUpDownLine,
-  RiArrowUpLine,
+  RiCloseLine,
   RiRefreshLine,
   RiSearchLine,
 } from '@remixicon/react'
+import { Badge } from '@workspace/ui/components/badge'
 import { Button } from '@workspace/ui/components/button'
-import { Checkbox } from '@workspace/ui/components/checkbox'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@workspace/ui/components/input-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@workspace/ui/components/table'
+import { Separator } from '@workspace/ui/components/separator'
+import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
 import { cn } from '@workspace/ui/lib/utils'
+
+import { DataTableCardList } from './card'
+import { DataTableGrid } from './table'
 
 import type { OptionItem } from '@/types/option'
 
+export { DataTableColumnHeader, DataTableSelectCell, DataTableSelectHeader } from './table'
+
+export type DataTableCardSlot = 'title' | 'subtitle' | 'badge' | 'primary' | 'field' | 'actions' | 'hidden'
+
 interface DataTableColumnMeta {
+  label?: string
+  cardSlot?: DataTableCardSlot
   headerClassName?: string
   cellClassName?: string
 }
@@ -64,7 +65,7 @@ export type DataTableFeatures = typeof dataTableFeatures
 
 export type DataTableInstance<TData extends RowData> = ReactTable<DataTableFeatures, TData>
 
-interface DataTableProps<TData extends RowData> {
+export interface DataTableProps<TData extends RowData> {
   table: DataTableInstance<TData>
   emptyText?: string
 }
@@ -73,121 +74,66 @@ export function DataTable<TData extends RowData>({
   table,
   emptyText = '沒有資料',
 }: DataTableProps<TData>): React.ReactNode {
-  const rows = table.getRowModel().rows
-  const columnCount = table.getAllLeafColumns().length
+  const isMobile = useIsMobile()
+  const { columnFilters, sorting } = table.state
+  // A new query or sort remounts the card list, so it starts over from the first batch at the top
+  const cardListKey = JSON.stringify([columnFilters, sorting])
 
   return (
-    <div className="min-w-0 overflow-hidden rounded-xl border bg-card">
-      <Table>
-        <TableHeader className="bg-muted/50">
-          {table.getHeaderGroups().map(headerGroup => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map(header => (
-                <TableHead
-                  key={header.id}
-                  className={cn('h-11 px-3 text-muted-foreground', header.column.columnDef.meta?.headerClassName)}
-                >
-                  {header.isPlaceholder ? null : <table.FlexRender header={header} />}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {rows.length > 0
-            ? rows.map(row => (
-                <TableRow key={row.id} data-state={row.getIsSelected() ? 'selected' : undefined}>
-                  {row.getAllCells().map(cell => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn('px-3 py-2.5', cell.column.columnDef.meta?.cellClassName)}
-                    >
-                      <table.FlexRender cell={cell} />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            : (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={columnCount} className="h-32 text-center text-muted-foreground">
-                    {emptyText}
-                  </TableCell>
-                </TableRow>
-              )}
-        </TableBody>
-      </Table>
+    <div
+      key={isMobile ? cardListKey : 'grid'}
+      className={cn(
+        'min-h-0 min-w-0 flex-1 overflow-auto',
+        !isMobile && 'rounded-xl border bg-card *:data-[slot=table-container]:h-full',
+      )}
+    >
+      {isMobile
+        ? <DataTableCardList table={table} emptyText={emptyText} />
+        : <DataTableGrid table={table} emptyText={emptyText} />}
     </div>
   )
 }
 
-interface DataTableColumnHeaderProps<TData extends RowData, TValue> {
-  column: Column<DataTableFeatures, TData, TValue>
-  title: string
-  className?: string
+interface DataTableBulkBarProps<TData extends RowData> {
+  table: DataTableInstance<TData>
+  itemLabel: string
+  children: React.ReactNode
 }
 
-export function DataTableColumnHeader<TData extends RowData, TValue>({
-  column,
-  title,
-  className,
-}: DataTableColumnHeaderProps<TData, TValue>): React.ReactNode {
-  if (!column.getCanSort()) {
-    return <span className={className}>{title}</span>
-  }
-
-  const sortDirection = column.getIsSorted()
-  let SortIcon = RiArrowUpDownLine
-  if (sortDirection === 'asc')
-    SortIcon = RiArrowUpLine
-  if (sortDirection === 'desc')
-    SortIcon = RiArrowDownLine
-
-  return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className={cn('-ml-2.5 text-muted-foreground hover:text-foreground data-[sorted=true]:text-foreground', className)}
-      data-sorted={sortDirection !== false}
-      onClick={column.getToggleSortingHandler()}
-    >
-      {title}
-      <SortIcon data-icon="inline-end" className={cn(sortDirection === false && 'opacity-50')} />
-    </Button>
-  )
-}
-
-interface DataTableSelectHeaderProps<TData extends RowData> {
-  table: TableInstance<DataTableFeatures, TData>
-}
-
-export function DataTableSelectHeader<TData extends RowData>({
+// Positioned against the nearest relative parent
+export function DataTableBulkBar<TData extends RowData>({
   table,
-}: DataTableSelectHeaderProps<TData>): React.ReactNode {
-  return (
-    <Checkbox
-      aria-label="選擇本頁全部"
-      className="data-indeterminate:border-primary data-indeterminate:bg-primary data-indeterminate:text-primary-foreground"
-      checked={table.getIsAllPageRowsSelected()}
-      indeterminate={!table.getIsAllPageRowsSelected() && table.getIsSomePageRowsSelected()}
-      onCheckedChange={checked => table.toggleAllPageRowsSelected(checked)}
-    />
-  )
-}
+  itemLabel,
+  children,
+}: DataTableBulkBarProps<TData>): React.ReactNode {
+  const isMobile = useIsMobile()
+  const selectedCount = table.getSelectedRowIds().length
 
-interface DataTableSelectCellProps<TData extends RowData> {
-  row: Row<DataTableFeatures, TData>
-}
+  if (isMobile || selectedCount === 0) return null
 
-export function DataTableSelectCell<TData extends RowData>({
-  row,
-}: DataTableSelectCellProps<TData>): React.ReactNode {
   return (
-    <Checkbox
-      aria-label="選擇此列"
-      checked={row.getIsSelected()}
-      disabled={!row.getCanSelect()}
-      onCheckedChange={checked => row.toggleSelected(checked)}
-    />
+    <div
+      role="toolbar"
+      aria-label="批次操作"
+      className="absolute bottom-0 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full border bg-popover p-1.5 text-sm shadow-lg"
+    >
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="rounded-full"
+        aria-label="取消選取"
+        onClick={() => table.resetRowSelection()}
+      >
+        <RiCloseLine />
+      </Button>
+      <Separator orientation="vertical" className="data-vertical:h-5 data-vertical:self-center" />
+      <span className="flex items-center gap-2 px-1.5 whitespace-nowrap">
+        <Badge className="tabular-nums">{selectedCount}</Badge>
+        {`${itemLabel}已選擇`}
+      </span>
+      <Separator orientation="vertical" className="data-vertical:h-5 data-vertical:self-center" />
+      {children}
+    </div>
   )
 }
 
@@ -208,6 +154,9 @@ export function DataTablePagination<TData extends RowData>({
   const pageCount = Math.max(table.getPageCount(), 1)
   const selectedCount = table.getSelectedRowIds().length
   const filteredCount = table.getFilteredRowModel().rows.length
+  const isMobile = useIsMobile()
+
+  if (isMobile) return null
 
   return (
     <div className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
@@ -302,11 +251,11 @@ export function DataTableFilterForm({
     >
       {children}
       <div className="flex gap-2">
-        <Button type="submit" className="flex-1 lg:flex-none">
+        <Button type="submit" size="lg" className="flex-1 lg:flex-none">
           <RiSearchLine data-icon="inline-start" />
           查詢
         </Button>
-        <Button type="button" variant="outline" className="flex-1 lg:flex-none" onClick={onReset}>
+        <Button type="button" size="lg" variant="outline" className="flex-1 lg:flex-none" onClick={onReset}>
           <RiRefreshLine data-icon="inline-start" />
           重置
         </Button>

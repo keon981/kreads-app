@@ -18,7 +18,7 @@ export default async function PagesLayout({
       style={{
         '--sidebar-width': '16rem',
         '--sidebar-width-icon': '3.5rem',
-        '--header-height': '4rem',
+        '--header-height': '4.5rem',
       } as React.CSSProperties}
     >
       <AppHeader user={user} />

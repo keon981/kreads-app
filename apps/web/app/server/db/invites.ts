@@ -49,14 +49,17 @@ async function redeemInviteCode(code: string, userId: string): Promise<RedeemRes
     .update(inviteCodeTable)
     .set({ redeemedBy: userId, redeemedAt: new Date() })
     .where(and(eq(inviteCodeTable.code, code), isNull(inviteCodeTable.redeemedAt)))
-    .returning({ id: inviteCodeTable.id })
-  if (redeemed.length > 0) return { status: 'valid', invitedBy: null }
+    .returning({ role: inviteCodeTable.role })
+  if (redeemed.length > 0) {
+    const role = hasRole(redeemed[0].role, 'admin') ? 'admin' : 'user'
+    return { status: 'valid', invitedBy: null, role }
+  }
 
   const result = await getUserInviteCodeStatus(code)
   if (result.status !== 'valid') return result
   if (result.inviterId === userId) return { status: 'invalid' }
 
-  return { status: 'valid', invitedBy: result.inviterId }
+  return { status: 'valid', invitedBy: result.inviterId, role: 'user' }
 }
 
 export {

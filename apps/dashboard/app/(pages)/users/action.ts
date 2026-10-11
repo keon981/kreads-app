@@ -8,9 +8,10 @@ import * as z from 'zod'
 
 import { isManagedUser } from '@/app/server/db/users'
 import { verifyAdmin } from '@/app/server/session'
+import { assignUserRole } from '@/app/server/user-role'
 import { paths } from '@/configs/path-config'
 import { auth } from '@/lib/auth'
-import { UserActionTypeSchema } from '@/types/user'
+import { AssignableRoleSchema, UserActionTypeSchema } from '@/types/user'
 
 import type { ActionState } from '@workspace/server/types/action'
 import type { UserActionType } from '@/types/user'
@@ -51,5 +52,23 @@ export async function updateUserAction(type: UserActionType, userId: string): Pr
   }
 
   revalidatePath(paths.users)
+  return {}
+}
+
+const UserRoleSchema = z.object({
+  role: AssignableRoleSchema,
+})
+
+export async function updateUserRoleAction(userId: string, _prevState: ActionState, formData: FormData): Promise<ActionState> {
+  await verifyAdmin()
+
+  const parsedForm = UserRoleSchema.safeParse(Object.fromEntries(formData))
+  if (!userId || !parsedForm.success) return { message: '無效的分組' }
+
+  const result = await assignUserRole(userId, parsedForm.data.role)
+  if (result.message) return result
+
+  revalidatePath(paths.users)
+  revalidatePath(paths.keys)
   return {}
 }
