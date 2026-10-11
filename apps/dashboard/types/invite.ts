@@ -1,5 +1,5 @@
 import type { ActionState } from '@workspace/server/types/action'
-import type { AssignableRole, AssignableRoleFilter } from '@/types/user'
+import type { AssignableRole } from '@/types/user'
 
 export type InviteStatus = 'unused' | 'redeemed'
 
@@ -22,12 +22,6 @@ export interface InviteRow {
   redeemer: InviteRedeemer | null
   createdAt: Date
   redeemedAt: Date | null
-}
-
-export interface InviteFilterValues {
-  code: string
-  role: AssignableRoleFilter
-  status: InviteStatusFilter
 }
 
 export interface DeleteInvitesState extends ActionState {

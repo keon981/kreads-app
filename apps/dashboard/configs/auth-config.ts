@@ -1,6 +1,6 @@
 import type { Role } from '@workspace/server/auth/access'
 import type { OptionItem } from '@/types/option'
-import type { AssignableRole } from '@/types/user'
+import type { AssignableRole, AssignableRoleFilter } from '@/types/user'
 
 // Both apps run on localhost in development and cookies ignore ports, so the dashboard needs its own prefix
 export const authCookiePrefix = 'kreads-dashboard'
@@ -16,3 +16,5 @@ export const roleOptions: OptionItem<AssignableRole>[] = [
 ]
 
 export const defaultRole: AssignableRole = roleOptions[0].value
+
+export const roleFilterOptions: OptionItem<AssignableRoleFilter>[] = [{ label: '全部分組', value: 'all' }, ...roleOptions]

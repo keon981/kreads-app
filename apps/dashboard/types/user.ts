@@ -27,13 +27,6 @@ export interface UserRow {
   createdAt: Date
 }
 
-export interface UserFilterValues {
-  name: string
-  username: string
-  role: AssignableRoleFilter
-  status: UserStatusFilter
-}
-
 export const UserActionTypeSchema = z.enum(['ban', 'unban', 'revoke', 'remove'])
 
 export type UserActionType = z.infer<typeof UserActionTypeSchema>

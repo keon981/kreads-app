@@ -25,13 +25,10 @@ import { formatDateTime } from '@workspace/ui/lib/format'
 import { DataTableColumnHeader } from '@/components/blocks/data-table'
 import { UserAvatar } from '@/components/ui/user-avatar'
 
-import type { DataTableFeatures } from '@/components/blocks/data-table'
-import type { UserActionType, UserRow, UserStatus } from '@/types/user'
+import { userStatusLabels } from './data'
 
-export const userStatusLabels: Record<UserStatus, string> = {
-  active: '正常',
-  banned: '停權',
-}
+import type { DataTableFeatures } from '@/components/blocks/data-table'
+import type { UserActionType, UserRow } from '@/types/user'
 
 interface UserColumnsOptions {
   isAdmin: boolean
