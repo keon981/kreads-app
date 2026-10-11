@@ -27,15 +27,26 @@ import {
   DataTablePagination,
   DataTableSelectFilter,
   DataTableTextFilter,
-} from '@/components/ui/data-table'
+} from '@/components/blocks/data-table'
+import { RoleEditSheet } from '@/components/blocks/role-edit-sheet'
+import { defaultRole, roleOptions } from '@/configs/auth-config'
 
-import { updateUserAction } from './action'
+import { updateUserAction, updateUserRoleAction } from './action'
 import { getUserColumns, userStatusLabels } from './columns'
 
 import type { OptionItem } from '@/types/option'
-import type { UserActionType, UserFilterValues, UserRow, UserStatus, UserStatusFilter } from '@/types/user'
+import type {
+  AssignableRoleFilter,
+  UserActionType,
+  UserFilterValues,
+  UserRow,
+  UserStatus,
+  UserStatusFilter,
+} from '@/types/user'
 
-const emptyFilters: UserFilterValues = { name: '', username: '', status: 'all' }
+const emptyFilters: UserFilterValues = { name: '', username: '', role: 'all', status: 'all' }
+
+const roleFilterOptions: OptionItem<AssignableRoleFilter>[] = [{ label: '全部分組', value: 'all' }, ...roleOptions]
 
 function getColumnFilters(filters: UserFilterValues): ColumnFiltersState {
   const columnFilters: ColumnFiltersState = []
@@ -44,6 +55,8 @@ function getColumnFilters(filters: UserFilterValues): ColumnFiltersState {
     columnFilters.push({ id: 'name', value: filters.name.trim() })
   if (filters.username.trim())
     columnFilters.push({ id: 'username', value: filters.username.trim() })
+  if (filters.role !== 'all')
+    columnFilters.push({ id: 'role', value: filters.role })
   if (filters.status !== 'all')
     columnFilters.push({ id: 'status', value: filters.status })
 
@@ -63,7 +76,9 @@ interface UsersTableProps {
 export function UsersTable({ users, isAdmin }: UsersTableProps): React.ReactNode {
   const [filters, setFilters] = useState<UserFilterValues>(emptyFilters)
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
+  const [editTarget, setEditTarget] = useState<UserRow | null>(null)
   const { dialogProps: confirmDialogProps, trigger: openConfirm, dismiss: closeConfirm } = useDialog()
+  const { dialogProps: editSheetProps, trigger: openEditSheet, dismiss: closeEditSheet } = useDialog()
   const [isPending, startTransition] = useTransition()
 
   function runAction(type: UserActionType, user: UserRow): void {
@@ -89,6 +104,10 @@ export function UsersTable({ users, isAdmin }: UsersTableProps): React.ReactNode
 
   const columns = getUserColumns({
     isAdmin,
+    onEdit: (user) => {
+      setEditTarget(user)
+      openEditSheet()
+    },
     onAction: (type, user) => {
       if (type === 'ban' || type === 'remove') {
         setPendingAction({ type, user })
@@ -158,6 +177,12 @@ export function UsersTable({ users, isAdmin }: UsersTableProps): React.ReactNode
           />
         ))}
         <DataTableSelectFilter
+          label="分組"
+          options={roleFilterOptions}
+          value={filters.role}
+          onValueChange={role => setFilters(previous => ({ ...previous, role }))}
+        />
+        <DataTableSelectFilter
           label="狀態"
           options={statusOptions}
           value={filters.status}
@@ -165,10 +190,27 @@ export function UsersTable({ users, isAdmin }: UsersTableProps): React.ReactNode
         />
       </DataTableFilterForm>
 
-      <div className="flex min-w-0 flex-col gap-3">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
         <DataTable table={table} emptyText="沒有符合條件的使用者" />
         <DataTablePagination table={table} />
       </div>
+
+      <RoleEditSheet
+        {...editSheetProps}
+        title="編輯使用者"
+        description="變更使用者在主站的權限分組。"
+        formKey={editTarget?.id}
+        fields={[
+          { label: '名稱', value: editTarget?.name ?? '' },
+          { label: 'Username', value: editTarget?.username ?? '未完成註冊' },
+        ]}
+        role={editTarget?.role ?? defaultRole}
+        action={updateUserRoleAction.bind(null, editTarget?.id ?? '')}
+        onSuccess={() => {
+          closeEditSheet()
+          toast.add({ title: '已更新分組', description: editTarget?.name, type: 'success' })
+        }}
+      />
 
       <AlertDialog {...confirmDialogProps}>
         <AlertDialogContent>
