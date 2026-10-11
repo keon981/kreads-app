@@ -1,13 +1,13 @@
 import { Suspense } from 'react'
 
 import { createPostAction, deletePostAction, updatePostAction } from '@/app/server/actions/posts'
-import { IssueComposerItem, PostItem } from '@/components/blocks/issue'
+import { IssueComposerItem, PostItem } from '@/components/blocks/issue/issue-items'
 import { AboutUser } from '@/components/blocks/user'
 import ArticleLayout from '@/components/layout/article-layout'
 import {
   IssueItemGroup,
   IssueItemSkeleton,
-} from '@/components/ui/issue-item'
+} from '@/components/ui/issue'
 import { fetchAccessTokenCache, getSessionCache } from '@/lib/auth'
 import { fetchIssues } from '@/services/api/issues'
 import { fetchUserRepo } from '@/services/user-repo'
