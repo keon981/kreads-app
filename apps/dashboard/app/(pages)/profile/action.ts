@@ -31,10 +31,6 @@ const ChangePasswordSchema = z.object({
   current_password: z.string().min(1, '請輸入目前密碼'),
   new_password: z.string().min(minPasswordLength, `新密碼至少要 ${minPasswordLength} 個字元`),
   confirm_password: z.string(),
-  revoke_other_sessions: z
-    .literal('on')
-    .optional()
-    .transform(Boolean),
 }).refine(data => data.new_password === data.confirm_password, { message: '兩次輸入的新密碼不一致', path: ['confirm_password'] })
 
 export async function changeEmailAction(_prevState: ActionState, formData: FormData): Promise<ActionState> {
@@ -69,11 +65,11 @@ export async function changePasswordAction(_prevState: ActionState, formData: Fo
   const parsedForm = ChangePasswordSchema.safeParse(Object.fromEntries(formData))
   if (!parsedForm.success) return { message: parsedForm.error.issues[0].message }
 
-  const { current_password, new_password, revoke_other_sessions } = parsedForm.data
+  const { current_password, new_password } = parsedForm.data
 
   try {
     await auth.api.changePassword({
-      body: { currentPassword: current_password, newPassword: new_password, revokeOtherSessions: revoke_other_sessions },
+      body: { currentPassword: current_password, newPassword: new_password, revokeOtherSessions: true },
       headers: await headers(),
     })
   } catch (error) {

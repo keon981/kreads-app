@@ -9,7 +9,6 @@ import { Input } from '@workspace/ui/components/input'
 import { Password } from '@workspace/ui/components/password'
 import { Spinner } from '@workspace/ui/components/spinner'
 
-import { SwitchField } from '@/components/ui/field'
 import { SectionCard } from '@/components/ui/section-card'
 
 import { changeEmailAction, changePasswordAction } from './action'
@@ -68,7 +67,7 @@ export function AccountSettings({ email, isViewer }: AccountSettingsProps): Reac
     <>
       {isViewer && (
         <p className="rounded-lg border border-dashed px-4 py-3 text-sm text-muted-foreground">
-          遊客帳號是公開帳號，無法修改登入 Email 與密碼。
+          公開帳號無法修改登入 Email 與密碼。
         </p>
       )}
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
@@ -108,13 +107,6 @@ export function AccountSettings({ email, isViewer }: AccountSettingsProps): Reac
               <Password id={name} name={name} autoComplete={autoComplete} required />
             </Field>
           ))}
-          <SwitchField
-            id="revoke_other_sessions"
-            name="revoke_other_sessions"
-            label="登出其他裝置"
-            description="更新後，其他裝置上的登入會失效。"
-            disabled={isViewer}
-          />
         </AccountForm>
       </div>
     </>
