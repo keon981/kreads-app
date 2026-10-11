@@ -7,7 +7,7 @@ import { Bar, BarChart, CartesianGrid, LabelList, Line, LineChart, XAxis, YAxis 
 import { SectionCard } from '@/components/ui/section-card'
 
 import type { ChartConfig } from '@workspace/ui/components/chart'
-import type { DailyActivity, InviterRank } from './types'
+import type { DailyActivity, InviterRank } from '@/types/stats'
 
 const chartConfig: ChartConfig = {
   registrations: { label: '新註冊', color: 'var(--chart-2)' },

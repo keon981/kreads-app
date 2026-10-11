@@ -4,3 +4,5 @@ import type { Role } from '@workspace/server/auth/access'
 export const authCookiePrefix = 'kreads-dashboard'
 
 export const dashboardRoles: Role[] = ['admin', 'viewer']
+
+export const minPasswordLength = 6

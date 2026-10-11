@@ -6,7 +6,8 @@ import { paths } from '@/configs/path-config'
 import { SignInForm } from './form'
 
 export default async function SignInPage(): Promise<React.ReactNode> {
-  if (await getSession()) redirect(paths.dashboard)
+  const session = await getSession()
+  if (session) redirect(paths.dashboard)
 
   return <SignInForm />
 }

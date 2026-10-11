@@ -1,4 +1,4 @@
-import type { InviteRedeemer } from '@/app/(pages)/keys/types'
+import type { InviteRedeemer } from './invite'
 
 export interface DailyActivity {
   /** MM/DD */

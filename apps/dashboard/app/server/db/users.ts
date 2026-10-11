@@ -2,7 +2,7 @@ import { db } from '@workspace/server/db/client'
 import { account, session, user } from '@workspace/server/db/schema/auth-schema'
 import { and, count, desc, eq, exists, gt, max } from 'drizzle-orm'
 
-import type { UserRow, UserStatus } from '@/app/(pages)/users/types'
+import type { UserRow, UserStatus } from '@/types/user'
 
 import 'server-only'
 

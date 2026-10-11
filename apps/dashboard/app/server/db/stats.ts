@@ -11,7 +11,13 @@ import { isGithubUser } from '@/app/server/db/users'
 
 import type { SQL } from 'drizzle-orm'
 import type { PgColumn } from 'drizzle-orm/pg-core'
-import type { ActivityUser, DailyActivity, DashboardStats, InviterRank, RedeemedInvite } from '@/app/(pages)/dashboard/types'
+import type {
+  ActivityUser,
+  DailyActivity,
+  DashboardStats,
+  InviterRank,
+  RedeemedInvite,
+} from '@/types/stats'
 
 import 'server-only'
 

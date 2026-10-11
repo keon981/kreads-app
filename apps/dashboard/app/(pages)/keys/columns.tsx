@@ -12,10 +12,13 @@ import { CopyButton } from '@/components/ui/copy-button'
 import { DataTableColumnHeader } from '@/components/ui/data-table'
 import { UserAvatar } from '@/components/ui/user-avatar'
 
-import { inviteStatusLabels } from './utils'
-
 import type { DataTableFeatures } from '@/components/ui/data-table'
-import type { InviteRow } from './types'
+import type { InviteRow, InviteStatus } from '@/types/invite'
+
+export const inviteStatusLabels: Record<InviteStatus, string> = {
+  unused: '未使用',
+  redeemed: '已核銷',
+}
 
 interface InviteColumnsOptions {
   isAdmin: boolean

@@ -5,7 +5,7 @@ import { and, desc, eq, isNull } from 'drizzle-orm'
 
 import { isGithubUser } from '@/app/server/db/users'
 
-import type { InviteRow } from '@/app/(pages)/invites/types'
+import type { InviteRow } from '@/types/invite'
 
 import 'server-only'
 

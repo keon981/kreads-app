@@ -6,7 +6,7 @@ import { APIError, createAuthMiddleware, getSessionFromCtx } from 'better-auth/a
 import { betterAuth } from 'better-auth/minimal'
 import { eq } from 'drizzle-orm'
 
-import { authCookiePrefix, dashboardRoles } from '@/configs/auth-config'
+import { authCookiePrefix, dashboardRoles, minPasswordLength } from '@/configs/auth-config'
 
 import { env } from './env'
 
@@ -25,7 +25,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     disableSignUp: true,
-    minPasswordLength: 6,
+    minPasswordLength,
   },
   advanced: {
     cookiePrefix: authCookiePrefix,

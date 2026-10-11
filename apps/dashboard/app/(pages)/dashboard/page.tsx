@@ -29,7 +29,7 @@ import { UserAvatar } from '@/components/ui/user-avatar'
 import { ChartsCard } from './charts-card'
 import { RefreshButton } from './refresh-button'
 
-import type { ActivityUser, DailyActivity } from './types'
+import type { ActivityUser, DailyActivity } from '@/types/stats'
 
 interface ActivityUserListProps {
   users: ActivityUser[]

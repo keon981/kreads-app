@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import { RiArrowUpDownLine, RiCommandLine } from '@remixicon/react'
+import { RiArrowUpDownLine } from '@remixicon/react'
 import { DropdownMenu, DropdownMenuTrigger } from '@workspace/ui/components/dropdown-menu'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@workspace/ui/components/sheet'
 import {
@@ -24,7 +24,6 @@ import {
 import { UserMenuContent, UserSummary } from '@/components/layout/user-menu'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { getActiveNavItem, navGroups } from '@/configs/nav-config'
-import { paths } from '@/configs/path-config'
 import { env } from '@/lib/env'
 
 import type { SessionUser } from '@/types/user'

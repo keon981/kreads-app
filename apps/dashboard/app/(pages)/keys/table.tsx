@@ -30,11 +30,10 @@ import {
 } from '@/components/ui/data-table'
 
 import { deleteInviteAction } from './action'
-import { getInviteColumns } from './columns'
-import { inviteStatusLabels } from './utils'
+import { getInviteColumns, inviteStatusLabels } from './columns'
 
+import type { InviteFilterValues, InviteRow, InviteStatus, InviteStatusFilter } from '@/types/invite'
 import type { OptionItem } from '@/types/option'
-import type { InviteFilterValues, InviteRow, InviteStatus, InviteStatusFilter } from './types'
 
 const emptyFilters: InviteFilterValues = { note: '', status: 'all' }
 

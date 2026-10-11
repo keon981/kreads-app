@@ -30,11 +30,10 @@ import {
 } from '@/components/ui/data-table'
 
 import { updateUserAction } from './action'
-import { getUserColumns } from './columns'
-import { userStatusLabels } from './utils'
+import { getUserColumns, userStatusLabels } from './columns'
 
 import type { OptionItem } from '@/types/option'
-import type { UserActionType, UserFilterValues, UserRow, UserStatus, UserStatusFilter } from './types'
+import type { UserActionType, UserFilterValues, UserRow, UserStatus, UserStatusFilter } from '@/types/user'
 
 const emptyFilters: UserFilterValues = { name: '', username: '', status: 'all' }
 
