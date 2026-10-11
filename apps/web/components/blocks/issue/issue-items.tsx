@@ -41,6 +41,8 @@ import type { Issue, IssueComment } from '@/types/issue'
 import type { DropdownMenuItemOnClick } from './issue-actions'
 import type { IssueFormDialogProps } from './issue-form-dialog'
 
+const POST_EXCERPT_LENGTH = 500
+
 function toastActionState(res: ActionState) {
   toast.add({
     type: res.status && res.status < HttpStatusCode.BadRequest ? 'success' : 'error',
@@ -188,6 +190,10 @@ function PostItem({
 } & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>) {
   const router = useRouter()
 
+  // Count code points so emoji aren't split
+  const bodyChars = Array.from(post.bodyText)
+  const isTruncated = bodyChars.length > POST_EXCERPT_LENGTH
+
   const getCopyUrl = () => {
     const path = (href || chatHref(post)).replace(/^\//, '')
     return `${window.location.origin}/${path}`
@@ -226,7 +232,17 @@ function PostItem({
           </div>
           <IssueBaseMenu />
         </IssueItemTitle>
-        <IssueItemArticle html={post.bodyHTML} />
+        {isTruncated
+          ? (
+              <IssueItemArticle className="whitespace-pre-line">
+                {bodyChars.slice(0, POST_EXCERPT_LENGTH).join('')}
+                …
+                <Link href={href || chatHref(post)} className="text-muted-foreground no-underline hover:underline">
+                  展開
+                </Link>
+              </IssueItemArticle>
+            )
+          : <IssueItemArticle html={post.bodyHTML} />}
         <IssueBaseFooter
           actions={[
             {

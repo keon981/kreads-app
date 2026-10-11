@@ -149,16 +149,17 @@ function IssueItemTitle({ children, className, ...props }: React.ComponentProps<
   )
 }
 
-function IssueItemArticle({ html, className, ...props }: React.ComponentProps<'div'> & { html: string }) {
-  return (
-    <div
-      data-slot="item-description"
-      className={cn('mt-1 ps-2.5 pt-1 typeset typeset-post wrap-break-word', className)}
-      // eslint-disable-next-line react/dom-no-dangerously-set-innerhtml
-      dangerouslySetInnerHTML={{ __html: html }}
-      {...props}
-    />
-  )
+function IssueItemArticle({ html, className, children, ...props }: React.ComponentProps<'div'> & { html?: string }) {
+  const articleProps = {
+    'data-slot': 'item-description',
+    'className': cn('mt-1 ps-2.5 pt-1 typeset typeset-post wrap-break-word', className),
+    ...props,
+  }
+
+  if (html === undefined) return <div {...articleProps}>{children}</div>
+
+  // eslint-disable-next-line react/dom-no-dangerously-set-innerhtml
+  return <div {...articleProps} dangerouslySetInnerHTML={{ __html: html }} />
 }
 
 function IssueItemFooter({ ...props }: React.ComponentProps<typeof ButtonGroup>) {
