@@ -1,0 +1,34 @@
+{
+  "name": "@workspace/server",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "typecheck": "tsc --noEmit",
+    "drizzle:generate": "vpx drizzle-kit generate",
+    "drizzle:migrate": "vpx drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.7.3",
+    "@neondatabase/serverless": "^1.1.0",
+    "better-auth": "^1.7.3",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^1.0.0-rc.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "drizzle-kit": "1.0.0-rc.4",
+    "eslint": "^9",
+    "typescript": "^5"
+  },
+  "exports": {
+    "./auth/*": "./src/auth/*.ts",
+    "./db/client": "./src/db/client.ts",
+    "./db/schema/*": "./src/db/schema/*.ts",
+    "./types/*": "./src/types/*.ts"
+  }
+}

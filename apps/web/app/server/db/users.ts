@@ -1,7 +1,7 @@
 import { cacheLife, cacheTag } from 'next/cache'
 
-import { db } from '@workspace/db/client'
-import { user } from '@workspace/db/schema/auth-schema'
+import { db } from '@workspace/server/db/client'
+import { user } from '@workspace/server/db/schema/auth-schema'
 import { eq } from 'drizzle-orm'
 
 import { getViewerUser } from '@/utils/user'

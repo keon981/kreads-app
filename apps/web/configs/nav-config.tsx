@@ -38,7 +38,7 @@ import { useTheme } from 'next-themes'
 
 import { createPostAction } from '@/app/server/actions/posts'
 import { AuthDialogTrigger } from '@/components/auth/auth-dialog-trigger'
-import { IssueFormDialog } from '@/components/blocks/issue'
+import { IssueFormDialog } from '@/components/blocks/issue/issue-form-dialog'
 import { LinkNavItem, NoticeNavItem } from '@/components/blocks/nav-item'
 import { homePaths, paths } from '@/configs/path-config'
 import { useAuth } from '@/contexts/auth-provider'

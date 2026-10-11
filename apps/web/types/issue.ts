@@ -3,6 +3,7 @@ interface Issue {
   title: string
   body: string
   bodyHTML: string
+  bodyText: string
   createdAt: string
   author: {
     login: string

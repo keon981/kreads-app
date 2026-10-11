@@ -13,6 +13,13 @@
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@remixicon/react": "^4.9.0",
+    "@tiptap/extension-paragraph": "3.31.4",
+    "@tiptap/extension-underline": "3.31.4",
+    "@tiptap/extensions": "3.31.4",
+    "@tiptap/markdown": "3.31.4",
+    "@tiptap/pm": "3.31.4",
+    "@tiptap/react": "3.31.4",
+    "@tiptap/starter-kit": "3.31.4",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
     "es-toolkit": "^1.52.0",
