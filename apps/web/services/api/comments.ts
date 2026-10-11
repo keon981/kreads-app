@@ -1,11 +1,11 @@
-import { PAGE_SIZE } from '@/configs/constants'
-
 import { ISSUE_COMMENTS_QUERY } from '../graphql/comments'
 import { isViewerReacted } from './reactions'
 
 import type { IssueComment } from '@/types/issue'
 import type { UserRepo } from '@/types/user'
 import type { GraphqlIssueComment, GraphqlIssueCommentsResponse } from '../graphql/comments'
+
+const perPage = 100
 
 /* === utils === */
 
@@ -57,7 +57,7 @@ async function fetchIssueCommentsWithRest(
     owner,
     repo,
     issue_number: issueNumber,
-    per_page: PAGE_SIZE.comments,
+    per_page: perPage,
     mediaType: { format: 'full' }, // return body & body_html
   })
   return data.map(toIssueComment)
@@ -71,7 +71,7 @@ async function fetchIssueCommentsWithGraphql(
     owner,
     repo,
     number: issueNumber,
-    first: PAGE_SIZE.comments,
+    first: perPage,
   })
   return repository.issue.comments.nodes.map(toIssueCommentFromGraphql)
 }

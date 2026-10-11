@@ -1,22 +1,17 @@
 import { env } from '@/lib/env'
 
-interface Paths {
-  readonly home: string
-  readonly signIn: string
-  readonly signUp: string
-  readonly profile: string
-  readonly user: (login: string) => string
-  readonly post: (login: string, number: number) => string
-}
-
-export const paths: Paths = {
+export const paths = {
   home: '/',
   signIn: '/sign-in',
   signUp: '/sign-up',
   profile: '/profile',
-  user: login => `/@${login}`,
-  post: (login, number) => `/@${login}/post/${number}`,
-}
+  user: (login: string) => `/@${login}`,
+  post: (login: string, number: number) => `/@${login}/post/${number}`,
+} as const
+
+export const api = {
+  signOut: '/api/sign-out',
+} as const
 
 export const homePaths: readonly string[] = [paths.home, `/${env.NEXT_PUBLIC_HOME_USERNAME}`]
 

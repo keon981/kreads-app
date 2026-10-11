@@ -1,10 +1,10 @@
-import { db } from '@workspace/db/client'
-import { user } from '@workspace/db/schema/auth-schema'
-import { inviteCode as inviteCodeTable } from '@workspace/db/schema/invite-schema'
+import { hasRole } from '@workspace/server/auth/access'
+import { db } from '@workspace/server/db/client'
+import { user } from '@workspace/server/db/schema/auth-schema'
+import { inviteCode as inviteCodeTable } from '@workspace/server/db/schema/invite-schema'
 import { and, count, eq, isNull } from 'drizzle-orm'
 
 import { env } from '@/lib/env'
-import { isAdminRole } from '@/utils/user'
 
 import type { InviteCodeStatus, RedeemResult } from '@/types/invite'
 
@@ -21,7 +21,7 @@ async function getUserInviteCodeStatus(code: string): Promise<UserInviteCodeResu
     .where(eq(user.inviteCode, code))
     .limit(1)
   if (!inviter) return { status: 'invalid' }
-  if (isAdminRole(inviter.role)) return { status: 'valid', inviterId: inviter.id }
+  if (hasRole(inviter.role, 'admin')) return { status: 'valid', inviterId: inviter.id }
 
   const [{ invited }] = await db
     .select({ invited: count() })
@@ -49,14 +49,17 @@ async function redeemInviteCode(code: string, userId: string): Promise<RedeemRes
     .update(inviteCodeTable)
     .set({ redeemedBy: userId, redeemedAt: new Date() })
     .where(and(eq(inviteCodeTable.code, code), isNull(inviteCodeTable.redeemedAt)))
-    .returning({ id: inviteCodeTable.id })
-  if (redeemed.length > 0) return { status: 'valid', invitedBy: null }
+    .returning({ role: inviteCodeTable.role })
+  if (redeemed.length > 0) {
+    const role = hasRole(redeemed[0].role, 'admin') ? 'admin' : 'user'
+    return { status: 'valid', invitedBy: null, role }
+  }
 
   const result = await getUserInviteCodeStatus(code)
   if (result.status !== 'valid') return result
   if (result.inviterId === userId) return { status: 'invalid' }
 
-  return { status: 'valid', invitedBy: result.inviterId }
+  return { status: 'valid', invitedBy: result.inviterId, role: 'user' }
 }
 
 export {

@@ -1,4 +1,4 @@
-import { HttpStatusCode, PAGE_SIZE } from '@/configs/constants'
+import { HttpStatusCode } from '@/configs/constants'
 import { isGraphqlNotFoundError, isRequestError } from '@/utils/toolkit'
 
 import { ISSUE_QUERY, ISSUES_QUERY } from '../graphql/issues'
@@ -8,7 +8,32 @@ import type { Issue } from '@/types/issue'
 import type { UserRepo } from '@/types/user'
 import type { GraphqlIssue, GraphqlIssueResponse, GraphqlIssuesResponse } from '../graphql/issues'
 
+const perPage = 20
+
 /* === utils === */
+
+const HTML_ENTITIES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: '\'',
+  nbsp: ' ',
+}
+
+// Plain text from GitHub's sanitized body_html, keeping line breaks between blocks
+function getTextFromHtml(html: string): string {
+  return html
+    .replace(/<br\s*\/?>|<\/(?:p|li|h[1-6]|blockquote|pre|div|tr)>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&(?:#(\d+)|#x([\da-f]+)|(\w+));/gi, (entity, dec?: string, hex?: string, name?: string) => {
+      if (dec) return String.fromCodePoint(Number(dec))
+      if (hex) return String.fromCodePoint(Number.parseInt(hex, 16))
+      return HTML_ENTITIES[name?.toLowerCase() ?? ''] ?? entity
+    })
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
 
 function toIssueFromRest(issue: {
   number: number
@@ -30,6 +55,7 @@ function toIssueFromRest(issue: {
     title: issue.title,
     body: issue.body ?? '',
     bodyHTML: issue.body_html ?? '',
+    bodyText: getTextFromHtml(issue.body_html ?? ''),
     createdAt: issue.created_at,
     author: issue.user
       ? { login: issue.user.login, avatarUrl: issue.user.avatar_url }
@@ -46,6 +72,7 @@ function toIssueFromGraphql(issue: GraphqlIssue): Issue {
     title: issue.title,
     body: issue.body,
     bodyHTML: issue.bodyHTML,
+    bodyText: getTextFromHtml(issue.bodyHTML),
     createdAt: issue.createdAt,
     author: issue.author,
     reactionCount: issue.reactions.totalCount,
@@ -68,7 +95,7 @@ async function fetchIssuesWithRest(
       state: 'open',
       sort: 'created',
       direction: 'desc',
-      per_page: PAGE_SIZE.issues,
+      per_page: perPage,
       mediaType: { format: 'full' }, // return body & body_html
     })
 
@@ -88,7 +115,7 @@ async function fetchIssuesWithGraphql({ octokit, owner, repo }: UserRepo,
     const { repository } = await octokit.graphql<GraphqlIssuesResponse>(ISSUES_QUERY, {
       owner,
       repo,
-      first: PAGE_SIZE.issues,
+      first: perPage,
     })
 
     return repository.issues.nodes.map(toIssueFromGraphql)

@@ -3,8 +3,8 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import type { NextRequest } from 'next/server'
 
-import { db } from '@workspace/db/client'
-import { user } from '@workspace/db/schema/auth-schema'
+import { db } from '@workspace/server/db/client'
+import { user } from '@workspace/server/db/schema/auth-schema'
 import { eq } from 'drizzle-orm'
 
 import { redeemInviteCode } from '@/app/server/db/invites'
@@ -76,6 +76,7 @@ export async function GET(request: NextRequest) {
       username,
       inviteCode: generateInviteCode(),
       invitedBy: redeemed.invitedBy,
+      role: redeemed.role,
     })
     .where(eq(user.id, session.user.id))
 

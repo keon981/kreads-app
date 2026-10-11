@@ -1,4 +1,4 @@
-import { REACTION_EMOJI } from '@/configs/constants'
+import { env } from '@/lib/env'
 
 import type { GraphqlReactionGroup } from './issues'
 
@@ -39,7 +39,7 @@ const ISSUE_COMMENTS_QUERY = `
             bodyHTML
             createdAt
             author { login avatarUrl }
-            reactions(content: ${REACTION_EMOJI.toUpperCase()}) { totalCount }
+            reactions(content: ${env.REACTION_EMOJI.toUpperCase()}) { totalCount }
             reactionGroups { content viewerHasReacted }
           }
         }

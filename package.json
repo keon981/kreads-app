@@ -4,14 +4,16 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "vp run -F web dev",
+    "dev": "vp run -F './apps/*' --parallel --log labeled dev",
+    "dev:web": "vp run web#dev",
+    "dev:dashboard": "vp run dashboard#dev",
     "storybook": "vp run -F @workspace/ui storybook",
     "build": "vp run -r build",
     "lint": "vp run -r lint",
     "lint:fix": "vp run -r lint:fix",
     "typecheck": "vp run -r typecheck",
-    "drizzle:generate": "vp run -F @workspace/db drizzle:generate",
-    "drizzle:migrate": "vp run -F @workspace/db drizzle:migrate"
+    "drizzle:generate": "vp run -F @workspace/server drizzle:generate",
+    "drizzle:migrate": "vp run -F @workspace/server drizzle:migrate"
   },
   "devDependencies": {
     "@workspace/typescript-config": "workspace:*"

@@ -1,12 +1,12 @@
 import { cookies, headers } from 'next/headers'
 import { userAgent } from 'next/server'
 
-import { VIEWPORT_COOKIE } from '@/configs/constants'
+import { viewportCookie } from '@workspace/ui/configs/cookie-config'
 
 import 'server-only'
 
 export async function getInitialIsMobile(): Promise<boolean> {
-  const viewport = (await cookies()).get(VIEWPORT_COOKIE.name)?.value
+  const viewport = (await cookies()).get(viewportCookie.name)?.value
   if (viewport === 'mobile') return true
   if (viewport === 'desktop') return false
 

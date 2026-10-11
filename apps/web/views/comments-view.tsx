@@ -4,12 +4,12 @@ import { Suspense } from 'react'
 
 import { createCommentAction, deleteCommentAction, updateCommentAction } from '@/app/(pages)/[id]/post/[number]/action'
 import { deletePostAction, updatePostAction } from '@/app/server/actions/posts'
-import { CommentItem, IssueComposerItem } from '@/components/blocks/issue'
+import { CommentItem, IssueComposerItem } from '@/components/blocks/issue/issue-items'
 import ArticleLayout from '@/components/layout/article-layout'
 import {
   IssueItemGroup,
   IssueItemSkeleton,
-} from '@/components/ui/issue-item'
+} from '@/components/ui/issue'
 import { fetchAccessTokenCache, verifySession } from '@/lib/auth'
 import { fetchIssueComments } from '@/services/api/comments'
 import { fetchIssue } from '@/services/api/issues'
@@ -71,6 +71,7 @@ export async function IssueDetailView({ user, issueNumber }: IssueDetailViewProp
           target={{ repoName, issueNumber }}
           isOwner={isOwner}
           editTitle="編輯貼文"
+          isRefreshable
           reaction={{ reactionCount: issue.reactionCount, isReacted: issue.isReacted }}
           reply={{ action: createCommentAction, count: issue.commentCount }}
           updateAction={updatePostAction}
