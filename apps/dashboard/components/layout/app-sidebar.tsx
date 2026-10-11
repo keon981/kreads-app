@@ -51,23 +51,7 @@ function AppSidebarBody({ user, isMobile = false }: AppSidebarBodyProps): React.
 
   return (
     <>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              className={menuButtonClassName}
-              render={<Link href={paths.dashboard} onClick={handleNavigate} />}
-            >
-              <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <RiCommandLine className="size-4!" />
-              </div>
-              <span className="font-heading text-base font-semibold">{env.NEXT_PUBLIC_APP_TITLE}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
+      <SidebarHeader className="h-4" />
       <SidebarContent>
         {navGroups.map(group => (
           <SidebarGroup key={group.label}>
@@ -139,7 +123,10 @@ export function AppSidebar({ user }: AppSidebarProps): React.ReactNode {
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+    <Sidebar
+      collapsible="icon"
+      className="top-(--header-height,3.5rem)! h-[calc(100svh-var(--header-height,3.5rem))]"
+    >
       <AppSidebarBody user={user} />
       <SidebarRail />
     </Sidebar>

@@ -18,7 +18,7 @@ export async function createInviteAction(_prevState: CreateInviteState, formData
   const note = `${formData.get('note') ?? ''}`.trim()
   await insertInvite(code, note || null)
 
-  revalidatePath(paths.invites)
+  revalidatePath(paths.keys)
   return { code }
 }
 
@@ -26,6 +26,6 @@ export async function deleteInviteAction(id: string): Promise<ActionState> {
   await verifyAdmin()
   if (!await deleteUnusedInvite(id)) return { message: '已使用的邀請碼無法刪除' }
 
-  revalidatePath(paths.invites)
+  revalidatePath(paths.keys)
   return {}
 }

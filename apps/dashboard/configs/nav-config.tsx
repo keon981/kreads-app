@@ -28,13 +28,8 @@ export const navGroups: NavGroup[] = [
     label: '控制台',
     items: [
       { title: '儀表板', href: paths.dashboard, icon: RiDashboard3Line },
-    ],
-  },
-  {
-    label: '管理',
-    items: [
-      { title: '使用者管理', href: paths.users, icon: RiTeamLine },
-      { title: '邀請碼管理', href: paths.invites, icon: RiCoupon3Line },
+      { title: '使用者', href: paths.users, icon: RiTeamLine },
+      { title: '邀請碼', href: paths.keys, icon: RiCoupon3Line },
     ],
   },
   {

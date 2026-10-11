@@ -40,7 +40,7 @@ export default async function ProfilePage(): Promise<React.ReactNode> {
             <div className="flex min-w-0 flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-heading text-xl font-semibold tracking-tight">{user.name}</h2>
-                <Badge variant={isViewer ? 'outline' : 'default'}>{isViewer ? '管理員' : '我啦我'}</Badge>
+                <Badge variant={isViewer ? 'outline' : 'default'}>{isViewer ? 'user' : '最高意志'}</Badge>
               </div>
               <p className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground [&_svg]:size-4 [&_svg]:shrink-0">
                 <RiMailLine />

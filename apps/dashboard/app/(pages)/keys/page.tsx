@@ -14,8 +14,7 @@ export default async function InvitesPage(): Promise<React.ReactNode> {
 
   return (
     <SectionPageLayout
-      title="邀請碼管理"
-      description="建立一次性邀請碼，追蹤每組碼的使用狀態。"
+      title="邀請碼"
       actions={isAdmin && <CreateInviteDialog />}
     >
       <InvitesTable invites={invites} isAdmin={isAdmin} />

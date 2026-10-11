@@ -14,13 +14,20 @@ export default async function PagesLayout({
   return (
     <SidebarProvider
       defaultOpen
-      style={{ '--sidebar-width': '16rem', '--sidebar-width-icon': '3.5rem' } as React.CSSProperties}
+      className="flex-col"
+      style={{
+        '--sidebar-width': '16rem',
+        '--sidebar-width-icon': '3.5rem',
+        '--header-height': '4rem',
+      } as React.CSSProperties}
     >
-      <AppSidebar user={user} />
-      <SidebarInset className="min-w-0">
-        <AppHeader user={user} />
-        {children}
-      </SidebarInset>
+      <AppHeader user={user} />
+      <div className="flex flex-1">
+        <AppSidebar user={user} />
+        <SidebarInset className="min-w-0">
+          {children}
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   )
 }

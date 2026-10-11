@@ -1,15 +1,6 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
-
-import { RiMoonLine, RiSearchLine, RiSunLine } from '@remixicon/react'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@workspace/ui/components/breadcrumb'
+import { RiCommandLine, RiMoonLine, RiSearchLine, RiSunLine } from '@remixicon/react'
 import { Button } from '@workspace/ui/components/button'
 import { DropdownMenu, DropdownMenuTrigger } from '@workspace/ui/components/dropdown-menu'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@workspace/ui/components/input-group'
@@ -19,7 +10,7 @@ import { useTheme } from 'next-themes'
 
 import { UserMenuContent } from '@/components/layout/user-menu'
 import { UserAvatar } from '@/components/ui/user-avatar'
-import { getActiveNavItem, navGroups } from '@/configs/nav-config'
+import { env } from '@/lib/env'
 
 import type { SessionUser } from '@/types/user'
 
@@ -28,31 +19,16 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ user }: AppHeaderProps): React.ReactNode {
-  const pathname = usePathname()
   const { resolvedTheme, setTheme } = useTheme()
-  const activeItem = getActiveNavItem(pathname)
-  const activeGroup = navGroups.find(group => group.items.some(item => item.href === activeItem?.href))
 
   return (
-    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
+    <header className="sticky top-0 z-20 flex h-18 shrink-0 items-center gap-2 bg-background/80 px-4 backdrop-blur">
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="mr-2 data-vertical:h-4 data-vertical:self-center" />
-
-      <Breadcrumb>
-        <BreadcrumbList>
-          {activeGroup && (
-            <>
-              <BreadcrumbItem className="hidden md:block">{activeGroup.label}</BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-            </>
-          )}
-          {activeItem && (
-            <BreadcrumbItem>
-              <BreadcrumbPage>{activeItem.title}</BreadcrumbPage>
-            </BreadcrumbItem>
-          )}
-        </BreadcrumbList>
-      </Breadcrumb>
+      <Button variant="ghost" className="hover:bg-muted rounded-full">
+        <RiCommandLine />
+        {env.NEXT_PUBLIC_APP_TITLE}
+      </Button>
 
       <div className="ml-auto flex items-center gap-2">
         <InputGroup className="hidden w-56 md:flex">
