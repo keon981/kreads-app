@@ -1,9 +1,8 @@
 'use client'
 
-import { RiCommandLine, RiMoonLine, RiSearchLine, RiSunLine } from '@remixicon/react'
+import { RiCommandLine, RiMoonLine, RiSunLine } from '@remixicon/react'
 import { Button } from '@workspace/ui/components/button'
 import { DropdownMenu, DropdownMenuTrigger } from '@workspace/ui/components/dropdown-menu'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@workspace/ui/components/input-group'
 import { Separator } from '@workspace/ui/components/separator'
 import { SidebarTrigger } from '@workspace/ui/components/sidebar'
 import { useTheme } from 'next-themes'
@@ -31,12 +30,6 @@ export function AppHeader({ user }: AppHeaderProps): React.ReactNode {
       </Button>
 
       <div className="ml-auto flex items-center gap-2">
-        <InputGroup className="hidden w-56 md:flex">
-          <InputGroupAddon>
-            <RiSearchLine />
-          </InputGroupAddon>
-          <InputGroupInput placeholder="搜尋…" aria-label="搜尋" />
-        </InputGroup>
         <Button
           variant="ghost"
           size="icon"
