@@ -22,8 +22,8 @@ export function AppHeader({ user }: AppHeaderProps): React.ReactNode {
 
   return (
     <header className="sticky top-0 z-20 flex h-(--header-height) shrink-0 items-center gap-2 bg-background/80 px-4 backdrop-blur">
-      <SidebarTrigger className="-ml-1" />
-      <Separator orientation="vertical" className="mr-2 data-vertical:h-4 data-vertical:self-center" />
+      <SidebarTrigger className="-ml-1 max-md:hidden" />
+      <Separator orientation="vertical" className="mr-2 data-vertical:h-4 data-vertical:self-center max-md:hidden" />
       <Button variant="ghost" className="hover:bg-muted rounded-full">
         <RiCommandLine />
         {env.NEXT_PUBLIC_APP_TITLE}

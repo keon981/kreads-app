@@ -24,7 +24,7 @@ export default async function PagesLayout({
       <AppHeader user={user} />
       <div className="flex flex-1">
         <AppSidebar user={user} />
-        <SidebarInset className="min-w-0">
+        <SidebarInset className="min-w-0 max-md:pb-14">
           {children}
         </SidebarInset>
       </div>
