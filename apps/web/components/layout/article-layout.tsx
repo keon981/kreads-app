@@ -4,80 +4,82 @@ import Link from 'next/link'
 
 import React from 'react'
 
-import { RiCommandLine, RiMenu2Line } from '@remixicon/react'
+import { RiArrowLeftLine, RiCommandLine, RiMenu2Line } from '@remixicon/react'
 import { Button } from '@workspace/ui/components/button'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@workspace/ui/components/sheet'
+import { Drawer, DrawerSwipeArea, DrawerTrigger } from '@workspace/ui/components/drawer'
 import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
 import { cn } from '@workspace/ui/lib/utils'
 
-import { settings } from '@/configs/nav-config'
+import { SettingsDrawerContent } from '@/components/blocks/settings-drawer'
 import { paths } from '@/configs/path-config'
 import { useAuth } from '@/contexts/auth-provider'
 
 import { SignInButton, SignInCard } from '../blocks/sign-in'
 
+import type { BaseUIEvent } from '@base-ui/react/types'
+
 function MobileHeader(): React.ReactNode {
   const { isAuth } = useAuth()
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [view, setView] = React.useState('menu')
+
+  const handleTriggerClick = (event: BaseUIEvent<React.MouseEvent<HTMLButtonElement>>): void => {
+    if (!isOpen || view === 'menu') return
+
+    event.preventBaseUIHandler()
+    setView('menu')
+  }
 
   return (
-    <div className="flex w-full h-full items-center justify-between px-4">
-      {/* Settings */}
-      <div className="flex items-center justify-start w-20">
-        <Sheet>
-          <SheetTrigger render={<Button variant="ghost" size="icon-lg" aria-label="設定" />}>
-            <RiMenu2Line />
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72 sm:max-w-xs">
-            <SheetHeader>
-              <SheetTitle>設定</SheetTitle>
-              <SheetDescription>外觀與系統選項</SheetDescription>
-            </SheetHeader>
-            <div className="flex flex-col gap-6 px-4">
-              {settings.main.map(({ id, Section }) => (
-                <Section key={id} />
-              ))}
-            </div>
-            <SheetFooter className="gap-6">
-              {settings.footer.map(({ id, Section }) => (
-                <Section key={id} />
-              ))}
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
-      </div>
+    <Drawer
+      swipeDirection="left"
+      modal={false}
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      onOpenChangeComplete={(open) => {
+        if (!open) setView('menu')
+      }}
+    >
+      <DrawerSwipeArea className="fixed top-0 left-0 z-30 h-dvh w-6" />
+      <div className="flex w-full h-full items-center justify-between px-4">
+        {/* Settings */}
+        <div className="flex items-center justify-start w-20">
+          <DrawerTrigger
+            render={<Button variant="ghost" size="icon-lg" />}
+            onClick={handleTriggerClick}
+            className="aria-expanded:bg-transparent"
+            aria-label={isOpen ? '返回' : '設定'}
+          >
+            {isOpen ? <RiArrowLeftLine /> : <RiMenu2Line />}
+          </DrawerTrigger>
+        </div>
 
-      {/* Logo */}
-      <div className="flex items-center justify-center">
-        <Link
-          href={paths.home}
-          className="flex items-center justify-center text-foreground hover:opacity-80 transition-opacity"
-          aria-label="Home"
-        >
-          <RiCommandLine className="size-8" />
-        </Link>
-      </div>
+        {/* Logo */}
+        <div className="flex items-center justify-center">
+          <Link
+            href={paths.home}
+            className="flex items-center justify-center text-foreground hover:opacity-80 transition-opacity"
+            aria-label="Home"
+          >
+            <RiCommandLine className="size-8" />
+          </Link>
+        </div>
 
-      {/* Sign in or Spacer */}
-      <div className="flex items-center justify-end w-20">
-        {!isAuth
-          ? (
+        {/* Sign in or Spacer */}
+        <div className="flex items-center justify-end w-20">
+          {!isAuth
+            ? (
               <SignInButton className="h-8 px-3 text-xs font-semibold rounded-full">
                 登入
               </SignInButton>
             )
-          : (
+            : (
               <div className="size-9" />
             )}
+        </div>
       </div>
-    </div>
+      <SettingsDrawerContent view={view} onViewChange={setView} />
+    </Drawer>
   )
 }
 

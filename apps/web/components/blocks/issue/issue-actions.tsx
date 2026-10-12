@@ -27,6 +27,7 @@ import { useDebouncedMutation } from '@workspace/ui/hooks/use-debounced-mutation
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
 
 import { toggleReactionAction } from '@/app/server/actions/posts'
+import { NoticeAlertDialog } from '@/components/blocks/confirm-dialog'
 import { IssueItemButton } from '@/components/ui/issue'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
@@ -38,6 +39,8 @@ import type { IssueFormDialogProps } from './issue-form-dialog'
 
 type IssueItemButtonProps = React.ComponentProps<typeof IssueItemButton>
 type DropdownMenuItemOnClick = React.ComponentProps<typeof DropdownMenuItem>['onClick']
+
+const NoticeDescription = '此功能正在努力開發中，敬請期待！'
 
 const isShow = (count?: number) => count ? 'block' : 'hidden'
 
@@ -131,6 +134,8 @@ function IssueDropdownMenu({
   onBookmark?: DropdownMenuItemOnClick
   onDelete?: DropdownMenuItemOnClick
 }) {
+  const { dialogProps, trigger } = useDialog()
+
   if (loading) {
     return (
       <Button variant="ghost" size="icon-sm" disabled>
@@ -139,57 +144,69 @@ function IssueDropdownMenu({
     )
   }
 
+  const handleBookmark: DropdownMenuItemOnClick = (e) => {
+    onBookmark?.(e)
+    trigger()
+  }
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={(
-        <Button variant="ghost" size="icon-sm">
-          <RiMoreLine />
-        </Button>
-      )}
+    <>
+      <NoticeAlertDialog
+        title="功能尚未開放"
+        description={NoticeDescription}
+        {...dialogProps}
       />
-      <DropdownMenuContent align="start">
-        {isOwner && (
-          <>
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={onEdit}>
-                編輯
-                <span className="ml-auto">
-                  <RiEditLine />
-                </span>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-          </>
+      <DropdownMenu>
+        <DropdownMenuTrigger render={(
+          <Button variant="ghost" size="icon-sm">
+            <RiMoreLine />
+          </Button>
         )}
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={onCopyLink}>
-            複製連結
-            <span className="ml-auto">
-              <RiLink />
-            </span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onBookmark}>
-            儲存
-            <span className="ml-auto">
-              <RiBookmarkLine />
-            </span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        {isOwner && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem variant="destructive" onClick={onDelete}>
-                刪除
-                <span className="ml-auto">
-                  <RiDeleteBin7Line />
-                </span>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        />
+        <DropdownMenuContent align="start">
+          {isOwner && (
+            <>
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={onEdit}>
+                  編輯
+                  <span className="ml-auto">
+                    <RiEditLine />
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={onCopyLink}>
+              複製連結
+              <span className="ml-auto">
+                <RiLink />
+              </span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleBookmark}>
+              儲存
+              <span className="ml-auto">
+                <RiBookmarkLine />
+              </span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          {isOwner && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem variant="destructive" onClick={onDelete}>
+                  刪除
+                  <span className="ml-auto">
+                    <RiDeleteBin7Line />
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   )
 }
 
