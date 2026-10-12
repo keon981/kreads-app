@@ -7,6 +7,7 @@ import { deletePostAction, updatePostAction } from '@/app/server/actions/posts'
 import { CommentItem, IssueComposerItem } from '@/components/blocks/issue/issue-items'
 import ArticleLayout from '@/components/layout/article-layout'
 import {
+  IssueEmpty,
   IssueItemGroup,
   IssueItemSkeleton,
 } from '@/components/ui/issue'
@@ -29,6 +30,8 @@ async function CommentList({ repoName, issueNumber }: CommentListProps): Promise
     fetchIssueComments(userRepo, issueNumber),
     verifySession(),
   ])
+
+  if (!comments.length) return <IssueEmpty>尚無留言</IssueEmpty>
 
   const viewer = status === 'active' ? session.user.username : null
 
@@ -66,7 +69,7 @@ export async function IssueDetailView({ user, issueNumber }: IssueDetailViewProp
       <IssueItemGroup className="mt-2">
         {/* post */}
         <CommentItem
-          className="border-0 border-b rounded-none"
+          className="border-0 border-b last:border-b rounded-none"
           issue={issue}
           target={{ repoName, issueNumber }}
           isOwner={isOwner}

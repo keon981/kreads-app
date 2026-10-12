@@ -5,10 +5,12 @@ import { IssueComposerItem, PostItem } from '@/components/blocks/issue/issue-ite
 import { AboutUser } from '@/components/blocks/user'
 import ArticleLayout from '@/components/layout/article-layout'
 import {
+  IssueEmpty,
   IssueItemGroup,
   IssueItemSkeleton,
 } from '@/components/ui/issue'
 import { fetchAccessTokenCache, getSessionCache } from '@/lib/auth'
+import { env } from '@/lib/env'
 import { fetchIssues } from '@/services/api/issues'
 import { fetchUserRepo } from '@/services/user-repo'
 import { chatHref } from '@/utils/navigation'
@@ -20,9 +22,10 @@ interface UserPostsViewProps {
 }
 
 // repo issue list
-async function UserPostList({ repoName, isOwner }: {
+async function UserPostList({ repoName, isOwner, prefetchLimit }: {
   repoName: string
   isOwner: boolean
+  prefetchLimit: number
 }) {
   const token = await fetchAccessTokenCache()
   const userRepo = fetchUserRepo(token, repoName)
@@ -30,21 +33,22 @@ async function UserPostList({ repoName, isOwner }: {
 
   if (!posts?.length) {
     return (
-      <p className="px-6 py-10 border-t text-sm text-center text-muted-foreground">
-        {posts ? '尚無任何貼文。' : '此個人檔案不公開。'}
-      </p>
+      <IssueEmpty className="border-t border-solid rounded-none">
+        {posts ? '此人很懶，什麼都沒留下' : '此個人檔案不公開。'}
+      </IssueEmpty>
     )
   }
 
   return (
     <IssueItemGroup className="">
-      {posts.map(post => (
+      {posts.map((post, index) => (
         <PostItem
           key={post.number}
           post={post}
           repoName={repoName}
           isOwner={isOwner}
           href={chatHref(post)}
+          isPrefetched={index < prefetchLimit}
           updateAction={updatePostAction}
           onDelete={deletePostAction}
         />
@@ -57,6 +61,7 @@ export async function UserPostsView({ user }: UserPostsViewProps): Promise<React
   const session = await getSessionCache()
   const isOwner = session?.user.username === user.username
   const ownerInviteCode = isOwner ? session?.user.inviteCode : null
+  const prefetchLimit = user.username === env.NEXT_PUBLIC_HOME_USERNAME ? env.POST_PREFETCH_LIMIT : 0
 
   return (
     <ArticleLayout>
@@ -78,7 +83,7 @@ export async function UserPostsView({ user }: UserPostsViewProps): Promise<React
       {/* post list */}
       <IssueItemGroup>
         <Suspense fallback={<IssueItemSkeleton />}>
-          <UserPostList isOwner={isOwner} repoName={user.repoName} />
+          <UserPostList isOwner={isOwner} repoName={user.repoName} prefetchLimit={prefetchLimit} />
         </Suspense>
       </IssueItemGroup>
     </ArticleLayout>

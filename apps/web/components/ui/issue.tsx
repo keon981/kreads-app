@@ -11,6 +11,7 @@ import {
 } from '@workspace/ui/components/avatar'
 import { Button } from '@workspace/ui/components/button'
 import { ButtonGroup } from '@workspace/ui/components/button-group'
+import { Empty, EmptyDescription, EmptyHeader } from '@workspace/ui/components/empty'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@workspace/ui/components/hover-card'
 import {
   Item,
@@ -210,6 +211,16 @@ function IssueItemSkeleton() {
   )
 }
 
+function IssueEmpty({ children, className, ...props }: React.ComponentProps<typeof Empty>) {
+  return (
+    <Empty className={cn('py-10', className)} {...props}>
+      <EmptyHeader>
+        <EmptyDescription>{children}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  )
+}
+
 function IssueItemGroup({ className, ...props }: React.ComponentProps<typeof ItemGroup>) {
   return (
     <ItemGroup
@@ -231,6 +242,7 @@ function IssueItemHeader({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 export {
+  IssueEmpty,
   IssueItem,
   IssueItemArticle,
   IssueItemButton,

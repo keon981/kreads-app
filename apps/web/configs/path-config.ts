@@ -13,6 +13,6 @@ export const api = {
   signOut: '/api/sign-out',
 } as const
 
-export const homePaths: readonly string[] = [paths.home, `/${env.NEXT_PUBLIC_HOME_USERNAME}`]
+export const homePaths: string[] = [paths.home, `/${env.NEXT_PUBLIC_HOME_USERNAME}`]
 
-export const privatePaths: readonly string[] = [paths.profile]
+export const privatePaths: string[] = [paths.profile]

@@ -1,9 +1,10 @@
 'use client'
 
+import type { PrefetchKind } from 'next/dist/client/components/router-reducer/router-reducer-types'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { createContext, Fragment, use, useTransition } from 'react'
+import { createContext, Fragment, use, useEffect, useTransition } from 'react'
 
 import { RiChat1Line } from '@remixicon/react'
 import { Button } from '@workspace/ui/components/button'
@@ -172,6 +173,7 @@ function PostItem({
   repoName,
   isOwner = false,
   href,
+  isPrefetched = false,
   updateAction,
   onDelete,
   onSubmit,
@@ -183,12 +185,19 @@ function PostItem({
   repoName: string
   isOwner?: boolean
   href?: string
+  isPrefetched?: boolean
   updateAction?: IssueFormAction
   onDelete?: IssueDeleteAction
   onSubmit?: IssueFormAction
   onCopyLink?: DropdownMenuItemOnClick
 } & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>) {
   const router = useRouter()
+
+  useEffect(() => {
+    if (!isPrefetched || !href) return
+    // Full prefetch loads the post and comments, not just the static shell
+    router.prefetch(href, { kind: 'full' as PrefetchKind })
+  }, [isPrefetched, href, router])
 
   // Count code points so emoji aren't split
   const bodyChars = Array.from(post.bodyText)
