@@ -87,6 +87,7 @@ function IssueBaseItem({
   updateAction,
   onDelete,
   onCopyLink,
+  redirectTo,
   children,
   ...props
 }: {
@@ -98,7 +99,9 @@ function IssueBaseItem({
   updateAction?: IssueFormAction
   onDelete?: IssueDeleteAction
   onCopyLink?: DropdownMenuItemOnClick
+  redirectTo?: string
 } & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>) {
+  const router = useRouter()
   const { dialogProps, trigger: triggerEdit } = useDialog()
   const {
     dialogProps: deleteDialogProps,
@@ -118,6 +121,9 @@ function IssueBaseItem({
     startTransition(async () => {
       const res = await onDelete?.(target)
       if (res) toastActionState(res)
+      if (redirectTo && res?.status && res.status < HttpStatusCode.BadRequest) {
+        router.replace(redirectTo)
+      }
     })
     dismissDeleteDialog()
   }
@@ -171,13 +177,10 @@ function IssueBaseFooter({ actions, ...props }: { actions: IssueAction[] } & Rea
 function PostItem({
   post,
   repoName,
-  isOwner = false,
   href,
   isPrefetched = false,
   updateAction,
-  onDelete,
   onSubmit,
-  onCopyLink,
   className,
   ...props
 }: {
@@ -190,6 +193,7 @@ function PostItem({
   onDelete?: IssueDeleteAction
   onSubmit?: IssueFormAction
   onCopyLink?: DropdownMenuItemOnClick
+  redirectTo?: string
 } & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>) {
   const router = useRouter()
 
@@ -220,12 +224,9 @@ function PostItem({
     <IssueBaseItem
       body={post.body}
       target={{ repoName, issueNumber: post.number }}
-      isOwner={isOwner}
       editTitle="編輯貼文"
       getCopyUrl={getCopyUrl}
       updateAction={updateAction}
-      onDelete={onDelete}
-      onCopyLink={onCopyLink}
       className={cn(href && 'cursor-pointer', className)}
       onClick={handleNavigate}
       {...props}
@@ -252,14 +253,14 @@ function PostItem({
         </IssueItemTitle>
         {isTruncated
           ? (
-              <IssueItemArticle className="whitespace-pre-line">
-                {bodyChars.slice(0, POST_EXCERPT_LENGTH).join('')}
-                …
-                <Link href={href || chatHref(post)} className="text-muted-foreground no-underline hover:underline">
-                  展開
-                </Link>
-              </IssueItemArticle>
-            )
+            <IssueItemArticle className="whitespace-pre-line">
+              {bodyChars.slice(0, POST_EXCERPT_LENGTH).join('')}
+              …
+              <Link href={href || chatHref(post)} className="text-muted-foreground no-underline hover:underline">
+                展開
+              </Link>
+            </IssueItemArticle>
+          )
           : <IssueItemArticle html={post.bodyHTML} />}
         <IssueBaseFooter
           actions={[
@@ -276,24 +277,24 @@ function PostItem({
               id: 'chat',
               render: ({ target }) => onSubmit
                 ? (
-                    <IssueReplyButton
-                      onSubmit={onSubmit}
-                      title="新貼文"
-                      placeholder="有什麼新鮮事？"
-                      count={post.commentCount}
-                      defaultValues={{ repoName: target.repoName, issueNumber: target.issueNumber }}
-                    />
-                  )
+                  <IssueReplyButton
+                    onSubmit={onSubmit}
+                    title="新貼文"
+                    placeholder="有什麼新鮮事？"
+                    count={post.commentCount}
+                    defaultValues={{ repoName: target.repoName, issueNumber: target.issueNumber }}
+                  />
+                )
                 : (
-                    <IssueItemButton
-                      size="lg"
-                      nativeButton={false}
-                      render={<Link href={href ?? ''} />}
-                    >
-                      <RiChat1Line />
-                      {post.commentCount > 0 && post.commentCount}
-                    </IssueItemButton>
-                  ),
+                  <IssueItemButton
+                    size="lg"
+                    nativeButton={false}
+                    render={<Link href={href ?? ''} />}
+                  >
+                    <RiChat1Line />
+                    {post.commentCount > 0 && post.commentCount}
+                  </IssueItemButton>
+                ),
             },
             {
               id: 'share',
@@ -308,15 +309,10 @@ function PostItem({
 
 function CommentItem({
   issue,
-  target,
-  isOwner = false,
-  editTitle = '編輯留言',
   isRefreshable = false,
   reaction,
   reply,
   updateAction,
-  onDelete,
-  onCopyLink,
   className,
   ...props
 }: {
@@ -333,6 +329,7 @@ function CommentItem({
   updateAction?: IssueFormAction
   onDelete?: IssueDeleteAction
   onCopyLink?: DropdownMenuItemOnClick
+  redirectTo?: string
 } & React.ComponentProps<typeof IssueItem>) {
   const [isRefreshing, startRefresh] = useTransition()
 
@@ -355,13 +352,9 @@ function CommentItem({
   return (
     <IssueBaseItem
       body={issue.body}
-      target={target}
-      isOwner={isOwner}
-      editTitle={editTitle}
+      editTitle="編輯留言"
       getCopyUrl={getCopyUrl}
       updateAction={updateAction}
-      onDelete={onDelete}
-      onCopyLink={onCopyLink}
       className={cn('flex-col items-start gap-2.5', className)}
       {...props}
     >
@@ -383,16 +376,16 @@ function CommentItem({
             <IssueUser login={issue.author?.login} avatarUrl={issue.author?.avatarUrl} className="text-base" />
             {isRefreshable
               ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="p-0 transition-opacity hover:opacity-60"
-                    disabled={isRefreshing}
-                    onClick={handleRefresh}
-                  >
-                    {timeElement}
-                  </Button>
-                )
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="p-0 transition-opacity hover:opacity-60"
+                  disabled={isRefreshing}
+                  onClick={handleRefresh}
+                >
+                  {timeElement}
+                </Button>
+              )
               : timeElement}
           </div>
         </div>

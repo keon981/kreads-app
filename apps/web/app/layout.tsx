@@ -36,7 +36,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="zh-tw"
       suppressHydrationWarning
       className={cn('antialiased', fontMono.variable, 'font-sans', spaceGrotesk.variable, oxaniumHeading.variable)}
     >
@@ -88,10 +88,10 @@ async function RootProviders({ children }: {
       isAuth={!!user}
       user={user
         ? {
-            id: user.username ?? undefined,
-            name: user.name,
-            avatarUrl: user.image ?? undefined,
-          }
+          id: user.username ?? undefined,
+          name: user.name,
+          avatarUrl: user.image ?? undefined,
+        }
         : null}
     >
       {children}

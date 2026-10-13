@@ -213,7 +213,7 @@ function IssueItemSkeleton() {
 
 function IssueEmpty({ children, className, ...props }: React.ComponentProps<typeof Empty>) {
   return (
-    <Empty className={cn('py-10', className)} {...props}>
+    <Empty data-slot="issue-empty" className={cn('py-10', className)} {...props}>
       <EmptyHeader>
         <EmptyDescription>{children}</EmptyDescription>
       </EmptyHeader>

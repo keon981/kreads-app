@@ -33,7 +33,7 @@ async function UserPostList({ repoName, isOwner, prefetchLimit }: {
 
   if (!posts?.length) {
     return (
-      <IssueEmpty className="border-t border-solid rounded-none">
+      <IssueEmpty className="rounded-none">
         {posts ? '此人很懶，什麼都沒留下' : '此個人檔案不公開。'}
       </IssueEmpty>
     )

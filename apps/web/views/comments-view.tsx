@@ -2,8 +2,13 @@ import { notFound } from 'next/navigation'
 
 import { Suspense } from 'react'
 
-import { createCommentAction, deleteCommentAction, updateCommentAction } from '@/app/(pages)/[id]/post/[number]/action'
-import { deletePostAction, updatePostAction } from '@/app/server/actions/posts'
+import {
+  createCommentAction,
+  deleteCommentAction,
+  deletePostAction,
+  updateCommentAction,
+} from '@/app/(pages)/[id]/post/[number]/action'
+import { updatePostAction } from '@/app/server/actions/posts'
 import { CommentItem, IssueComposerItem } from '@/components/blocks/issue/issue-items'
 import ArticleLayout from '@/components/layout/article-layout'
 import {
@@ -11,6 +16,7 @@ import {
   IssueItemGroup,
   IssueItemSkeleton,
 } from '@/components/ui/issue'
+import { paths } from '@/configs/path-config'
 import { fetchAccessTokenCache, verifySession } from '@/lib/auth'
 import { fetchIssueComments } from '@/services/api/comments'
 import { fetchIssue } from '@/services/api/issues'
@@ -79,6 +85,7 @@ export async function IssueDetailView({ user, issueNumber }: IssueDetailViewProp
           reply={{ action: createCommentAction, count: issue.commentCount }}
           updateAction={updatePostAction}
           onDelete={deletePostAction}
+          redirectTo={paths.user(user.username)}
         />
 
         {/* comment composer */}

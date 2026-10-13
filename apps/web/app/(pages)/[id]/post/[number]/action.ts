@@ -1,11 +1,13 @@
 'use server'
 
-import { refresh } from 'next/cache'
+import { refresh, revalidatePath } from 'next/cache'
 
 import * as z from 'zod'
 
+import { paths } from '@/configs/path-config'
 import { fetchAccessTokenCache } from '@/lib/auth'
 import { createIssueComment, deleteIssueComment, updateIssueComment } from '@/services/api/comments'
+import { closeIssue } from '@/services/api/issues'
 import { catchParseWithUserRepoError, parseWithUserRepo } from '@/services/user-repo'
 import { getFormDataValue } from '@/utils/toolkit'
 
@@ -31,6 +33,11 @@ const UpdateCommentSchema = z.object({
 const DeleteCommentSchema = z.object({
   repoName: z.string().min(1),
   commentId: IdSchema,
+})
+
+const DeletePostSchema = z.object({
+  repoName: z.string().min(1),
+  issueNumber: IdSchema,
 })
 
 export async function createCommentAction(
@@ -79,6 +86,20 @@ export async function deleteCommentAction(target: IssueTarget): Promise<ActionSt
     const { data, userRepo } = parseWithUserRepo(token, DeleteCommentSchema, target)
     const status = await deleteIssueComment(userRepo, data.commentId)
     refresh()
+    return { status, message: '刪除成功' }
+  } catch (err) {
+    return catchParseWithUserRepoError(err, '刪除失敗，請再試一次')
+  }
+}
+
+export async function deletePostAction(target: IssueTarget): Promise<ActionState> {
+  try {
+    const token = await fetchAccessTokenCache()
+    const { data, userRepo } = parseWithUserRepo(token, DeletePostSchema, target)
+    const status = await closeIssue(userRepo, data.issueNumber)
+    revalidatePath(paths.user(userRepo.owner))
+    revalidatePath(paths.profile)
+    revalidatePath(paths.home)
     return { status, message: '刪除成功' }
   } catch (err) {
     return catchParseWithUserRepoError(err, '刪除失敗，請再試一次')

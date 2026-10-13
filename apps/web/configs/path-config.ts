@@ -5,8 +5,8 @@ export const paths = {
   signIn: '/sign-in',
   signUp: '/sign-up',
   profile: '/profile',
-  user: (login: string) => `/@${login}`,
-  post: (login: string, number: number) => `/@${login}/post/${number}`,
+  user: (login: string) => `/@${login.replace(/^@/, '')}`,
+  post: (login: string, number: number) => `/@${login.replace(/^@/, '')}/post/${number}`,
 } as const
 
 export const api = {
