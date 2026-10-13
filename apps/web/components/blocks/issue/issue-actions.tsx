@@ -40,7 +40,7 @@ import type { IssueFormDialogProps } from './issue-form-dialog'
 type IssueItemButtonProps = React.ComponentProps<typeof IssueItemButton>
 type DropdownMenuItemOnClick = React.ComponentProps<typeof DropdownMenuItem>['onClick']
 
-const NoticeDescription = '此功能正在努力開發中，敬請期待！'
+const NoticeDescription = '此功能正在努力開發中。\n敬請期待！'
 
 const isShow = (count?: number) => count ? 'block' : 'hidden'
 

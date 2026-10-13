@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation'
 
+import { Suspense } from 'react'
+
 import { fetchViewerUser } from '@/app/server/db/users'
-import { UserPostsView } from '@/views/posts-view'
+import { UserPostsView, UserPostsViewSkeleton } from '@/views/posts-view'
 
 async function Page({ params }: PageProps<'/[id]'>) {
   const { id } = await params
@@ -9,7 +11,11 @@ async function Page({ params }: PageProps<'/[id]'>) {
   const viewer = await fetchViewerUser(username)
   if (!viewer) notFound()
 
-  return <UserPostsView user={viewer} />
+  return (
+    <Suspense fallback={<UserPostsViewSkeleton user={viewer} />}>
+      <UserPostsView user={viewer} />
+    </Suspense>
+  )
 }
 
 export default Page

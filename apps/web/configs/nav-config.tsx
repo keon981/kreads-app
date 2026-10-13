@@ -62,7 +62,7 @@ export const themeOptions = [
   { value: 'system', label: '跟隨系統', icon: RiComputerLine },
 ] as const
 
-const NoticeDescription = '此功能正在努力開發中，敬請期待！'
+const NoticeDescription = '此功能正在努力開發中。\n敬請期待！'
 
 export const sidebar: Sidebar = {
   navMain: [

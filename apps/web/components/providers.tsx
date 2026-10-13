@@ -1,27 +1,27 @@
-import { Suspense } from 'react'
+import { Toaster } from '@workspace/ui/components/toast'
+import { DeviceProvider } from '@workspace/ui/contexts/device-provider'
 
-import { SidebarInset, SidebarProvider } from '@workspace/ui/components/sidebar'
-
-import { AppNav, AppNavSkeleton } from '@/components/layout/app-sidebar'
+import { SignInDialog } from '@/components/blocks/sign-in'
 import { AuthProvider } from '@/contexts/auth-provider'
-import { ThemeProvider } from '@/contexts/theme-provider'
+
+interface ProvidersProps
+  extends React.ComponentProps<typeof AuthProvider>,
+  Pick<React.ComponentProps<typeof DeviceProvider>, 'initialIsMobile'> {}
 
 export function Providers({
   children,
+  initialIsMobile,
   ...props
-}: React.ComponentProps<typeof AuthProvider>): React.ReactNode {
+}: ProvidersProps): React.ReactNode {
   return (
-    <ThemeProvider>
+    <DeviceProvider initialIsMobile={initialIsMobile}>
       <AuthProvider {...props}>
-        <SidebarProvider>
-          <Suspense fallback={<AppNavSkeleton />}>
-            <AppNav />
-          </Suspense>
-          <SidebarInset className="flex-row items-start justify-center gap-4">
-            {children}
-          </SidebarInset>
-        </SidebarProvider>
+        {children}
+
+        {/* fallback */}
+        <SignInDialog />
+        <Toaster />
       </AuthProvider>
-    </ThemeProvider>
+    </DeviceProvider>
   )
 }

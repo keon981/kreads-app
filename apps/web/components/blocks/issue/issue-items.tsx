@@ -174,6 +174,8 @@ function IssueBaseFooter({ actions, ...props }: { actions: IssueAction[] } & Rea
   )
 }
 
+const getShrinkChars = (text: string[]) => text.slice(0, POST_EXCERPT_LENGTH).join('')
+
 function PostItem({
   post,
   repoName,
@@ -253,14 +255,14 @@ function PostItem({
         </IssueItemTitle>
         {isTruncated
           ? (
-            <IssueItemArticle className="whitespace-pre-line">
-              {bodyChars.slice(0, POST_EXCERPT_LENGTH).join('')}
-              …
-              <Link href={href || chatHref(post)} className="text-muted-foreground no-underline hover:underline">
-                展開
-              </Link>
-            </IssueItemArticle>
-          )
+              <IssueItemArticle className="whitespace-pre-line">
+                {getShrinkChars(bodyChars)}
+                …
+                <Link href={href || chatHref(post)} className="text-muted-foreground no-underline hover:underline">
+                  展開
+                </Link>
+              </IssueItemArticle>
+            )
           : <IssueItemArticle html={post.bodyHTML} />}
         <IssueBaseFooter
           actions={[
@@ -277,24 +279,24 @@ function PostItem({
               id: 'chat',
               render: ({ target }) => onSubmit
                 ? (
-                  <IssueReplyButton
-                    onSubmit={onSubmit}
-                    title="新貼文"
-                    placeholder="有什麼新鮮事？"
-                    count={post.commentCount}
-                    defaultValues={{ repoName: target.repoName, issueNumber: target.issueNumber }}
-                  />
-                )
+                    <IssueReplyButton
+                      onSubmit={onSubmit}
+                      title="新貼文"
+                      placeholder="有什麼新鮮事？"
+                      count={post.commentCount}
+                      defaultValues={{ repoName: target.repoName, issueNumber: target.issueNumber }}
+                    />
+                  )
                 : (
-                  <IssueItemButton
-                    size="lg"
-                    nativeButton={false}
-                    render={<Link href={href ?? ''} />}
-                  >
-                    <RiChat1Line />
-                    {post.commentCount > 0 && post.commentCount}
-                  </IssueItemButton>
-                ),
+                    <IssueItemButton
+                      size="lg"
+                      nativeButton={false}
+                      render={<Link href={href ?? ''} />}
+                    >
+                      <RiChat1Line />
+                      {post.commentCount > 0 && post.commentCount}
+                    </IssueItemButton>
+                  ),
             },
             {
               id: 'share',
@@ -376,16 +378,16 @@ function CommentItem({
             <IssueUser login={issue.author?.login} avatarUrl={issue.author?.avatarUrl} className="text-base" />
             {isRefreshable
               ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="p-0 transition-opacity hover:opacity-60"
-                  disabled={isRefreshing}
-                  onClick={handleRefresh}
-                >
-                  {timeElement}
-                </Button>
-              )
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="p-0 transition-opacity hover:opacity-60"
+                    disabled={isRefreshing}
+                    onClick={handleRefresh}
+                  >
+                    {timeElement}
+                  </Button>
+                )
               : timeElement}
           </div>
         </div>

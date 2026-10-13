@@ -13,31 +13,31 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@base-ui/react": "^1.7.0",
+    "@base-ui/react": "catalog:",
     "@octokit/rest": "^22.0.1",
-    "@remixicon/react": "^4.9.0",
-    "@t3-oss/env-nextjs": "^0.13.11",
+    "@remixicon/react": "catalog:",
+    "@t3-oss/env-nextjs": "catalog:",
     "@workspace/server": "workspace:*",
     "@workspace/ui": "workspace:*",
-    "better-auth": "^1.7.3",
-    "drizzle-orm": "^1.0.0-rc.4",
-    "next": "16.2.6",
-    "next-themes": "^0.4.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "zod": "^4.6.5",
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
+    "next": "catalog:",
+    "next-themes": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
-    "eslint": "^9",
+    "eslint": "catalog:",
     "eslint-config-next": "16.2.6",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
-    "typescript": "^5"
+    "typescript": "catalog:"
   }
 }

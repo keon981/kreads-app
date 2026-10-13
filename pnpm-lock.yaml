@@ -105,6 +105,60 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@base-ui/react':
+      specifier: ^1.9.0
+      version: 1.9.0
+    '@remixicon/react':
+      specifier: ^4.9.0
+      version: 4.9.0
+    '@t3-oss/env-nextjs':
+      specifier: ^0.13.11
+      version: 0.13.11
+    '@types/node':
+      specifier: ^20
+      version: 20.19.43
+    '@types/react':
+      specifier: ^19
+      version: 19.2.18
+    '@types/react-dom':
+      specifier: ^19
+      version: 19.2.5
+    better-auth:
+      specifier: ^1.7.3
+      version: 1.7.3
+    drizzle-orm:
+      specifier: ^1.0.0-rc.4
+      version: 1.0.0-rc.4
+    eslint:
+      specifier: ^9
+      version: 9.39.5
+    next:
+      specifier: 16.2.6
+      version: 16.2.6
+    next-themes:
+      specifier: ^0.4.6
+      version: 0.4.6
+    react:
+      specifier: 19.2.4
+      version: 19.2.4
+    react-dom:
+      specifier: 19.2.4
+      version: 19.2.4
+    recharts:
+      specifier: 3.8.0
+      version: 3.8.0
+    typescript:
+      specifier: ^5
+      version: 5.9.3
+    usehooks-ts:
+      specifier: ^3.1.1
+      version: 3.1.1
+    zod:
+      specifier: ^4.6.5
+      version: 4.6.5
+
 importers:
 
   .:
@@ -116,10 +170,10 @@ importers:
   apps/dashboard:
     dependencies:
       '@remixicon/react':
-        specifier: ^4.9.0
+        specifier: 'catalog:'
         version: 4.9.0(react@19.2.4)
       '@t3-oss/env-nextjs':
-        specifier: ^0.13.11
+        specifier: 'catalog:'
         version: 0.13.11(typescript@5.9.3)(zod@4.6.5)
       '@tanstack/react-table':
         specifier: ^9.2.6
@@ -131,41 +185,41 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       better-auth:
-        specifier: ^1.7.3
+        specifier: 'catalog:'
         version: 1.7.3(drizzle-kit@1.0.0-rc.4)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(zod@4.6.5))(next@16.2.6(@babel/core@7.29.7(supports-color@7.2.0))(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       drizzle-orm:
-        specifier: ^1.0.0-rc.4
+        specifier: 'catalog:'
         version: 1.0.0-rc.4(@neondatabase/serverless@1.1.0)(zod@4.6.5)
       next:
-        specifier: 16.2.6
+        specifier: 'catalog:'
         version: 16.2.6(@babel/core@7.29.7(supports-color@7.2.0))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       next-themes:
-        specifier: ^0.4.6
+        specifier: 'catalog:'
         version: 0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react:
-        specifier: 19.2.4
+        specifier: 'catalog:'
         version: 19.2.4
       react-dom:
-        specifier: 19.2.4
+        specifier: 'catalog:'
         version: 19.2.4(react@19.2.4)
       recharts:
-        specifier: 3.8.0
+        specifier: 'catalog:'
         version: 3.8.0(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react-is@17.0.2)(react@19.2.4)(redux@5.0.1)
       usehooks-ts:
-        specifier: ^3.1.1
+        specifier: 'catalog:'
         version: 3.1.1(react@19.2.4)
       zod:
-        specifier: ^4.6.5
+        specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
       '@types/node':
-        specifier: ^20
+        specifier: 'catalog:'
         version: 20.19.43
       '@types/react':
-        specifier: ^19
+        specifier: 'catalog:'
         version: 19.2.18
       '@types/react-dom':
-        specifier: ^19
+        specifier: 'catalog:'
         version: 19.2.5(@types/react@19.2.18)
       '@workspace/eslint-config':
         specifier: workspace:*
@@ -174,25 +228,25 @@ importers:
         specifier: workspace:*
         version: link:../../packages/typescript-config
       eslint:
-        specifier: ^9
+        specifier: 'catalog:'
         version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: ^5
+        specifier: 'catalog:'
         version: 5.9.3
 
   apps/web:
     dependencies:
       '@base-ui/react':
-        specifier: ^1.7.0
-        version: 1.7.0(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: 'catalog:'
+        version: 1.9.0(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@octokit/rest':
         specifier: ^22.0.1
         version: 22.0.1
       '@remixicon/react':
-        specifier: ^4.9.0
+        specifier: 'catalog:'
         version: 4.9.0(react@19.2.4)
       '@t3-oss/env-nextjs':
-        specifier: ^0.13.11
+        specifier: 'catalog:'
         version: 0.13.11(typescript@5.9.3)(zod@4.6.5)
       '@workspace/server':
         specifier: workspace:*
@@ -201,38 +255,38 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       better-auth:
-        specifier: ^1.7.3
+        specifier: 'catalog:'
         version: 1.7.3(drizzle-kit@1.0.0-rc.4)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(zod@4.6.5))(next@16.2.6(@babel/core@7.29.7(supports-color@7.2.0))(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       drizzle-orm:
-        specifier: ^1.0.0-rc.4
+        specifier: 'catalog:'
         version: 1.0.0-rc.4(@neondatabase/serverless@1.1.0)(zod@4.6.5)
       next:
-        specifier: 16.2.6
+        specifier: 'catalog:'
         version: 16.2.6(@babel/core@7.29.7(supports-color@7.2.0))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       next-themes:
-        specifier: ^0.4.6
+        specifier: 'catalog:'
         version: 0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react:
-        specifier: 19.2.4
+        specifier: 'catalog:'
         version: 19.2.4
       react-dom:
-        specifier: 19.2.4
+        specifier: 'catalog:'
         version: 19.2.4(react@19.2.4)
       zod:
-        specifier: ^4.6.5
+        specifier: 'catalog:'
         version: 4.6.5
       zustand:
         specifier: ^5.0.15
         version: 5.0.15(@types/react@19.2.18)(immer@11.1.21)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
       '@types/node':
-        specifier: ^20
+        specifier: 'catalog:'
         version: 20.19.43
       '@types/react':
-        specifier: ^19
+        specifier: 'catalog:'
         version: 19.2.18
       '@types/react-dom':
-        specifier: ^19
+        specifier: 'catalog:'
         version: 19.2.5(@types/react@19.2.18)
       '@workspace/eslint-config':
         specifier: workspace:*
@@ -241,7 +295,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/typescript-config
       eslint:
-        specifier: ^9
+        specifier: 'catalog:'
         version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       eslint-config-next:
         specifier: 16.2.6
@@ -253,7 +307,7 @@ importers:
         specifier: ^0.8.0
         version: 0.8.1(prettier@3.9.6)
       typescript:
-        specifier: ^5
+        specifier: 'catalog:'
         version: 5.9.3
 
   packages/eslint-config:
@@ -268,7 +322,7 @@ importers:
         specifier: ^16.3.3
         version: 16.3.3(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))
       eslint:
-        specifier: ^9
+        specifier: 'catalog:'
         version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       eslint-plugin-react-refresh:
         specifier: ^0.5.5
@@ -283,17 +337,17 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       better-auth:
-        specifier: ^1.7.3
+        specifier: 'catalog:'
         version: 1.7.3(drizzle-kit@1.0.0-rc.4)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(zod@4.6.5))(next@16.2.6(@babel/core@7.29.7(supports-color@7.2.0))(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
       drizzle-orm:
-        specifier: ^1.0.0-rc.4
+        specifier: 'catalog:'
         version: 1.0.0-rc.4(@neondatabase/serverless@1.1.0)(zod@4.6.5)
     devDependencies:
       '@types/node':
-        specifier: ^20
+        specifier: 'catalog:'
         version: 20.19.43
       '@workspace/eslint-config':
         specifier: workspace:*
@@ -305,10 +359,10 @@ importers:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4
       eslint:
-        specifier: ^9
+        specifier: 'catalog:'
         version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       typescript:
-        specifier: ^5
+        specifier: 'catalog:'
         version: 5.9.3
 
   packages/typescript-config: {}
@@ -316,10 +370,10 @@ importers:
   packages/ui:
     dependencies:
       '@base-ui/react':
-        specifier: ^1.7.0
-        version: 1.7.0(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: 'catalog:'
+        version: 1.9.0(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@remixicon/react':
-        specifier: ^4.9.0
+        specifier: 'catalog:'
         version: 4.9.0(react@19.2.4)
       '@tiptap/extension-paragraph':
         specifier: 3.31.4
@@ -352,13 +406,13 @@ importers:
         specifier: ^1.52.0
         version: 1.52.0
       react:
-        specifier: 19.2.4
+        specifier: 'catalog:'
         version: 19.2.4
       react-dom:
-        specifier: 19.2.4
+        specifier: 'catalog:'
         version: 19.2.4(react@19.2.4)
       recharts:
-        specifier: 3.8.0
+        specifier: 'catalog:'
         version: 3.8.0(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react-is@17.0.2)(react@19.2.4)(redux@5.0.1)
       shadcn:
         specifier: ^4.19.0
@@ -367,7 +421,7 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
       usehooks-ts:
-        specifier: ^3.1.1
+        specifier: 'catalog:'
         version: 3.1.1(react@19.2.4)
     devDependencies:
       '@storybook/react-vite':
@@ -377,13 +431,13 @@ importers:
         specifier: ^4
         version: 4.3.3
       '@types/node':
-        specifier: ^20
+        specifier: 'catalog:'
         version: 20.19.43
       '@types/react':
-        specifier: ^19
+        specifier: 'catalog:'
         version: 19.2.18
       '@types/react-dom':
-        specifier: ^19
+        specifier: 'catalog:'
         version: 19.2.5(@types/react@19.2.18)
       '@workspace/eslint-config':
         specifier: workspace:*
@@ -392,7 +446,7 @@ importers:
         specifier: workspace:*
         version: link:../typescript-config
       eslint:
-        specifier: ^9
+        specifier: 'catalog:'
         version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       storybook:
         specifier: ^10.6.1
@@ -401,7 +455,7 @@ importers:
         specifier: ^4
         version: 4.3.3
       typescript:
-        specifier: ^5
+        specifier: 'catalog:'
         version: 5.9.3
       vite:
         specifier: ^8.3.4
@@ -616,8 +670,8 @@ packages:
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
 
-  '@base-ui/react@1.7.0':
-    resolution: {integrity: sha512-j+8QjX44C32jrXD/qyEAGpFr70FRpGL2CY61mQd9nBPWN737CK0xxD1ceJ055rW4RtdvFDT1e7otzdlfxvsYug==}
+  '@base-ui/react@1.9.0':
+    resolution: {integrity: sha512-S8CSYosASBKtpL8SWUfS78rFElfLijiCgA7oHOK22jCJ95FULsYyKwBNFOgudt0RA+/7yNc7F81bOvQnRgbBiQ==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       '@date-fns/tz': ^1.2.0
@@ -633,8 +687,8 @@ packages:
       date-fns:
         optional: true
 
-  '@base-ui/utils@0.3.2':
-    resolution: {integrity: sha512-oWy1aq/I2GmYjpl4PhEAhzflF8VPGKgZeq0xAWTbfD5KBWyxcN0ZP2+WHSUm/5Z6lVMBDLReLcoXwSYoRc/zNQ==}
+  '@base-ui/utils@0.5.0':
+    resolution: {integrity: sha512-dYGGcEttjkYiMoa5nHm8vLaJ2UcuTWxo3BFAwOYXeRg/q7UVVvA6cacEIXEs3FgBfK1CGtW1ptElqs7wsx+t9A==}
     peerDependencies:
       '@types/react': ^17 || ^18 || ^19
       react: ^17 || ^18 || ^19
@@ -5894,6 +5948,11 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
+  use-sync-external-store@1.7.0:
+    resolution: {integrity: sha512-6L+EeigHMQhdaIPNIFUKwfWJSwWFQ8gJbJ2DLOs5sDIegTwR9fRxvnM3uciHKjIZhFz+KAv2emhWMRvDmMcY8A==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   usehooks-ts@3.1.1:
     resolution: {integrity: sha512-I4diPp9Cq6ieSUH2wu+fDAVQO43xwtulo+fKEidHUwZPnYImbtkTjzIJYcDcJqxgmX31GVqNFURodvcgHcW0pA==}
     engines: {node: '>=16.15.0'}
@@ -6346,26 +6405,26 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@base-ui/react@1.7.0(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@base-ui/react@1.9.0(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@babel/runtime': 7.29.7
-      '@base-ui/utils': 0.3.2(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@base-ui/utils': 0.5.0(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@floating-ui/react-dom': 2.1.9(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@floating-ui/utils': 0.2.12
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      use-sync-external-store: 1.6.0(react@19.2.4)
+      use-sync-external-store: 1.7.0(react@19.2.4)
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@base-ui/utils@0.3.2(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@base-ui/utils@0.5.0(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@babel/runtime': 7.29.7
       '@floating-ui/utils': 0.2.12
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       reselect: 5.3.0
-      use-sync-external-store: 1.6.0(react@19.2.4)
+      use-sync-external-store: 1.7.0(react@19.2.4)
     optionalDependencies:
       '@types/react': 19.2.18
 
@@ -11756,6 +11815,10 @@ snapshots:
       punycode: 2.3.1
 
   use-sync-external-store@1.6.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+
+  use-sync-external-store@1.7.0(react@19.2.4):
     dependencies:
       react: 19.2.4
 

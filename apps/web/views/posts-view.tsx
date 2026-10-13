@@ -82,7 +82,11 @@ export async function UserPostsView({ user }: UserPostsViewProps): Promise<React
 
       {/* post list */}
       <IssueItemGroup>
-        <Suspense fallback={<IssueItemSkeleton />}>
+        <Suspense
+          fallback={Array.from({ length: 3 }, (_, i) => (
+            <IssueItemSkeleton key={i} />
+          ))}
+        >
           <UserPostList isOwner={isOwner} repoName={user.repoName} prefetchLimit={prefetchLimit} />
         </Suspense>
       </IssueItemGroup>

@@ -119,12 +119,18 @@ function NoticeAlertDialog({
   actionText = '我知道了',
   actionProps,
   onAction,
+  className,
   ...props
-}: WithNodeChildren<typeof Dialog> & NoticeAlertDialogProps) {
+}: WithNodeChildren<typeof Dialog> & NoticeAlertDialogProps & {
+  className?: string
+}) {
   return (
     <Dialog {...props}>
       {children}
-      <DialogContent showCloseButton={false} className="w-70 min-h-30.5 gap-0">
+      <DialogContent
+        showCloseButton={false}
+        className={cn('w-70 min-h-30.5 gap-0', className)}
+      >
         <DialogHeader className="justify-center items-center">
           <DialogTitle className={cn('px-6 pt-2 pb-2', !description && 'pb-4', !title && 'sr-only')}>
             {title ?? '提示'}
