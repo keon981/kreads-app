@@ -1,90 +1,154 @@
 'use client'
 
-import type { PrefetchKind } from 'next/dist/client/components/router-reducer/router-reducer-types'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { createContext, Fragment, use, useEffect, useTransition } from 'react'
+import { createContext, Fragment, use, useState } from 'react'
 
-import { RiChat1Line } from '@remixicon/react'
+import { useMutationState, useQueryClient } from '@tanstack/react-query'
+import type { Mutation, MutationKey } from '@tanstack/react-query'
+
+import {
+  RiAlertLine,
+  RiBookmarkLine,
+  RiDeleteBin7Line,
+  RiEditLine,
+  RiLink,
+  RiMoreLine,
+  RiRefreshLine,
+} from '@remixicon/react'
 import { Button } from '@workspace/ui/components/button'
+import { ConfirmDialog, NoticeConfirmDialog } from '@workspace/ui/components/confirm-dialog'
 import { DialogTrigger } from '@workspace/ui/components/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@workspace/ui/components/dropdown-menu'
 import { Spinner } from '@workspace/ui/components/spinner'
 import { toast } from '@workspace/ui/components/toast'
 import { useCopy } from '@workspace/ui/hooks/use-copy'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
-import { formatDateTime } from '@workspace/ui/lib/format'
 import { cn } from '@workspace/ui/lib/utils'
 
-import { DeleteAlertDialog } from '@/components/blocks/confirm-dialog'
 import {
   IssueItem,
-  IssueItemArticle,
-  IssueItemButton,
   IssueItemContent,
   IssueItemFooter,
-  IssueItemHeader,
   IssueItemMedia,
-  IssueItemTitle,
-  IssueUser,
 } from '@/components/ui/issue'
-import { HttpStatusCode } from '@/configs/constants'
+import { NOTICE_DESCRIPTION } from '@/configs/constants'
 import { useAuth } from '@/contexts/auth-provider'
-import { chatHref } from '@/utils/navigation'
 
-import { IssueDropdownMenu, IssueReactionButton, IssueReplyButton, IssueShareButton } from './issue-actions'
 import { IssueFormDialog } from './issue-form-dialog'
 
+import type { RemixiconComponentType } from '@remixicon/react'
 import type { ActionState } from '@workspace/server/types/action'
+import type { ConfirmDialogProps } from '@workspace/ui/components/confirm-dialog'
 import type { UseDialogReturn } from '@workspace/ui/hooks/use-dialog'
-import type { IssueDeleteAction, IssueFormAction, IssueTarget } from '@/types/action'
-import type { Issue, IssueComment } from '@/types/issue'
-import type { DropdownMenuItemOnClick } from './issue-actions'
+import type { IssueTarget } from '@/types/action'
+import type { Issue, IssueSubmission } from '@/types/issue'
 import type { IssueFormDialogProps } from './issue-form-dialog'
 
-const POST_EXCERPT_LENGTH = 500
+type DropdownMenuItemOnClick = React.ComponentProps<typeof DropdownMenuItem>['onClick']
+type IssueMenuStatus = 'idle' | 'loading' | 'failed'
 
-function toastActionState(res: ActionState) {
-  toast.add({
-    type: res.status && res.status < HttpStatusCode.BadRequest ? 'success' : 'error',
-    description: res.message,
+function getStagedAuthor(user: ReturnType<typeof useAuth>['user']): Issue['author'] {
+  if (!user?.id) return null
+
+  return { login: user.id.replace(/^@/, ''), avatarUrl: user.avatarUrl ?? '' }
+}
+
+function isStagedMutation(mutation: Mutation<unknown, Error, unknown, unknown>): boolean {
+  return ['pending', 'error'].includes(mutation.state.status)
+}
+
+interface StagedIssue {
+  id: number
+  status: 'loading' | 'failed'
+  submission: IssueSubmission
+  retry: () => void
+  discard: () => void
+  resubmit: (submission: IssueSubmission) => void
+}
+
+function useStagedIssues(mutationKey: MutationKey, mutate: (submission: IssueSubmission) => void): StagedIssue[] {
+  const queryClient = useQueryClient()
+  const stagedMutations = useMutationState({
+    filters: { mutationKey, predicate: isStagedMutation },
+    select: ({ mutationId, state }) => ({
+      id: mutationId,
+      status: state.status,
+      submission: state.variables as IssueSubmission,
+    }),
   })
+
+  const remove = (id: number): void => {
+    const mutationCache = queryClient.getMutationCache()
+    const mutation = mutationCache.find({ predicate: ({ mutationId }) => mutationId === id })
+    if (mutation) mutationCache.remove(mutation)
+  }
+
+  return stagedMutations.map(({ id, status, submission }) => ({
+    id,
+    status: status === 'error' ? 'failed' : 'loading',
+    submission,
+    retry: () => {
+      remove(id)
+      mutate(submission)
+    },
+    discard: () => remove(id),
+    resubmit: (nextSubmission) => {
+      remove(id)
+      mutate(nextSubmission)
+    },
+  }))
 }
 
-interface IssueAction {
-  id: string
-  render: (context: { target: IssueTarget, copyLink: () => void }) => React.ReactNode
+interface ConfirmOptions extends Pick<ConfirmDialogProps, 'title' | 'description' | 'confirmText'> {
+  onConfirm: () => void
 }
 
-interface IssueBaseItemContextValue {
+interface IssueItemContextValue {
   target: IssueTarget
   isOwner: boolean
-  isPending: boolean
+  menuStatus: IssueMenuStatus
+  onRetry?: () => void
+  onDiscard?: () => void
   copyLink: () => void
   onCopyLink?: DropdownMenuItemOnClick
+  onDelete?: () => Promise<ActionState>
+  redirectTo?: string
   triggerEdit: UseDialogReturn['trigger']
-  triggerDelete: UseDialogReturn['trigger']
+  triggerConfirm: (options: ConfirmOptions) => void
+  triggerNotice: UseDialogReturn['trigger']
 }
 
-const IssueBaseItemContext = createContext<IssueBaseItemContextValue | null>(null)
+const IssueItemContext = createContext<IssueItemContextValue | null>(null)
 
-function useIssueBaseItem() {
-  const context = use(IssueBaseItemContext)
+function useIssueItem(): IssueItemContextValue {
+  const context = use(IssueItemContext)
 
   if (!context) {
-    throw new Error('useIssueBaseItem must be used within a IssueBaseItem.')
+    throw new Error('useIssueItem must be used within a StyledIssueItem.')
   }
 
   return context
 }
 
-function IssueBaseItem({
+function IssueItemProvider({
   body,
   target,
+  status,
+  onRetry,
+  onDiscard,
   isOwner = false,
+  isDeleting = false,
   editTitle,
   getCopyUrl,
-  updateAction,
+  onEdit,
   onDelete,
   onCopyLink,
   redirectTo,
@@ -93,337 +157,231 @@ function IssueBaseItem({
 }: {
   body: string
   target: IssueTarget
+  status?: IssueMenuStatus
+  onRetry?: () => void
+  onDiscard?: () => void
   isOwner?: boolean
+  isDeleting?: boolean
   editTitle: string
-  getCopyUrl: () => string
-  updateAction?: IssueFormAction
-  onDelete?: IssueDeleteAction
+  getCopyUrl?: () => string
+  onEdit?: (submission: IssueSubmission) => void
+  onDelete?: () => Promise<ActionState>
   onCopyLink?: DropdownMenuItemOnClick
   redirectTo?: string
-} & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>) {
-  const router = useRouter()
-  const { dialogProps, trigger: triggerEdit } = useDialog()
+} & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>): React.ReactNode {
+  const { dialogProps: editDialogProps, trigger: triggerEdit } = useDialog()
   const {
-    dialogProps: deleteDialogProps,
-    trigger: triggerDelete,
-    dismiss: dismissDeleteDialog,
+    dialogProps: confirmDialogProps,
+    trigger: openConfirmDialog,
+    dismiss: dismissConfirmDialog,
   } = useDialog()
-  const [isPending, startTransition] = useTransition()
+  const { dialogProps: noticeDialogProps, trigger: triggerNotice } = useDialog()
+  const [confirmOptions, setConfirmOptions] = useState<ConfirmOptions>()
 
   const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
 
-  const copyLink = () => {
-    if (typeof window === 'undefined') return
+  const menuStatus: IssueMenuStatus = isDeleting || status === 'loading'
+    ? 'loading'
+    : (status ?? 'idle')
+
+  const copyLink = (): void => {
+    if (typeof window === 'undefined' || !getCopyUrl) return
     copy(getCopyUrl())
   }
 
-  const handleDelete = () => {
-    startTransition(async () => {
-      const res = await onDelete?.(target)
-      if (res) toastActionState(res)
-      if (redirectTo && res?.status && res.status < HttpStatusCode.BadRequest) {
-        router.replace(redirectTo)
-      }
-    })
-    dismissDeleteDialog()
+  const triggerConfirm = (options: ConfirmOptions): void => {
+    setConfirmOptions(options)
+    openConfirmDialog()
+  }
+
+  const handleConfirm = (): void => {
+    confirmOptions?.onConfirm()
+    dismissConfirmDialog()
   }
 
   return (
-    <IssueBaseItemContext value={{ target, isOwner, isPending, copyLink, onCopyLink, triggerEdit, triggerDelete }}>
+    <IssueItemContext
+      value={{
+        target,
+        isOwner,
+        menuStatus,
+        onRetry,
+        onDiscard,
+        copyLink,
+        onCopyLink,
+        onDelete,
+        redirectTo,
+        triggerEdit,
+        triggerConfirm,
+        triggerNotice,
+      }}
+    >
       <IssueItem {...props}>
         {children}
-        <DeleteAlertDialog {...deleteDialogProps} onConfirm={handleDelete} />
+        {confirmOptions && (
+          <ConfirmDialog
+            {...{ ...confirmDialogProps, ...confirmOptions }}
+            onConfirm={handleConfirm}
+          />
+        )}
+        <NoticeConfirmDialog
+          {...noticeDialogProps}
+          title="功能尚未開放"
+          description={NOTICE_DESCRIPTION}
+        />
         {isOwner && (
           <IssueFormDialog
-            onSubmit={updateAction}
+            onSubmit={onEdit}
             title={editTitle}
-            defaultValues={{ content: body, ...target }}
-            dialogProps={dialogProps}
+            defaultValues={{ content: body }}
+            dialogProps={editDialogProps}
           />
         )}
       </IssueItem>
-    </IssueBaseItemContext>
+    </IssueItemContext>
   )
 }
 
-function IssueBaseMenu() {
-  const { isOwner, isPending, copyLink, onCopyLink, triggerEdit, triggerDelete } = useIssueBaseItem()
-
+function IssueMenuItem({ label, icon: Icon, ...props }: {
+  label: string
+  icon: RemixiconComponentType
+} & React.ComponentProps<typeof DropdownMenuItem>): React.ReactNode {
   return (
-    <IssueDropdownMenu
-      isOwner={isOwner}
-      loading={isPending}
-      onEdit={triggerEdit}
-      onCopyLink={onCopyLink ?? copyLink}
-      onDelete={triggerDelete}
-    />
+    <DropdownMenuItem {...props}>
+      {label}
+      <span className="ml-auto">
+        <Icon />
+      </span>
+    </DropdownMenuItem>
   )
 }
 
-function IssueBaseFooter({ actions, ...props }: { actions: IssueAction[] } & React.ComponentProps<typeof IssueItemFooter>) {
-  const { target, copyLink } = useIssueBaseItem()
+function EditMenuItem(): React.ReactNode {
+  const { triggerEdit } = useIssueItem()
 
-  return (
-    <IssueItemFooter {...props}>
-      {actions.map(action => (
-        <Fragment key={action.id}>
-          {action.render({ target, copyLink })}
-        </Fragment>
-      ))}
-    </IssueItemFooter>
-  )
+  return <IssueMenuItem label="編輯" icon={RiEditLine} onClick={triggerEdit} />
 }
 
-const getShrinkChars = (text: string[]) => text.slice(0, POST_EXCERPT_LENGTH).join('')
+function CopyLinkMenuItem(): React.ReactNode {
+  const { copyLink, onCopyLink } = useIssueItem()
 
-function PostItem({
-  post,
-  repoName,
-  href,
-  isPrefetched = false,
-  updateAction,
-  onSubmit,
-  className,
-  ...props
-}: {
-  post: Issue
-  repoName: string
-  isOwner?: boolean
-  href?: string
-  isPrefetched?: boolean
-  updateAction?: IssueFormAction
-  onDelete?: IssueDeleteAction
-  onSubmit?: IssueFormAction
-  onCopyLink?: DropdownMenuItemOnClick
-  redirectTo?: string
-} & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>) {
+  return <IssueMenuItem label="複製連結" icon={RiLink} onClick={onCopyLink ?? copyLink} />
+}
+
+function BookmarkMenuItem(): React.ReactNode {
+  const { triggerNotice } = useIssueItem()
+
+  return <IssueMenuItem label="儲存" icon={RiBookmarkLine} onClick={triggerNotice} />
+}
+
+function DeleteMenuItem(): React.ReactNode {
   const router = useRouter()
+  const { onDelete, redirectTo, triggerConfirm } = useIssueItem()
 
-  useEffect(() => {
-    if (!isPrefetched || !href) return
-    // Full prefetch loads the post and comments, not just the static shell
-    router.prefetch(href, { kind: 'full' as PrefetchKind })
-  }, [isPrefetched, href, router])
+  const handleDelete = async (): Promise<void> => {
+    const res = await onDelete?.().catch(() => null)
+    if (!res) return
 
-  // Count code points so emoji aren't split
-  const bodyChars = Array.from(post.bodyText)
-  const isTruncated = bodyChars.length > POST_EXCERPT_LENGTH
-
-  const getCopyUrl = () => {
-    const path = (href || chatHref(post)).replace(/^\//, '')
-    return `${window.location.origin}/${path}`
+    toast.add({ type: 'success', description: res.message })
+    if (redirectTo) router.replace(redirectTo)
   }
 
-  const handleNavigate = (e: React.MouseEvent<HTMLDivElement>): void => {
-    // Clicks inside portals (dialog, dropdown, hover card) still bubble through the React tree
-    if (!href || !(e.target instanceof Element) || !e.currentTarget.contains(e.target)) return
-    if (e.target.closest('a, button')) return
-    if (window.getSelection()?.toString()) return
-    router.push(href)
+  const handleClick = (): void => {
+    triggerConfirm({
+      title: '刪除貼文？',
+      description: '刪除這則貼文後，即無法恢復顯示。',
+      confirmText: '刪除',
+      onConfirm: () => void handleDelete(),
+    })
   }
 
-  return (
-    <IssueBaseItem
-      body={post.body}
-      target={{ repoName, issueNumber: post.number }}
-      editTitle="編輯貼文"
-      getCopyUrl={getCopyUrl}
-      updateAction={updateAction}
-      className={cn(href && 'cursor-pointer', className)}
-      onClick={handleNavigate}
-      {...props}
-    >
-      <IssueItemMedia src={post.author?.avatarUrl} login={post.author?.login} />
-      <IssueItemContent>
-        <IssueItemTitle>
-          <div className="flex flex-1 min-w-0 items-center gap-1.5">
-            <IssueUser login={post.author?.login} avatarUrl={post.author?.avatarUrl} />
-
-            <Button
-              type="button"
-              variant="ghost"
-              className="p-0 transition-opacity hover:opacity-60"
-              render={<Link href={href ?? '/'} />}
-              nativeButton={false}
-            >
-              <time className="text-muted-foreground font-normal shrink-0" dateTime={post.createdAt}>
-                {formatDateTime(post.createdAt, { withTime: false })}
-              </time>
-            </Button>
-          </div>
-          <IssueBaseMenu />
-        </IssueItemTitle>
-        {isTruncated
-          ? (
-              <IssueItemArticle className="whitespace-pre-line">
-                {getShrinkChars(bodyChars)}
-                …
-                <Link href={href || chatHref(post)} className="text-muted-foreground no-underline hover:underline">
-                  展開
-                </Link>
-              </IssueItemArticle>
-            )
-          : <IssueItemArticle html={post.bodyHTML} />}
-        <IssueBaseFooter
-          actions={[
-            {
-              id: 'reaction',
-              render: ({ target }) => (
-                <IssueReactionButton
-                  target={target}
-                  reaction={{ reactionCount: post.reactionCount, isReacted: post.isReacted }}
-                />
-              ),
-            },
-            {
-              id: 'chat',
-              render: ({ target }) => onSubmit
-                ? (
-                    <IssueReplyButton
-                      onSubmit={onSubmit}
-                      title="新貼文"
-                      placeholder="有什麼新鮮事？"
-                      count={post.commentCount}
-                      defaultValues={{ repoName: target.repoName, issueNumber: target.issueNumber }}
-                    />
-                  )
-                : (
-                    <IssueItemButton
-                      size="lg"
-                      nativeButton={false}
-                      render={<Link href={href ?? ''} />}
-                    >
-                      <RiChat1Line />
-                      {post.commentCount > 0 && post.commentCount}
-                    </IssueItemButton>
-                  ),
-            },
-            {
-              id: 'share',
-              render: ({ copyLink }) => <IssueShareButton onClick={copyLink} />,
-            },
-          ]}
-        />
-      </IssueItemContent>
-    </IssueBaseItem>
-  )
+  return <IssueMenuItem label="刪除" icon={RiDeleteBin7Line} variant="destructive" onClick={handleClick} />
 }
 
-function CommentItem({
-  issue,
-  isRefreshable = false,
-  reaction,
-  reply,
-  updateAction,
-  className,
-  ...props
-}: {
-  issue: Pick<IssueComment, 'body' | 'bodyHTML' | 'createdAt' | 'author'>
-  target: IssueTarget
-  isOwner?: boolean
-  editTitle?: string
-  isRefreshable?: boolean
-  reaction?: React.ComponentProps<typeof IssueReactionButton>['reaction']
-  reply?: {
-    action: IssueFormAction
-    count?: number
-  }
-  updateAction?: IssueFormAction
-  onDelete?: IssueDeleteAction
-  onCopyLink?: DropdownMenuItemOnClick
-  redirectTo?: string
-} & React.ComponentProps<typeof IssueItem>) {
-  const [isRefreshing, startRefresh] = useTransition()
+function RetryMenuItem(): React.ReactNode {
+  const { onRetry } = useIssueItem()
 
-  const router = useRouter()
+  return <IssueMenuItem label="重傳" icon={RiRefreshLine} onClick={onRetry} />
+}
 
-  const authorName = issue.author?.login ?? 'ghost'
+function DiscardMenuItem(): React.ReactNode {
+  const { onDiscard, triggerConfirm } = useIssueItem()
 
-  const getCopyUrl = () => `${window.location.origin}${window.location.pathname}`
-
-  const handleRefresh = () => {
-    startRefresh(() => router.refresh())
+  const handleClick = (): void => {
+    if (!onDiscard) return
+    triggerConfirm({ title: '捨棄貼文？', confirmText: '捨棄', onConfirm: onDiscard })
   }
 
-  const timeElement = (
-    <time className="text-muted-foreground font-normal shrink-0" dateTime={issue.createdAt}>
-      {formatDateTime(issue.createdAt, { withTime: false })}
-    </time>
-  )
+  return <IssueMenuItem label="捨棄" icon={RiDeleteBin7Line} variant="destructive" onClick={handleClick} />
+}
+
+type IssueMenu = Record<string, Record<string, React.ComponentType>>
+
+const issueOwnerMenu: IssueMenu = {
+  manage: { edit: EditMenuItem },
+  share: { copyLink: CopyLinkMenuItem, bookmark: BookmarkMenuItem },
+  danger: { delete: DeleteMenuItem },
+}
+
+const issueViewerMenu: IssueMenu = {
+  share: { copyLink: CopyLinkMenuItem, bookmark: BookmarkMenuItem },
+}
+
+const issueFailedMenu: IssueMenu = {
+  manage: { retry: RetryMenuItem, edit: EditMenuItem },
+  danger: { discard: DiscardMenuItem },
+}
+
+function getIssueMenu(menuStatus: IssueMenuStatus, isOwner: boolean): IssueMenu {
+  if (menuStatus === 'failed') return issueFailedMenu
+  if (isOwner) return issueOwnerMenu
+
+  return issueViewerMenu
+}
+
+const statusIcon: Record<IssueMenuStatus, React.ReactNode> = {
+  idle: <RiMoreLine />,
+  loading: <Spinner />,
+  failed: <RiAlertLine />,
+}
+
+function IssueDropdownMenu(): React.ReactNode {
+  const { isOwner, menuStatus } = useIssueItem()
 
   return (
-    <IssueBaseItem
-      body={issue.body}
-      editTitle="編輯留言"
-      getCopyUrl={getCopyUrl}
-      updateAction={updateAction}
-      className={cn('flex-col items-start gap-2.5', className)}
-      {...props}
-    >
-      {isRefreshing && (
-        <div className="flex w-full justify-center py-2">
-          <Spinner className="size-5" />
-        </div>
-      )}
-
-      {/* Header: avatar, name/time, menu */}
-      <IssueItemHeader>
-        <div className="flex items-center gap-2.5 min-w-0">
-          <IssueItemMedia
-            src={issue.author?.avatarUrl}
-            login={issue.author?.login}
-            className="group-has-data-[slot=item-description]/item:translate-y-0 group-has-data-[slot=item-description]/item:self-center"
-          />
-          <div className="flex items-center gap-1.5 min-w-0">
-            <IssueUser login={issue.author?.login} avatarUrl={issue.author?.avatarUrl} className="text-base" />
-            {isRefreshable
-              ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="p-0 transition-opacity hover:opacity-60"
-                    disabled={isRefreshing}
-                    onClick={handleRefresh}
-                  >
-                    {timeElement}
-                  </Button>
-                )
-              : timeElement}
-          </div>
-        </div>
-        <IssueBaseMenu />
-      </IssueItemHeader>
-
-      {/* Content: below header */}
-      <IssueItemArticle html={issue.bodyHTML} className="ps-0 mt-0 w-full" />
-
-      {/* Footer: buttons below content */}
-      <IssueBaseFooter
-        className="mt-1"
-        actions={[
-          {
-            id: 'reaction',
-            render: ({ target }) => <IssueReactionButton target={target} reaction={reaction} />,
-          },
-          {
-            id: 'reply',
-            render: ({ target }) => reply && (
-              <IssueReplyButton
-                onSubmit={reply.action}
-                title="回覆"
-                placeholder={`回覆${authorName}……`}
-                count={reply.count}
-                defaultValues={{ repoName: target.repoName, issueNumber: target.issueNumber }}
-              />
-            ),
-          },
-          {
-            id: 'share',
-            render: ({ copyLink }) => <IssueShareButton onClick={copyLink} />,
-          },
-        ]}
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={(
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            disabled={menuStatus === 'loading'}
+            className={cn(menuStatus === 'failed' && 'text-destructive hover:text-destructive')}
+          >
+            {statusIcon[menuStatus]}
+          </Button>
+        )}
       />
-    </IssueBaseItem>
+      <DropdownMenuContent align="start">
+        {Object.entries(getIssueMenu(menuStatus, isOwner)).map(([group, items], index) => (
+          <Fragment key={group}>
+            {index > 0 && <DropdownMenuSeparator />}
+            <DropdownMenuGroup>
+              {Object.entries(items).map(([id, MenuItem]) => <MenuItem key={id} />)}
+            </DropdownMenuGroup>
+          </Fragment>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+function IssueFooter({
+  className,
+  ...props
+}: React.ComponentProps<typeof IssueItemFooter>): React.ReactNode {
+  return (
+    <IssueItemFooter className={cn('mt-1', className)} {...props} />
   )
 }
 
@@ -431,10 +389,9 @@ function IssueComposerItem({
   onSubmit,
   title,
   placeholder,
-  defaultValues,
   ...props
-}: Pick<IssueFormDialogProps, 'onSubmit' | 'title' | 'placeholder' | 'defaultValues'>
-  & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>) {
+}: Pick<IssueFormDialogProps, 'onSubmit' | 'title' | 'placeholder'>
+  & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>): React.ReactNode {
   const { user } = useAuth()
   const { name, avatarUrl } = user || {}
 
@@ -447,7 +404,6 @@ function IssueComposerItem({
             onSubmit={onSubmit}
             title={title}
             placeholder={placeholder}
-            defaultValues={defaultValues}
           >
             <DialogTrigger className="flex-1 text-start cursor-text">
               <span className="text-base text-muted-foreground">
@@ -467,4 +423,12 @@ function IssueComposerItem({
   )
 }
 
-export { CommentItem, IssueBaseFooter, IssueBaseItem, IssueBaseMenu, IssueComposerItem, PostItem }
+export {
+  getStagedAuthor,
+  IssueComposerItem,
+  IssueDropdownMenu,
+  IssueFooter,
+  IssueItemProvider,
+  useStagedIssues,
+}
+export type { IssueMenuStatus, StagedIssue }

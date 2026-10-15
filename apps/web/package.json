@@ -17,6 +17,7 @@
     "@octokit/rest": "^22.0.1",
     "@remixicon/react": "catalog:",
     "@t3-oss/env-nextjs": "catalog:",
+    "@tanstack/react-query": "^5.104.2",
     "@workspace/server": "workspace:*",
     "@workspace/ui": "workspace:*",
     "better-auth": "catalog:",

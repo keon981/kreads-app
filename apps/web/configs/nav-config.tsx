@@ -2,6 +2,8 @@ import { usePathname, useRouter } from 'next/navigation'
 
 import type { ComponentType, ReactNode } from 'react'
 
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
 import {
   RiAddLargeLine,
   RiBookmarkLine,
@@ -32,12 +34,13 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 import { useTheme } from 'next-themes'
 
-import { createPostAction } from '@/app/server/actions/posts'
 import { AuthDialogTrigger } from '@/components/auth/auth-dialog-trigger'
 import { IssueFormDialog } from '@/components/blocks/issue/issue-form-dialog'
 import { LinkNavItem, NoticeNavItem } from '@/components/blocks/nav-item'
+import { NOTICE_DESCRIPTION } from '@/configs/constants'
 import { homePaths, paths } from '@/configs/path-config'
 import { useAuth } from '@/contexts/auth-provider'
+import { postMutations } from '@/hooks/mutations/posts'
 import { signOutWithClient } from '@/lib/auth-client'
 
 import type { RemixiconComponentType } from '@remixicon/react'
@@ -61,8 +64,6 @@ export const themeOptions = [
   { value: 'dark', label: '深色模式', icon: RiMoonLine },
   { value: 'system', label: '跟隨系統', icon: RiComputerLine },
 ] as const
-
-const NoticeDescription = '此功能正在努力開發中。\n敬請期待！'
 
 export const sidebar: Sidebar = {
   navMain: [
@@ -93,7 +94,7 @@ export const sidebar: Sidebar = {
         return (
           <NoticeNavItem
             label="搜尋"
-            description={NoticeDescription}
+            description={NOTICE_DESCRIPTION}
             icon={<RiSearchLine />}
           >
             {children}
@@ -106,9 +107,12 @@ export const sidebar: Sidebar = {
       icon: RiAddLargeLine,
       isPrimary: true,
       NavItem({ children }: NavItemProps): ReactNode {
+        const { user } = useAuth()
+        const { mutate } = useMutation(postMutations.create(user?.repoName ?? ''))
+
         return (
           <IssueFormDialog
-            onSubmit={createPostAction}
+            onSubmit={mutate}
             title="新貼文"
             placeholder="有什麼新鮮事？"
           >
@@ -126,7 +130,7 @@ export const sidebar: Sidebar = {
         return (
           <NoticeNavItem
             label="書籤"
-            description={NoticeDescription}
+            description={NOTICE_DESCRIPTION}
             icon={<RiBookmarkLine />}
           >
             {children}
@@ -163,9 +167,11 @@ export const sidebar: Sidebar = {
         const router = useRouter()
         const { isAuth, user } = useAuth()
         const { theme, setTheme } = useTheme()
+        const queryClient = useQueryClient()
 
         const handleSignOut = async (): Promise<void> => {
           await signOutWithClient()
+          queryClient.clear()
           router.refresh()
         }
 

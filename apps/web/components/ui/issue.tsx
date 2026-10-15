@@ -5,12 +5,26 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 import {
+  RiBold,
+  RiFileCopyLine,
+  RiItalic,
+  RiScissorsCutLine,
+  RiStrikethrough,
+  RiUnderline,
+} from '@remixicon/react'
+import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from '@workspace/ui/components/avatar'
 import { Button } from '@workspace/ui/components/button'
 import { ButtonGroup } from '@workspace/ui/components/button-group'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@workspace/ui/components/context-menu'
 import { Empty, EmptyDescription, EmptyHeader } from '@workspace/ui/components/empty'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@workspace/ui/components/hover-card'
 import {
@@ -21,12 +35,19 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@workspace/ui/components/item'
+import {
+  MarkdownEditor,
+  MarkdownEditorClipboardItem,
+  MarkdownEditorContent,
+  MarkdownEditorMarkItem,
+} from '@workspace/ui/components/markdown-editor'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
 
 import { paths } from '@/configs/path-config'
 
 import type { ButtonProps } from '@workspace/ui/components/button'
+import type { UseMarkdownEditorReturn } from '@workspace/ui/components/markdown-editor'
 
 function IssueItem({
   children,
@@ -152,7 +173,7 @@ function IssueItemTitle({ children, className, ...props }: React.ComponentProps<
 
 function IssueItemArticle({ html, className, children, ...props }: React.ComponentProps<'div'> & { html?: string }) {
   const articleProps = {
-    'data-slot': 'item-description',
+    'data-slot': 'item-article',
     'className': cn('mt-1 ps-2.5 pt-1 typeset typeset-post wrap-break-word', className),
     ...props,
   }
@@ -182,7 +203,7 @@ function IssueItemButton({ className, ...props }: ButtonProps) {
 
 function IssueItemSkeleton() {
   return (
-    <Item className="flex-nowrap items-start rounded-none border-0 border-t p-3" variant="outline">
+    <Item data-slot="issue-item-skeleton" className="flex-nowrap items-start rounded-none border-0 border-b last:border-b-0 p-3" variant="outline">
       <ItemMedia>
         <Avatar className="size-10 after:border-transparent">
           <Skeleton className="size-full rounded-full" />
@@ -241,7 +262,62 @@ function IssueItemHeader({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
+interface IssueContentEditorProps {
+  editor: UseMarkdownEditorReturn['editor']
+  value?: string
+  name?: string
+  className?: string
+}
+
+function IssueContentEditor({
+  editor,
+  value,
+  name = 'content',
+  className,
+}: IssueContentEditorProps) {
+  return (
+    <>
+      <MarkdownEditor editor={editor}>
+        <ContextMenu>
+          <ContextMenuTrigger>
+            <MarkdownEditorContent className={cn('md:text-base', className)} />
+          </ContextMenuTrigger>
+          <ContextMenuContent className="w-36">
+            <MarkdownEditorMarkItem mark="bold">
+              <RiBold />
+              粗體
+            </MarkdownEditorMarkItem>
+            <MarkdownEditorMarkItem mark="italic">
+              <RiItalic />
+              斜體
+            </MarkdownEditorMarkItem>
+            <MarkdownEditorMarkItem mark="underline">
+              <RiUnderline />
+              底線
+            </MarkdownEditorMarkItem>
+            <MarkdownEditorMarkItem mark="strike">
+              <RiStrikethrough />
+              刪除線
+            </MarkdownEditorMarkItem>
+            <ContextMenuSeparator />
+            <MarkdownEditorClipboardItem command="copy">
+              <RiFileCopyLine />
+              複製
+            </MarkdownEditorClipboardItem>
+            <MarkdownEditorClipboardItem command="cut">
+              <RiScissorsCutLine />
+              剪下
+            </MarkdownEditorClipboardItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      </MarkdownEditor>
+      {value !== undefined && <input type="hidden" name={name} value={value} />}
+    </>
+  )
+}
+
 export {
+  IssueContentEditor,
   IssueEmpty,
   IssueItem,
   IssueItemArticle,
@@ -255,3 +331,4 @@ export {
   IssueItemTitle,
   IssueUser,
 }
+export type { IssueContentEditorProps }

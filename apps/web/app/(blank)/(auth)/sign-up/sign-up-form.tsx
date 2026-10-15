@@ -1,4 +1,5 @@
 'use client'
+
 import Link from 'next/link'
 
 import { useActionState } from 'react'
@@ -18,8 +19,9 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@workspace/ui/comp
 import { Password } from '@workspace/ui/components/password'
 import { Spinner } from '@workspace/ui/components/spinner'
 
-import { completeSignUpAction } from '@/app/(blank)/(auth)/sign-up/action'
 import { safeNext, signInPath } from '@/utils/navigation'
+
+import { completeSignUpAction } from './action'
 
 import type { ActionState } from '@workspace/server/types/action'
 

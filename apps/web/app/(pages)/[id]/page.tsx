@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
 import { fetchViewerUser } from '@/app/server/db/users'
-import { UserPostsView, UserPostsViewSkeleton } from '@/views/posts-view'
+import { UserPostsView, UserPostsViewSkeleton } from '@/views/posts-view/view'
 
 async function Page({ params }: PageProps<'/[id]'>) {
   const { id } = await params

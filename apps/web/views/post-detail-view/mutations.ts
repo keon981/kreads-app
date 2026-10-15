@@ -1,0 +1,114 @@
+import { mutationOptions } from '@tanstack/react-query'
+import type { QueryClient } from '@tanstack/react-query'
+
+import { createCommentAction, deleteCommentAction, updateCommentAction } from '@/app/server/actions/comments'
+import { setPostDetail, setPostListItem } from '@/hooks/mutations/posts'
+import { commentQueries } from '@/hooks/queries/comments'
+import { getActionData, throwIfActionFailed } from '@/utils/toolkit'
+
+import type { IssueComment, IssueSubmission } from '@/types/issue'
+
+export function setCommentList(
+  client: QueryClient,
+  repoName: string,
+  issueNumber: number,
+  update: (comments: IssueComment[]) => IssueComment[],
+): void {
+  const queryKey = commentQueries.list(repoName, issueNumber).queryKey
+  client.setQueryData(queryKey, (currentComments) => {
+    if (!currentComments) return currentComments
+    return update(currentComments)
+  })
+  client.invalidateQueries({ queryKey, refetchType: 'none' })
+}
+
+export const setCommentsData = setCommentList
+
+export const commentMutations = {
+  create: (repoName: string, issueNumber: number) =>
+    mutationOptions({
+      mutationKey: ['comment', 'create', repoName, issueNumber],
+      mutationFn: async (submission: IssueSubmission) => {
+        const body = submission.content.body
+        const actionState = await createCommentAction({ repoName, issueNumber, content: body })
+        return getActionData(actionState)
+      },
+      gcTime: Infinity,
+      onSuccess: (createdComment, _variables, _context, { client }) => {
+        // Append new comment to comment list
+        setCommentList(client, repoName, issueNumber, comments => [...comments, createdComment])
+
+        // Increment comment count in post detail and list
+        setPostDetail(client, repoName, issueNumber, post => ({
+          ...post,
+          commentCount: post.commentCount + 1,
+        }))
+        setPostListItem(client, repoName, issueNumber, post => ({
+          ...post,
+          commentCount: post.commentCount + 1,
+        }))
+
+        // Invalidate all posts under this repo
+        client.invalidateQueries({ queryKey: ['post', repoName], refetchType: 'none' })
+      },
+    }),
+
+  update: (repoName: string, issueNumber: number, commentId: number) =>
+    mutationOptions({
+      mutationKey: ['comment', 'update', repoName, commentId],
+      mutationFn: async (submission: IssueSubmission) => {
+        const body = submission.content.body
+        const actionState = await updateCommentAction({ repoName, commentId, content: body })
+        return getActionData(actionState)
+      },
+      gcTime: Infinity,
+      onSuccess: (updatedComment, _variables, _context, { client }) => {
+        const { body, bodyHTML } = updatedComment
+
+        // Update comment in comment list
+        setCommentList(client, repoName, issueNumber, comments =>
+          comments.map((comment) => {
+            if (comment.id !== commentId) return comment
+            return { ...comment, body, bodyHTML }
+          }))
+      },
+    }),
+
+  delete: (repoName: string, issueNumber: number, commentId: number) =>
+    mutationOptions({
+      mutationKey: ['comment', 'delete', repoName, commentId],
+      mutationFn: async () => {
+        const actionState = await deleteCommentAction({ repoName, commentId })
+        throwIfActionFailed(actionState)
+        return actionState
+      },
+      onSuccess: (_actionState, _variables, _context, { client }) => {
+        // Filter out deleted comment
+        setCommentList(client, repoName, issueNumber, comments =>
+          comments.filter(comment => comment.id !== commentId))
+
+        // Decrement comment count in post detail and list
+        setPostDetail(client, repoName, issueNumber, post => ({
+          ...post,
+          commentCount: post.commentCount - 1,
+        }))
+        setPostListItem(client, repoName, issueNumber, post => ({
+          ...post,
+          commentCount: post.commentCount - 1,
+        }))
+
+        // Invalidate all posts under this repo
+        client.invalidateQueries({ queryKey: ['post', repoName], refetchType: 'none' })
+      },
+    }),
+}
+
+export const commentMutationKeys = {
+  create: (repoName: string, issueNumber: number) => commentMutations.create(repoName, issueNumber).mutationKey,
+  update: (repoName: string, commentId: number) => commentMutations.update(repoName, 0, commentId).mutationKey,
+  delete: (repoName: string, commentId: number) => commentMutations.delete(repoName, 0, commentId).mutationKey,
+}
+
+export const createCommentMutation = commentMutations.create
+export const updateCommentMutation = commentMutations.update
+export const deleteCommentMutation = commentMutations.delete

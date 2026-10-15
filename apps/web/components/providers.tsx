@@ -3,6 +3,7 @@ import { DeviceProvider } from '@workspace/ui/contexts/device-provider'
 
 import { SignInDialog } from '@/components/blocks/sign-in'
 import { AuthProvider } from '@/contexts/auth-provider'
+import { QueryProvider } from '@/contexts/query-provider'
 
 interface ProvidersProps
   extends React.ComponentProps<typeof AuthProvider>,
@@ -15,13 +16,15 @@ export function Providers({
 }: ProvidersProps): React.ReactNode {
   return (
     <DeviceProvider initialIsMobile={initialIsMobile}>
-      <AuthProvider {...props}>
-        {children}
+      <QueryProvider>
+        <AuthProvider {...props}>
+          {children}
 
-        {/* fallback */}
-        <SignInDialog />
-        <Toaster />
-      </AuthProvider>
+          {/* fallback */}
+          <SignInDialog />
+          <Toaster />
+        </AuthProvider>
+      </QueryProvider>
     </DeviceProvider>
   )
 }

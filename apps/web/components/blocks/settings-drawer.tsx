@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation'
 
 import React from 'react'
 
+import { useQueryClient } from '@tanstack/react-query'
+
 import { RiArrowRightSLine, RiContrast2Line, RiLogoutBoxRLine } from '@remixicon/react'
 import {
   DrawerClose,
@@ -30,9 +32,11 @@ export function SettingsDrawerContent({
   const router = useRouter()
   const { isAuth } = useAuth()
   const { theme, setTheme } = useTheme()
+  const queryClient = useQueryClient()
 
   const handleSignOut = async (): Promise<void> => {
     await signOutWithClient()
+    queryClient.clear()
     router.refresh()
   }
 

@@ -1,33 +1,17 @@
 'use client'
 
 import {
-  RiBookmarkLine,
   RiChat1Line,
-  RiDeleteBin7Line,
-  RiEditLine,
   RiHeartFill,
   RiHeartLine,
-  RiLink,
-  RiMoreLine,
   RiShareForwardLine,
 } from '@remixicon/react'
-import { Button } from '@workspace/ui/components/button'
 import { DialogTrigger } from '@workspace/ui/components/dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@workspace/ui/components/dropdown-menu'
-import { Spinner } from '@workspace/ui/components/spinner'
 import { toast } from '@workspace/ui/components/toast'
 import { useDebouncedMutation } from '@workspace/ui/hooks/use-debounced-mutation'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
 
 import { toggleReactionAction } from '@/app/server/actions/posts'
-import { NoticeAlertDialog } from '@/components/blocks/confirm-dialog'
 import { IssueItemButton } from '@/components/ui/issue'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
@@ -38,13 +22,10 @@ import type { IssueTarget } from '@/types/action'
 import type { IssueFormDialogProps } from './issue-form-dialog'
 
 type IssueItemButtonProps = React.ComponentProps<typeof IssueItemButton>
-type DropdownMenuItemOnClick = React.ComponentProps<typeof DropdownMenuItem>['onClick']
-
-const NoticeDescription = '此功能正在努力開發中。\n敬請期待！'
 
 const isShow = (count?: number) => count ? 'block' : 'hidden'
 
-function IssueReactionButton({ target, reaction }: {
+function IssueReactionButton({ target, reaction, ...props }: {
   target: IssueTarget
   reaction?: {
     reactionCount: number
@@ -82,7 +63,7 @@ function IssueReactionButton({ target, reaction }: {
   const onAuthGuardClick = useAuthGuard(handleClickHeart)
 
   return (
-    <IssueItemButton size="lg" onClick={onAuthGuardClick}>
+    <IssueItemButton size="lg" {...props} onClick={onAuthGuardClick}>
       {isReacted
         ? <RiHeartFill className="text-destructive" />
         : <RiHeartLine />}
@@ -93,14 +74,16 @@ function IssueReactionButton({ target, reaction }: {
 
 function IssueReplyButton({
   count,
+  disabled,
   ...props
-}: { count?: number } & Pick<IssueFormDialogProps, 'onSubmit' | 'title' | 'placeholder' | 'defaultValues'>) {
+}: { count?: number, disabled?: boolean } & Pick<IssueFormDialogProps, 'onSubmit' | 'title' | 'placeholder' | 'defaultValues'>) {
   const { dialogProps, trigger } = useDialog()
   const onAuthGuardClick = useAuthGuard(trigger)
 
   return (
     <IssueFormDialog {...props} dialogProps={dialogProps}>
       <DialogTrigger
+        disabled={disabled}
         render={<IssueItemButton size="lg" />}
         onClick={onAuthGuardClick}
       >
@@ -119,96 +102,8 @@ function IssueShareButton(props: IssueItemButtonProps) {
   )
 }
 
-function IssueDropdownMenu({
-  isOwner = false,
-  loading = false,
-  onEdit,
-  onCopyLink,
-  onBookmark,
-  onDelete,
-}: {
-  isOwner?: boolean
-  loading?: boolean
-  onEdit?: DropdownMenuItemOnClick
-  onCopyLink?: DropdownMenuItemOnClick
-  onBookmark?: DropdownMenuItemOnClick
-  onDelete?: DropdownMenuItemOnClick
-}) {
-  const { dialogProps, trigger } = useDialog()
-
-  if (loading) {
-    return (
-      <Button variant="ghost" size="icon-sm" disabled>
-        <Spinner />
-      </Button>
-    )
-  }
-
-  const handleBookmark: DropdownMenuItemOnClick = (e) => {
-    onBookmark?.(e)
-    trigger()
-  }
-
-  return (
-    <>
-      <NoticeAlertDialog
-        title="功能尚未開放"
-        description={NoticeDescription}
-        {...dialogProps}
-      />
-      <DropdownMenu>
-        <DropdownMenuTrigger render={(
-          <Button variant="ghost" size="icon-sm">
-            <RiMoreLine />
-          </Button>
-        )}
-        />
-        <DropdownMenuContent align="start">
-          {isOwner && (
-            <>
-              <DropdownMenuGroup>
-                <DropdownMenuItem onClick={onEdit}>
-                  編輯
-                  <span className="ml-auto">
-                    <RiEditLine />
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-            </>
-          )}
-          <DropdownMenuGroup>
-            <DropdownMenuItem onClick={onCopyLink}>
-              複製連結
-              <span className="ml-auto">
-                <RiLink />
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleBookmark}>
-              儲存
-              <span className="ml-auto">
-                <RiBookmarkLine />
-              </span>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          {isOwner && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem variant="destructive" onClick={onDelete}>
-                  刪除
-                  <span className="ml-auto">
-                    <RiDeleteBin7Line />
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </>
-  )
+export {
+  IssueReactionButton,
+  IssueReplyButton,
+  IssueShareButton,
 }
-
-export { IssueDropdownMenu, IssueReactionButton, IssueReplyButton, IssueShareButton }
-export type { DropdownMenuItemOnClick }

@@ -11,7 +11,7 @@ import StarterKit from '@tiptap/starter-kit'
 import { ContextMenuCheckboxItem, ContextMenuItem } from '@workspace/ui/components/context-menu'
 import { cn } from 'cn'
 
-import type { Editor, UseEditorOptions } from '@tiptap/react'
+import type { Editor, EditorContextValue, UseEditorOptions } from '@tiptap/react'
 
 // Escape block markers in plain text so GitHub doesn't render them as headings or lists
 const BULLET_OR_HEADING_MARKER = /^(\s*)(#{1,6}(?=\s|$)|[-+*](?=\s))/gm
@@ -42,12 +42,11 @@ interface UseMarkdownEditorReturn {
   isDirty: boolean
 }
 
-interface MarkdownEditorProps {
-  editor: Editor | null
+interface MarkdownEditorProps extends EditorContextValue {
   children?: React.ReactNode
 }
 
-interface MarkdownEditorContentProps extends Omit<React.ComponentProps<typeof EditorContent>, 'editor'> {}
+interface MarkdownEditorContentProps extends Omit<React.ComponentProps<typeof EditorContent>, 'editor'> { }
 
 interface MarkdownEditorMarkItemProps
   extends Omit<React.ComponentProps<typeof ContextMenuCheckboxItem>, 'checked' | 'onCheckedChange'> {

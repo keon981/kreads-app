@@ -16,7 +16,7 @@ export function ErrorLayout({
   actionProps,
 }: ErrorLayoutProps): React.ReactNode {
   return (
-    <div className="size-full flex justify-center items-center">
+    <div className="size-full h-dvh flex justify-center items-center">
       <hgroup className="flex flex-col gap-4 justify-center items-center w-sm text-center">
         <h2 className="font-bold text-foreground">
           {title}

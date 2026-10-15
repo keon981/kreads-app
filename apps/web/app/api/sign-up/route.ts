@@ -15,7 +15,7 @@ import {
   getSessionCache,
   signOutWithServer,
 } from '@/lib/auth'
-import { findOrCreateRepo } from '@/services/api/users'
+import { findOrCreateRepo } from '@/services/github/users'
 import { generateInviteCode } from '@/utils/invite'
 import { safeNext, signUpPath } from '@/utils/navigation'
 import { isRequestError } from '@/utils/toolkit'
@@ -83,9 +83,10 @@ export async function GET(request: NextRequest) {
   // A cached "not found" for this username would hide the new profile
   revalidateTag(viewerUserTag(username), { expire: 0 })
 
-  // reload session coolie cache
+  // reload session cookie cache
+  const requestHeaders = await headers()
   await auth.api.getSession({
-    headers: await headers(),
+    headers: requestHeaders,
     query: { disableCookieCache: true },
   })
 

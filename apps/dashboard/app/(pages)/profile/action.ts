@@ -48,7 +48,8 @@ export async function changeEmailAction(_prevState: ActionState, formData: FormD
   if (isTaken) return { message: '此 Email 已被使用' }
 
   try {
-    await auth.api.changeEmail({ body: { newEmail }, headers: await headers() })
+    const requestHeaders = await headers()
+    await auth.api.changeEmail({ body: { newEmail }, headers: requestHeaders })
   } catch (error) {
     if (!(error instanceof APIError)) throw error
     return { message: error.message }
@@ -68,9 +69,10 @@ export async function changePasswordAction(_prevState: ActionState, formData: Fo
   const { current_password, new_password } = parsedForm.data
 
   try {
+    const requestHeaders = await headers()
     await auth.api.changePassword({
       body: { currentPassword: current_password, newPassword: new_password, revokeOtherSessions: true },
-      headers: await headers(),
+      headers: requestHeaders,
     })
   } catch (error) {
     if (!(error instanceof APIError)) throw error

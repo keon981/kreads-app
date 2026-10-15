@@ -40,7 +40,8 @@ async function getInviteCodeStatus(code: string): Promise<InviteCodeStatus> {
     .limit(1)
   if (invite) return 'valid'
 
-  return (await getUserInviteCodeStatus(code)).status
+  const userInvite = await getUserInviteCodeStatus(code)
+  return userInvite.status
 }
 
 // One-time codes are redeemed first; otherwise the code is treated as a user's personal invite code

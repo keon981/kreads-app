@@ -11,6 +11,9 @@ export const paths = {
 
 export const api = {
   signOut: '/api/sign-out',
+  postList: '/api/posts',
+  postDetail: (number: number) => `/api/posts/${number}`,
+  commentList: (number: number) => `/api/posts/${number}/comments`,
 } as const
 
 export const homePaths: string[] = [paths.home, `/${env.NEXT_PUBLIC_HOME_USERNAME}`]

@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useParams, usePathname, useRouter } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 
 import React from 'react'
+
+import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 
 import { RiArrowLeftLine, RiCommandLine, RiGithubFill, RiMenu2Line } from '@remixicon/react'
 import { Button } from '@workspace/ui/components/button'
@@ -113,8 +115,8 @@ function AppSidebarHeader(): React.ReactNode {
   const pathname = usePathname()
   const params = useParams<PageParams>()
   const { user } = useAuth()
-  const router = useRouter()
-  const [isRefreshing, startRefresh] = React.useTransition()
+  const queryClient = useQueryClient()
+  const isRefreshing = useIsFetching({ type: 'active' }) > 0
 
   const getTitle = (): string | undefined => {
     if (params.number) return '留言'
@@ -125,7 +127,8 @@ function AppSidebarHeader(): React.ReactNode {
   const title = getTitle()
 
   const handleRefresh = (): void => {
-    startRefresh(() => router.refresh())
+    if (queryClient.isFetching({ type: 'active' }) > 0) return
+    queryClient.refetchQueries({ type: 'active' })
   }
 
   return (
