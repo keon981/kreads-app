@@ -21,7 +21,8 @@ export async function signInAction(_prevState: ActionState, formData: FormData):
   if (!parsedForm.success) return { message: parsedForm.error.issues[0].message }
 
   try {
-    await auth.api.signInEmail({ body: parsedForm.data, headers: await headers() })
+    const requestHeaders = await headers()
+    await auth.api.signInEmail({ body: parsedForm.data, headers: requestHeaders })
   } catch (error) {
     if (!(error instanceof APIError)) throw error
     return { message: error.status === 'UNAUTHORIZED' ? 'Email 或密碼錯誤' : error.message }

@@ -32,8 +32,14 @@ interface IssueReaction {
   login: string | null
 }
 
+interface IssueSubmission {
+  content: Pick<Issue, 'body' | 'bodyHTML' | 'bodyText'>
+  submittedAt: string
+}
+
 export type {
   Issue,
   IssueComment,
   IssueReaction,
+  IssueSubmission,
 }

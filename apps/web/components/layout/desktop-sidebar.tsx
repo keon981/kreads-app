@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 import React from 'react'
 
 import { RiCommandLine } from '@remixicon/react'
@@ -16,6 +18,7 @@ import {
 } from '@workspace/ui/components/sidebar'
 
 import { sidebar } from '@/configs/nav-config'
+import { paths } from '@/configs/path-config'
 
 interface DesktopSidebarContainerProps extends React.ComponentProps<typeof Sidebar> {
   footer?: React.ReactNode
@@ -37,7 +40,12 @@ function DesktopSidebarContainer({
           <SidebarMenu>
             {/* Logo */}
             <SidebarMenuItem className=" py-2 ">
-              <SidebarMenuButton variant="native" size="lg" className="[&_svg]:size-9 size-9! p-0 text-foreground">
+              <SidebarMenuButton
+                variant="native"
+                size="lg"
+                className="[&_svg]:size-9 size-9! p-0 text-foreground"
+                render={<Link href={paths.home} />}
+              >
                 <RiCommandLine />
               </SidebarMenuButton>
             </SidebarMenuItem>

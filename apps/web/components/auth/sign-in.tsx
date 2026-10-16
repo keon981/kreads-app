@@ -18,7 +18,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@workspace/ui/components/dialog'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from '@workspace/ui/components/drawer'
 import { toast } from '@workspace/ui/components/toast'
+import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
 import { cn } from '@workspace/ui/lib/utils'
 
 import { signInWithGitHub } from '@/lib/auth-client'
@@ -100,29 +108,54 @@ export function SignInButton({
   )
 }
 
-export function SignInDialog({ children, ...props }: WithNodeChildren<typeof Dialog>) {
+const signInPrompt = {
+  title: '透過 Kreads 暢所欲言',
+  description: '加入 Kreads App 即可分享想法、探索新鮮事、追蹤志趣相投的人，還有更多等你來發現。',
+}
+
+function SignInPromptButton() {
+  return (
+    <SignInButton
+      variant="outline"
+      size="lg"
+      className="w-full h-fit p-6 pe-5 bg-transparent hover:bg-transparent text-base"
+    >
+      <RiGithubFill className="size-11.5" />
+      <p className="flex-1">使用 GitHub 繼續</p>
+      <RiArrowRightSLine className="size-6" />
+    </SignInButton>
+  )
+}
+
+export function SignInDialog() {
   const open = useSignInDialog(s => s.open)
   const setOpen = useSignInDialog(s => s.setOpen)
+  const isMobile = useIsMobile()
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerContent className="rounded-t-3xl">
+          <div className="flex flex-col gap-8 px-6 pt-10 pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+            <DrawerHeader className="gap-4 p-0">
+              <DrawerTitle className="font-bold text-2xl">{signInPrompt.title}</DrawerTitle>
+              <DrawerDescription>{signInPrompt.description}</DrawerDescription>
+            </DrawerHeader>
+            <SignInPromptButton />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    )
+  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen} {...props}>
-      {children}
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent showCloseButton={false} className="w-md sm:max-w-md px-14 py-12 gap-8">
         <DialogHeader className="text-center">
-          <DialogTitle className="text-3xl">透過 Kreads 暢所欲言</DialogTitle>
-          <DialogDescription>
-            加入 Kreads App 即可分享想法、探索新鮮事、追蹤志趣相投的人，還有更多等你來發現。
-          </DialogDescription>
+          <DialogTitle className="text-3xl">{signInPrompt.title}</DialogTitle>
+          <DialogDescription>{signInPrompt.description}</DialogDescription>
         </DialogHeader>
-        <SignInButton
-          variant="outline"
-          size="lg"
-          className="w-full h-fit p-6 pe-5 bg-transparent hover:bg-transparent text-base"
-        >
-          <RiGithubFill className="size-11.5" />
-          <p className="flex-1">使用 GitHub 繼續</p>
-          <RiArrowRightSLine className="size-6" />
-        </SignInButton>
+        <SignInPromptButton />
       </DialogContent>
     </Dialog>
   )

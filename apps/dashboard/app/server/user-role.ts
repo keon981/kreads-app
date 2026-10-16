@@ -16,7 +16,8 @@ export async function assignUserRole(userId: string, role: AssignableRole): Prom
   if (!isManaged) return { message: '找不到此使用者' }
 
   try {
-    await auth.api.setRole({ body: { userId, role }, headers: await headers() })
+    const requestHeaders = await headers()
+    await auth.api.setRole({ body: { userId, role }, headers: requestHeaders })
   } catch (error) {
     if (!(error instanceof APIError)) throw error
     return { message: error.message }

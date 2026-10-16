@@ -1,6 +1,6 @@
 'use client'
 
-import React, { use, useCallback, useEffect, useState } from 'react'
+import React, { use, useCallback, useState } from 'react'
 
 import { mergeProps } from '@base-ui/react/merge-props'
 import { useRender } from '@base-ui/react/use-render'
@@ -27,7 +27,6 @@ const sidebarConfig = {
   width: '20rem',
   widthMobile: '18rem',
   widthIcon: '5rem',
-  keyboardShortcut: 'b',
 }
 
 interface SidebarContextProps {
@@ -90,22 +89,6 @@ function SidebarProvider({
   const toggleSidebar = useCallback(() => {
     return isMobile ? setOpenMobile(open => !open) : setOpen(open => !open)
   }, [isMobile, setOpen, setOpenMobile])
-
-  // Adds a keyboard shortcut to toggle the sidebar.
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === sidebarConfig.keyboardShortcut
-        && (event.metaKey || event.ctrlKey)
-      ) {
-        event.preventDefault()
-        toggleSidebar()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [toggleSidebar])
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.

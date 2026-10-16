@@ -1,17 +1,21 @@
 import { Suspense } from 'react'
 
-import { createPostAction, deletePostAction, updatePostAction } from '@/app/server/actions/posts'
-import { IssueComposerItem, PostItem } from '@/components/blocks/issue/issue-items'
-import { AboutUser } from '@/components/blocks/user'
+import { dehydrate, HydrationBoundary, noop } from '@tanstack/react-query'
+
 import ArticleLayout from '@/components/layout/article-layout'
 import {
   IssueItemGroup,
   IssueItemSkeleton,
 } from '@/components/ui/issue'
+import { postQueries } from '@/hooks/queries/posts'
 import { fetchAccessTokenCache, getSessionCache } from '@/lib/auth'
-import { fetchIssues } from '@/services/api/issues'
+import { env } from '@/lib/env'
+import { getQueryClient } from '@/lib/query-client'
+import { fetchIssues } from '@/services/github/issues'
 import { fetchUserRepo } from '@/services/user-repo'
-import { chatHref } from '@/utils/navigation'
+
+import { PostComposer, PostList } from './item'
+import { AboutUser } from './user'
 
 import type { ViewerUser } from '@/types/user'
 
@@ -20,36 +24,27 @@ interface UserPostsViewProps {
 }
 
 // repo issue list
-async function UserPostList({ repoName, isOwner }: {
+async function PrefetchedUserPostList({ repoName, isOwner, prefetchLimit }: {
   repoName: string
   isOwner: boolean
-}) {
+  prefetchLimit: number
+}): Promise<React.ReactNode> {
   const token = await fetchAccessTokenCache()
   const userRepo = fetchUserRepo(token, repoName)
-  const posts = await fetchIssues(userRepo)
-
-  if (!posts?.length) {
-    return (
-      <p className="px-6 py-10 border-t text-sm text-center text-muted-foreground">
-        {posts ? '尚無任何貼文。' : '此個人檔案不公開。'}
-      </p>
-    )
-  }
+  const queryClient = getQueryClient()
+  await queryClient.query({
+    ...postQueries.list(repoName),
+    queryFn: () => fetchIssues(userRepo),
+  }).catch(noop)
 
   return (
-    <IssueItemGroup className="">
-      {posts.map(post => (
-        <PostItem
-          key={post.number}
-          post={post}
-          repoName={repoName}
-          isOwner={isOwner}
-          href={chatHref(post)}
-          updateAction={updatePostAction}
-          onDelete={deletePostAction}
-        />
-      ))}
-    </IssueItemGroup>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <PostList
+        repoName={repoName}
+        isOwner={isOwner}
+        prefetchLimit={prefetchLimit}
+      />
+    </HydrationBoundary>
   )
 }
 
@@ -57,6 +52,7 @@ export async function UserPostsView({ user }: UserPostsViewProps): Promise<React
   const session = await getSessionCache()
   const isOwner = session?.user.username === user.username
   const ownerInviteCode = isOwner ? session?.user.inviteCode : null
+  const prefetchLimit = user.username === env.NEXT_PUBLIC_HOME_USERNAME ? env.POST_PREFETCH_LIMIT : 0
 
   return (
     <ArticleLayout>
@@ -67,20 +63,24 @@ export async function UserPostsView({ user }: UserPostsViewProps): Promise<React
         inviteCode={ownerInviteCode}
       />
       {/* new post */}
-      {isOwner && (
-        <IssueComposerItem
-          onSubmit={createPostAction}
-          title="新貼文"
-          placeholder="有什麼新鮮事？"
-        />
-      )}
+      {isOwner && <PostComposer repoName={user.repoName} />}
 
       {/* post list */}
-      <IssueItemGroup>
-        <Suspense fallback={<IssueItemSkeleton />}>
-          <UserPostList isOwner={isOwner} repoName={user.repoName} />
-        </Suspense>
-      </IssueItemGroup>
+      <Suspense
+        fallback={(
+          <IssueItemGroup>
+            {Array.from({ length: 3 }, (_, i) => (
+              <IssueItemSkeleton key={i} />
+            ))}
+          </IssueItemGroup>
+        )}
+      >
+        <PrefetchedUserPostList
+          isOwner={isOwner}
+          repoName={user.repoName}
+          prefetchLimit={prefetchLimit}
+        />
+      </Suspense>
     </ArticleLayout>
   )
 };

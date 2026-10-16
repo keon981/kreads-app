@@ -62,7 +62,8 @@ export const fetchAccessTokenCache = cache(async (): Promise<string | null> => {
   const session = await getSessionCache()
   if (!session) return null
 
-  return (await headers()).get(GITHUB_TOKEN_HEADER)
+  const requestHeaders = await headers()
+  return requestHeaders.get(GITHUB_TOKEN_HEADER)
 })
 
 export const verifySession = cache(async (): Promise<VerifiedSession> => {

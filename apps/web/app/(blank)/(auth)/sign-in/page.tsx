@@ -2,7 +2,7 @@ import React from 'react'
 
 import { RiArrowRightSLine, RiGithubFill } from '@remixicon/react'
 
-import { SignInButton } from '@/components/blocks/sign-in'
+import { SignInButton } from '@/components/auth/sign-in'
 
 function Page() {
   return (

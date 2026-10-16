@@ -5,9 +5,9 @@ import Link from 'next/link'
 import React from 'react'
 
 import { useRender } from '@base-ui/react/use-render'
+import { NoticeConfirmDialog } from '@workspace/ui/components/confirm-dialog'
 import { DialogTrigger } from '@workspace/ui/components/dialog'
 
-import { NoticeAlertDialog } from '@/components/blocks/confirm-dialog'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
 
@@ -60,10 +60,10 @@ export function NoticeNavItem({
   icon,
 }: NoticeNavItemProps): React.ReactNode {
   return (
-    <NoticeAlertDialog title="功能尚未開放" description={description}>
+    <NoticeConfirmDialog title="功能尚未開放" description={description}>
       <DialogTrigger render={children} aria-label={label}>
         {icon}
       </DialogTrigger>
-    </NoticeAlertDialog>
+    </NoticeConfirmDialog>
   )
 }

@@ -7,6 +7,7 @@ import { paths } from '@/configs/path-config'
 import { auth } from '@/lib/auth'
 
 export async function signOutAction(): Promise<never> {
-  await auth.api.signOut({ headers: await headers() })
+  const requestHeaders = await headers()
+  await auth.api.signOut({ headers: requestHeaders })
   redirect(paths.signIn)
 }

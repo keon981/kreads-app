@@ -1,19 +1,17 @@
 'use server'
 
-import { refresh } from 'next/cache'
-
 import * as z from 'zod'
 
 import { HttpStatusCode } from '@/configs/constants'
 import { fetchAccessTokenCache, getSessionCache } from '@/lib/auth'
-import { closeIssue, createIssue, updateIssue } from '@/services/api/issues'
-import { createIssueReaction, deleteIssueReaction, fetchIssueReactions } from '@/services/api/reactions'
+import { closeIssue, createIssue, updateIssue } from '@/services/github/issues'
+import { createIssueReaction, deleteIssueReaction, fetchIssueReactions } from '@/services/github/reactions'
 import { catchParseWithUserRepoError, fetchUserRepo, parseWithUserRepo } from '@/services/user-repo'
-import { getFormDataValue } from '@/utils/toolkit'
 
 import type { ActionState } from '@workspace/server/types/action'
-import type { ReactionSubject } from '@/services/api/reactions'
-import type { IssueFormState, IssueTarget } from '@/types/action'
+import type { ReactionSubject } from '@/services/github/reactions'
+import type { IssueActionState, IssueTarget } from '@/types/action'
+import type { Issue } from '@/types/issue'
 
 const PostFormSchema = z.object({
   content: z.string().trim().min(1, '請輸入內容'),
@@ -21,7 +19,7 @@ const PostFormSchema = z.object({
 
 const UpdatePostSchema = PostFormSchema.extend({
   repoName: z.string().min(1),
-  issueNumber: z.coerce.number().int().positive(),
+  issueNumber: z.int().positive(),
 })
 
 const DeletePostSchema = z.object({
@@ -49,51 +47,38 @@ interface ReactionActionState extends ActionState {
   isReacted?: boolean
 }
 
-export async function createPostAction(
-  _prev: IssueFormState,
-  formData: FormData,
-): Promise<IssueFormState> {
-  const content = getFormDataValue(formData, 'content')
-  const result = PostFormSchema.safeParse({ content })
+export async function createPostAction(input: { content: string }): Promise<IssueActionState<Issue>> {
+  const result = PostFormSchema.safeParse(input)
   if (!result.success) {
     return {
+      status: HttpStatusCode.BadRequest,
       message: result.error.issues[0].message,
-      content,
     }
   }
 
   const session = await getSessionCache()
   const token = await fetchAccessTokenCache()
   const userRepo = fetchUserRepo(token, session?.user.repoName)
-  if (userRepo.error) return { message: '發文失敗，請再試一次', content }
+  if (userRepo.error) return { status: HttpStatusCode.Unauthorized, message: '發文失敗，請再試一次' }
 
   try {
-    await createIssue(userRepo, result.data.content)
-    // TODO: useOptimistic
-    refresh()
-    return {}
+    const issue = await createIssue(userRepo, result.data.content)
+    return { status: HttpStatusCode.Created, data: issue }
   } catch (err) {
-    return { ...catchParseWithUserRepoError(err, '發文失敗，請再試一次'), content }
+    return catchParseWithUserRepoError(err, '發文失敗，請再試一次')
   }
 }
 
-export async function updatePostAction(
-  _prev: IssueFormState,
-  formData: FormData,
-): Promise<IssueFormState> {
-  const content = getFormDataValue(formData, 'content')
+export async function updatePostAction(input: Required<Pick<IssueTarget, 'repoName' | 'issueNumber'>> & {
+  content: string
+}): Promise<IssueActionState<Issue>> {
   try {
     const token = await fetchAccessTokenCache()
-    const { data, userRepo } = parseWithUserRepo(token, UpdatePostSchema, {
-      repoName: getFormDataValue(formData, 'repoName'),
-      issueNumber: getFormDataValue(formData, 'issueNumber'),
-      content,
-    })
-    await updateIssue(userRepo, data.issueNumber, data.content)
-    refresh()
-    return {}
+    const { data, userRepo } = parseWithUserRepo(token, UpdatePostSchema, input)
+    const issue = await updateIssue(userRepo, data.issueNumber, data.content)
+    return { status: HttpStatusCode.Ok, data: issue }
   } catch (err) {
-    return { ...catchParseWithUserRepoError(err, '編輯失敗，請再試一次'), content }
+    return catchParseWithUserRepoError(err, '編輯失敗，請再試一次')
   }
 }
 
@@ -102,8 +87,6 @@ export async function deletePostAction(target: IssueTarget): Promise<ActionState
     const token = await fetchAccessTokenCache()
     const { data, userRepo } = parseWithUserRepo(token, DeletePostSchema, target)
     const status = await closeIssue(userRepo, data.issueNumber)
-    // TODO: useOptimistic
-    refresh()
     return { status, message: '刪除成功' }
   } catch (err) {
     return catchParseWithUserRepoError(err, '刪除失敗，請再試一次')

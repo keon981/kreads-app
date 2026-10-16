@@ -5,14 +5,17 @@ export const paths = {
   signIn: '/sign-in',
   signUp: '/sign-up',
   profile: '/profile',
-  user: (login: string) => `/@${login}`,
-  post: (login: string, number: number) => `/@${login}/post/${number}`,
+  user: (login: string) => `/@${login.replace(/^@/, '')}`,
+  post: (login: string, number: number) => `/@${login.replace(/^@/, '')}/post/${number}`,
 } as const
 
 export const api = {
   signOut: '/api/sign-out',
+  postList: '/api/posts',
+  postDetail: (number: number) => `/api/posts/${number}`,
+  commentList: (number: number) => `/api/posts/${number}/comments`,
 } as const
 
-export const homePaths: readonly string[] = [paths.home, `/${env.NEXT_PUBLIC_HOME_USERNAME}`]
+export const homePaths: string[] = [paths.home, `/${env.NEXT_PUBLIC_HOME_USERNAME}`]
 
-export const privatePaths: readonly string[] = [paths.profile]
+export const privatePaths: string[] = [paths.profile]

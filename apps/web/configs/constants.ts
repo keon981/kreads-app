@@ -14,7 +14,10 @@ enum HttpStatusCode {
 
 const GITHUB_TOKEN_HEADER = 'x-github-token'
 
+const NOTICE_DESCRIPTION = '此功能正在努力開發中。\n敬請期待！'
+
 export {
   GITHUB_TOKEN_HEADER,
   HttpStatusCode,
+  NOTICE_DESCRIPTION,
 }

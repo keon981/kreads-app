@@ -14,7 +14,8 @@ import type { AuthSession } from '@workspace/server/auth/options'
 import 'server-only'
 
 export const getSession = cache(async (): Promise<AuthSession | null> => {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const requestHeaders = await headers()
+  const session = await auth.api.getSession({ headers: requestHeaders })
   if (!session || !dashboardRoles.some(role => hasRole(session.user.role, role))) return null
 
   return session

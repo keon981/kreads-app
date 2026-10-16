@@ -95,6 +95,7 @@ async function createIssueComment(
     repo,
     issue_number: issueNumber,
     body,
+    mediaType: { format: 'full' },
   })
   return toIssueComment(data)
 }
@@ -109,6 +110,7 @@ async function updateIssueComment(
     repo,
     comment_id: commentId,
     body,
+    mediaType: { format: 'full' },
   })
   return toIssueComment(data)
 }

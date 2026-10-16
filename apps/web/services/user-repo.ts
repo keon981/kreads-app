@@ -5,17 +5,22 @@ import { createOctokit } from '@/lib/octokit'
 import { isRequestError } from '@/utils/toolkit'
 
 import type { ActionState } from '@workspace/server/types/action'
+import type { CreateOctokitOptions } from '@/lib/octokit'
 import type { UserRepo } from '@/types/user'
 
 import 'server-only'
 
 const unauthorizedMessage = '請先登入'
 
-export function fetchUserRepo(token: string | null, repoName?: string | null): UserRepo & { error: boolean } {
+export function fetchUserRepo(
+  token: string | null,
+  repoName?: string | null,
+  options?: CreateOctokitOptions,
+): UserRepo & { error: boolean } {
   const [owner, repo] = repoName?.split('/') ?? ['', '']
 
   return {
-    octokit: createOctokit(token ?? undefined),
+    octokit: createOctokit(token ?? undefined, options),
     owner,
     repo,
     error: !token,

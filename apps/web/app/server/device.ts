@@ -6,10 +6,12 @@ import { viewportCookie } from '@workspace/ui/configs/cookie-config'
 import 'server-only'
 
 export async function getInitialIsMobile(): Promise<boolean> {
-  const viewport = (await cookies()).get(viewportCookie.name)?.value
+  const cookieStore = await cookies()
+  const viewport = cookieStore.get(viewportCookie.name)?.value
   if (viewport === 'mobile') return true
   if (viewport === 'desktop') return false
 
-  const { device } = userAgent({ headers: await headers() })
+  const requestHeaders = await headers()
+  const { device } = userAgent({ headers: requestHeaders })
   return device.type === 'mobile'
 }

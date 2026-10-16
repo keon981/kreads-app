@@ -22,7 +22,11 @@ const UpdateUserSchema = z.object({
 })
 
 async function switchActionType(type: UserActionType, userId: string): Promise<unknown> {
-  const request = { body: { userId }, headers: await headers() }
+  const requestHeaders = await headers()
+  const request = {
+    body: { userId },
+    headers: requestHeaders,
+  }
   switch (type) {
     case 'ban':
       return auth.api.banUser(request)
