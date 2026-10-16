@@ -33,6 +33,7 @@ export async function completeSignUpAction(
   if (inviteStatus === 'limit') return { message: '此邀請碼已達到上限' }
 
   // 取得 github 授權
+  const requestHeaders = await headers()
   const { url } = await auth.api.signInSocial({
     body: {
       provider: 'github',
@@ -41,7 +42,7 @@ export async function completeSignUpAction(
       callbackURL: `/api/sign-up?${new URLSearchParams({ repo, next_path: nextPath, invite_code: code })}`,
       errorCallbackURL: signUpPath({ next: nextPath, aff: code }),
     },
-    headers: await headers(),
+    headers: requestHeaders,
   })
   if (!url) return { message: '無法取得 GitHub 授權網址，請再試一次' }
 

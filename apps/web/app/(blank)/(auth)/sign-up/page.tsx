@@ -5,7 +5,8 @@ import React from 'react'
 import { getSessionCache } from '@/lib/auth'
 import { safeNext } from '@/utils/navigation'
 import { isUserActive } from '@/utils/user'
-import { SignUpForm } from '@/views/sign-up-form'
+
+import { SignUpForm } from './sign-up-form'
 
 const errorMessages: Record<string, string> = {
   signup_disabled: '',

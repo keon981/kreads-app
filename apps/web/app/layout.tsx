@@ -4,15 +4,16 @@ import { Geist_Mono, Oxanium, Space_Grotesk } from 'next/font/google'
 
 import { Suspense } from 'react'
 
-import { Toaster } from '@workspace/ui/components/toast'
-import { DeviceProvider } from '@workspace/ui/contexts/device-provider'
+import { Splash } from '@workspace/ui/components/splash'
 import { cn } from '@workspace/ui/lib/utils'
 
 import { getInitialIsMobile } from '@/app/server/device'
-import { SignInDialog } from '@/components/blocks/sign-in'
-import { Providers } from '@/components/providers'
+import { Providers } from '@/contexts/providers'
+import { ThemeProvider } from '@/contexts/theme-provider'
 import { verifySession } from '@/lib/auth'
 import { env } from '@/lib/env'
+
+import Loading from './loading'
 
 import '@workspace/ui/globals.css'
 
@@ -29,68 +30,50 @@ export const metadata: Metadata = {
   title: env.NEXT_PUBLIC_APP_TITLE,
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
     <html
-      lang="en"
+      lang="zh-tw"
       suppressHydrationWarning
       className={cn('antialiased', fontMono.variable, 'font-sans', spaceGrotesk.variable, oxaniumHeading.variable)}
     >
       <body>
-        <Suspense>
-          <DeviceRoot>
-            <Suspense fallback={(
-              <Providers isAuth={false} user={null}>
-                <></>
-              </Providers>
-            )}
-            >
-              <RootProviders>
-                {children}
-                <SignInDialog />
-                {/* alert */}
-                <Toaster />
-              </RootProviders>
-            </Suspense>
-          </DeviceRoot>
-        </Suspense>
+        <ThemeProvider>
+          <Splash>
+            <Loading />
+          </Splash>
+          <Suspense fallback={<Loading />}>
+            <RootProviders>{children}</RootProviders>
+          </Suspense>
+        </ThemeProvider>
       </body>
     </html>
-  )
-}
-
-interface DeviceRootProps {
-  children: React.ReactNode
-}
-
-async function DeviceRoot({ children }: DeviceRootProps): Promise<React.ReactNode> {
-  const initialIsMobile = await getInitialIsMobile()
-
-  return (
-    <DeviceProvider initialIsMobile={initialIsMobile}>
-      {children}
-    </DeviceProvider>
   )
 }
 
 async function RootProviders({ children }: {
   children: React.ReactNode
 }): Promise<React.ReactNode> {
-  const { status, session } = await verifySession()
+  const [initialIsMobile, { status, session }] = await Promise.all([
+    getInitialIsMobile(),
+    verifySession(),
+  ])
   const user = status === 'active' ? session.user : null
 
   return (
     <Providers
+      initialIsMobile={initialIsMobile}
       isAuth={!!user}
       user={user
         ? {
             id: user.username ?? undefined,
             name: user.name,
-            avatarUrl: user.image ?? undefined,
+            image: user.image ?? undefined,
+            repoName: user.repoName ?? undefined,
           }
         : null}
     >

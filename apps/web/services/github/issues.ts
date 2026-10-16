@@ -186,14 +186,15 @@ async function fetchIssue(
 async function createIssue(
   { octokit, owner, repo }: UserRepo,
   content: string,
-): Promise<number> {
-  const { status } = await octokit.rest.issues.create({
+): Promise<Issue> {
+  const { data } = await octokit.rest.issues.create({
     owner,
     repo,
     title: `${Date.now()}`,
     body: content,
+    mediaType: { format: 'full' },
   })
-  return status
+  return toIssueFromRest(data)
 }
 
 async function closeIssue(
@@ -213,14 +214,15 @@ async function updateIssue(
   { octokit, owner, repo }: UserRepo,
   issueNumber: number,
   content: string,
-): Promise<number> {
-  const { status } = await octokit.rest.issues.update({
+): Promise<Issue> {
+  const { data } = await octokit.rest.issues.update({
     owner,
     repo,
     issue_number: issueNumber,
     body: content,
+    mediaType: { format: 'full' },
   })
-  return status
+  return toIssueFromRest(data)
 }
 
 export {

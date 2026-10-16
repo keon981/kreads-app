@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation'
 
 import { RiArrowUpDownLine } from '@remixicon/react'
 import { DropdownMenu, DropdownMenuTrigger } from '@workspace/ui/components/dropdown-menu'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@workspace/ui/components/sheet'
 import {
   Sidebar,
   SidebarContent,
@@ -21,10 +20,10 @@ import {
   useSidebar,
 } from '@workspace/ui/components/sidebar'
 
+import { MobileTabBar } from '@/components/layout/mobile-tab-bar'
 import { UserMenuContent, UserSummary } from '@/components/layout/user-menu'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { getActiveNavItem, navGroups } from '@/configs/nav-config'
-import { env } from '@/lib/env'
 
 import type { SessionUser } from '@/types/user'
 
@@ -35,18 +34,9 @@ interface AppSidebarProps {
   user: SessionUser
 }
 
-interface AppSidebarBodyProps extends AppSidebarProps {
-  isMobile?: boolean
-}
-
-function AppSidebarBody({ user, isMobile = false }: AppSidebarBodyProps): React.ReactNode {
+function AppSidebarBody({ user }: AppSidebarProps): React.ReactNode {
   const pathname = usePathname()
   const activeItem = getActiveNavItem(pathname)
-  const { setOpenMobile } = useSidebar()
-
-  const handleNavigate = (): void => {
-    if (isMobile) setOpenMobile(false)
-  }
 
   return (
     <>
@@ -63,7 +53,7 @@ function AppSidebarBody({ user, isMobile = false }: AppSidebarBodyProps): React.
                       tooltip={title}
                       isActive={activeItem?.href === href}
                       className={`${menuButtonClassName} data-active:bg-sidebar-accent`}
-                      render={<Link href={href} onClick={handleNavigate} />}
+                      render={<Link href={href} />}
                     >
                       <Icon />
                       <span>{title}</span>
@@ -92,7 +82,7 @@ function AppSidebarBody({ user, isMobile = false }: AppSidebarBodyProps): React.
                 <UserSummary user={user} />
                 <RiArrowUpDownLine className="ml-auto size-4!" />
               </DropdownMenuTrigger>
-              <UserMenuContent user={user} side={isMobile ? 'top' : 'right'} align="end" sideOffset={8} />
+              <UserMenuContent user={user} side="right" align="end" sideOffset={8} />
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -102,24 +92,9 @@ function AppSidebarBody({ user, isMobile = false }: AppSidebarBodyProps): React.
 }
 
 export function AppSidebar({ user }: AppSidebarProps): React.ReactNode {
-  const { isMobile, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile } = useSidebar()
 
-  // packages/ui Sidebar is desktop-only (`hidden md:block`), so mobile uses its own Sheet
-  if (isMobile) {
-    return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
-        <SheetContent side="left" showCloseButton={false} className="w-(--sidebar-width) gap-0 bg-sidebar p-0">
-          <SheetHeader className="sr-only">
-            <SheetTitle>{env.NEXT_PUBLIC_APP_TITLE}</SheetTitle>
-            <SheetDescription>主選單</SheetDescription>
-          </SheetHeader>
-          <div className="flex h-full flex-col">
-            <AppSidebarBody user={user} isMobile />
-          </div>
-        </SheetContent>
-      </Sheet>
-    )
-  }
+  if (isMobile) return <MobileTabBar />
 
   return (
     <Sidebar

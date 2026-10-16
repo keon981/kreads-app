@@ -13,17 +13,17 @@
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.3",
     "@neondatabase/serverless": "^1.1.0",
-    "better-auth": "^1.7.3",
+    "better-auth": "catalog:",
     "dotenv": "^17.4.2",
-    "drizzle-orm": "^1.0.0-rc.4"
+    "drizzle-orm": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "catalog:",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "drizzle-kit": "1.0.0-rc.4",
-    "eslint": "^9",
-    "typescript": "^5"
+    "eslint": "catalog:",
+    "typescript": "catalog:"
   },
   "exports": {
     "./auth/*": "./src/auth/*.ts",

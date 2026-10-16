@@ -10,7 +10,18 @@ import {
   RiUserStarLine,
 } from '@remixicon/react'
 
-import { ActivityUserList, DailyLoginStrip, RedemptionList } from './activity-list'
+import { UserAvatar } from '@/components/ui/user-avatar'
+
+import {
+  ActivityEmpty,
+  ActivityItem,
+  ActivityItemContent,
+  ActivityItemDescription,
+  ActivityItemTime,
+  ActivityItemTitle,
+  ActivityList,
+  DailyLoginStrip,
+} from './activity-list'
 import { ActivityBarChart, ActivityLineChart, InviterChart } from './chart'
 import { formatCount, sumOf } from './utils'
 
@@ -140,7 +151,22 @@ export function getSideCards({ activity, recentLogins, recentUsers, recentRedemp
         </>
       ),
       description: '主站最近建立的登入',
-      content: <ActivityUserList users={recentLogins} emptyText="還沒有登入紀錄" />,
+      content: recentLogins.length === 0
+        ? <ActivityEmpty>還沒有登入紀錄</ActivityEmpty>
+        : (
+            <ActivityList>
+              {recentLogins.map(user => (
+                <ActivityItem key={`${user.username ?? user.name}-${user.time.getTime()}`}>
+                  <UserAvatar user={user} className="size-8" />
+                  <ActivityItemContent>
+                    <ActivityItemTitle>{user.name}</ActivityItemTitle>
+                    <ActivityItemDescription>{user.username ?? '未完成註冊'}</ActivityItemDescription>
+                  </ActivityItemContent>
+                  <ActivityItemTime date={user.time} />
+                </ActivityItem>
+              ))}
+            </ActivityList>
+          ),
     },
     {
       id: 'users',
@@ -151,7 +177,22 @@ export function getSideCards({ activity, recentLogins, recentUsers, recentRedemp
         </>
       ),
       description: '最近加入主站的使用者',
-      content: <ActivityUserList users={recentUsers} emptyText="還沒有使用者" />,
+      content: recentUsers.length === 0
+        ? <ActivityEmpty>還沒有使用者</ActivityEmpty>
+        : (
+            <ActivityList>
+              {recentUsers.map(user => (
+                <ActivityItem key={`${user.username ?? user.name}-${user.time.getTime()}`}>
+                  <UserAvatar user={user} className="size-8" />
+                  <ActivityItemContent>
+                    <ActivityItemTitle>{user.name}</ActivityItemTitle>
+                    <ActivityItemDescription>{user.username ?? '未完成註冊'}</ActivityItemDescription>
+                  </ActivityItemContent>
+                  <ActivityItemTime date={user.time} />
+                </ActivityItem>
+              ))}
+            </ActivityList>
+          ),
     },
     {
       id: 'redemptions',
@@ -162,7 +203,21 @@ export function getSideCards({ activity, recentLogins, recentUsers, recentRedemp
         </>
       ),
       description: '最近被用來註冊的邀請碼',
-      content: <RedemptionList invites={recentRedemptions} />,
+      content: recentRedemptions.length === 0
+        ? <ActivityEmpty>還沒有核銷紀錄</ActivityEmpty>
+        : (
+            <ActivityList>
+              {recentRedemptions.map(invite => (
+                <ActivityItem key={`${invite.code}-${invite.redeemedAt.getTime()}`}>
+                  <code className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs">{invite.code}</code>
+                  <ActivityItemContent>
+                    <ActivityItemTitle className="font-normal">{invite.redeemer?.name ?? '已刪除的使用者'}</ActivityItemTitle>
+                  </ActivityItemContent>
+                  <ActivityItemTime date={invite.redeemedAt} />
+                </ActivityItem>
+              ))}
+            </ActivityList>
+          ),
     },
     {
       id: 'daily-logins',

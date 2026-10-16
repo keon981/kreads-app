@@ -1,56 +1,43 @@
 import { formatDateTime } from '@workspace/ui/lib/format'
-
-import { UserAvatar } from '@/components/ui/user-avatar'
+import { cn } from '@workspace/ui/lib/utils'
 
 import { sumOf } from './utils'
 
-import type { ActivityUser, DailyActivity, RedeemedInvite } from '@/types/stats'
+import type { DailyActivity } from '@/types/stats'
 
-interface ActivityUserListProps {
-  users: ActivityUser[]
-  emptyText: string
+export function ActivityEmpty({ className, ...props }: React.ComponentProps<'p'>): React.ReactNode {
+  return <p className={cn('text-muted-foreground', className)} {...props} />
 }
 
-export function ActivityUserList({ users, emptyText }: ActivityUserListProps): React.ReactNode {
-  if (users.length === 0) return <p className="text-sm text-muted-foreground">{emptyText}</p>
+export function ActivityList({ className, ...props }: React.ComponentProps<'ul'>): React.ReactNode {
+  return <ul className={cn('flex flex-col gap-3', className)} {...props} />
+}
 
+export function ActivityItem({ className, ...props }: React.ComponentProps<'li'>): React.ReactNode {
+  return <li className={cn('flex items-center gap-3', className)} {...props} />
+}
+
+export function ActivityItemContent({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
+  return <div className={cn('flex min-w-0 flex-1 flex-col', className)} {...props} />
+}
+
+export function ActivityItemTitle({ className, ...props }: React.ComponentProps<'span'>): React.ReactNode {
+  return <span className={cn('truncate text-sm font-medium', className)} {...props} />
+}
+
+export function ActivityItemDescription({ className, ...props }: React.ComponentProps<'span'>): React.ReactNode {
+  return <span className={cn('truncate text-xs text-muted-foreground', className)} {...props} />
+}
+
+interface ActivityItemTimeProps extends Omit<React.ComponentProps<'time'>, 'dateTime' | 'children'> {
+  date: Date
+}
+
+export function ActivityItemTime({ date, className, ...props }: ActivityItemTimeProps): React.ReactNode {
   return (
-    <ul className="flex flex-col gap-3">
-      {users.map(user => (
-        <li key={`${user.username ?? user.name}-${user.time.getTime()}`} className="flex items-center gap-3">
-          <UserAvatar user={user} className="size-8" />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-sm font-medium">{user.name}</span>
-            <span className="truncate text-xs text-muted-foreground">{user.username ?? '未完成註冊'}</span>
-          </div>
-          <time dateTime={user.time.toISOString()} className="shrink-0 text-xs text-muted-foreground tabular-nums">
-            {formatDateTime(user.time)}
-          </time>
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-interface RedemptionListProps {
-  invites: RedeemedInvite[]
-}
-
-export function RedemptionList({ invites }: RedemptionListProps): React.ReactNode {
-  if (invites.length === 0) return <p className="text-sm text-muted-foreground">還沒有核銷紀錄</p>
-
-  return (
-    <ul className="flex flex-col gap-3">
-      {invites.map(invite => (
-        <li key={`${invite.code}-${invite.redeemedAt.getTime()}`} className="flex items-center gap-3">
-          <code className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs">{invite.code}</code>
-          <span className="min-w-0 flex-1 truncate text-sm">{invite.redeemer?.name ?? '已刪除的使用者'}</span>
-          <time dateTime={invite.redeemedAt.toISOString()} className="shrink-0 text-xs text-muted-foreground tabular-nums">
-            {formatDateTime(invite.redeemedAt)}
-          </time>
-        </li>
-      ))}
-    </ul>
+    <time dateTime={date.toISOString()} className={cn('shrink-0 text-sm text-muted-foreground tabular-nums', className)} {...props}>
+      {formatDateTime(date)}
+    </time>
   )
 }
 
@@ -69,7 +56,7 @@ export function DailyLoginStrip({ activity }: DailyLoginStripProps): React.React
             key={day.date}
             title={`${day.date}：${day.logins} 次`}
             data-level={Math.ceil((day.logins / maxLogins) * 3)}
-            className="min-w-0 flex-1 rounded-[2px] bg-muted data-[level=1]:bg-primary/30 data-[level=2]:bg-primary/60 data-[level=3]:bg-primary"
+            className="min-w-0 flex-1 rounded-xs bg-muted data-[level=1]:bg-primary/30 data-[level=2]:bg-primary/60 data-[level=3]:bg-primary"
           />
         ))}
       </div>

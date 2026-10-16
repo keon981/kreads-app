@@ -25,12 +25,19 @@ function Avatar({
   )
 }
 
-function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
+function AvatarImage({
+  className,
+  keepMounted = true,
+  loading = 'lazy',
+  ...props
+}: AvatarPrimitive.Image.Props) {
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
+      keepMounted={keepMounted} // render <img> during SSR
+      loading={loading}
       className={cn(
-        'aspect-square size-full rounded-full object-cover',
+        'absolute inset-0 aspect-square size-full rounded-full object-cover data-error:hidden',
         className,
       )}
       {...props}

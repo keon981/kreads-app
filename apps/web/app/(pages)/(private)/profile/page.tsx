@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 
 import { verifySession } from '@/lib/auth'
 import { getViewerUser } from '@/utils/user'
-import { UserPostsView } from '@/views/posts-view'
+import { UserPostsView } from '@/views/posts-view/view'
 
 async function Page() {
   // Signed-out and unregistered users are redirected by the (private) AuthGuard
