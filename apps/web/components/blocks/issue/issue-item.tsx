@@ -1,7 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-
 import { createContext, Fragment, use, useState } from 'react'
 
 import { useMutationState, useQueryClient } from '@tanstack/react-query'
@@ -9,12 +7,7 @@ import type { Mutation, MutationKey } from '@tanstack/react-query'
 
 import {
   RiAlertLine,
-  RiBookmarkLine,
-  RiDeleteBin7Line,
-  RiEditLine,
-  RiLink,
   RiMoreLine,
-  RiRefreshLine,
 } from '@remixicon/react'
 import { Button } from '@workspace/ui/components/button'
 import { ConfirmDialog, NoticeConfirmDialog } from '@workspace/ui/components/confirm-dialog'
@@ -28,7 +21,6 @@ import {
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu'
 import { Spinner } from '@workspace/ui/components/spinner'
-import { toast } from '@workspace/ui/components/toast'
 import { useCopy } from '@workspace/ui/hooks/use-copy'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
 import { cn } from '@workspace/ui/lib/utils'
@@ -53,7 +45,7 @@ import type { Issue, IssueSubmission } from '@/types/issue'
 import type { IssueFormDialogProps } from './issue-form-dialog'
 
 type DropdownMenuItemOnClick = React.ComponentProps<typeof DropdownMenuItem>['onClick']
-type IssueMenuStatus = 'idle' | 'loading' | 'failed'
+type IssueMenuStatus = 'owner' | 'viewer' | 'failed' | 'loading'
 
 function getStagedAuthor(user: ReturnType<typeof useAuth>['user']): Issue['author'] {
   if (!user?.id) return null
@@ -112,18 +104,19 @@ interface ConfirmOptions extends Pick<ConfirmDialogProps, 'title' | 'description
 }
 
 interface IssueItemContextValue {
-  target: IssueTarget
+  target?: IssueTarget
   isOwner: boolean
-  menuStatus: IssueMenuStatus
-  onRetry?: () => void
-  onDiscard?: () => void
+  status: IssueMenuStatus
   copyLink: () => void
   onCopyLink?: DropdownMenuItemOnClick
-  onDelete?: () => Promise<ActionState>
-  redirectTo?: string
-  triggerEdit: UseDialogReturn['trigger']
+  body?: string
+  onEdit?: (submission: IssueSubmission) => void
+  editTitle?: string
   triggerConfirm: (options: ConfirmOptions) => void
   triggerNotice: UseDialogReturn['trigger']
+  onDelete?: () => Promise<ActionState | void> | void
+  redirectTo?: string
+  onRetry?: () => void
 }
 
 const IssueItemContext = createContext<IssueItemContextValue | null>(null)
@@ -132,44 +125,47 @@ function useIssueItem(): IssueItemContextValue {
   const context = use(IssueItemContext)
 
   if (!context) {
-    throw new Error('useIssueItem must be used within a StyledIssueItem.')
+    throw new Error('useIssueItem must be used within an IssueItemProvider.')
   }
 
   return context
 }
 
+function resolveStatus(status?: IssueMenuStatus, isOwner = false): IssueMenuStatus {
+  if (status) return status
+  if (isOwner) return 'owner'
+  return 'viewer'
+}
+
 function IssueItemProvider({
   body,
   target,
-  status,
-  onRetry,
-  onDiscard,
+  status: propStatus,
   isOwner = false,
-  isDeleting = false,
-  editTitle,
+  editTitle = '編輯',
   getCopyUrl,
   onEdit,
   onDelete,
-  onCopyLink,
   redirectTo,
+  onRetry,
+  onCopyLink,
   children,
   ...props
 }: {
-  body: string
-  target: IssueTarget
+  body?: string
+  target?: IssueTarget
   status?: IssueMenuStatus
-  onRetry?: () => void
-  onDiscard?: () => void
   isOwner?: boolean
-  isDeleting?: boolean
-  editTitle: string
+  editTitle?: string
   getCopyUrl?: () => string
   onEdit?: (submission: IssueSubmission) => void
-  onDelete?: () => Promise<ActionState>
-  onCopyLink?: DropdownMenuItemOnClick
+  onDelete?: () => Promise<ActionState | void> | void
   redirectTo?: string
+  onRetry?: () => void
+  onCopyLink?: DropdownMenuItemOnClick
 } & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>): React.ReactNode {
-  const { dialogProps: editDialogProps, trigger: triggerEdit } = useDialog()
+  const status = resolveStatus(propStatus, isOwner)
+
   const {
     dialogProps: confirmDialogProps,
     trigger: openConfirmDialog,
@@ -180,13 +176,10 @@ function IssueItemProvider({
 
   const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
 
-  const menuStatus: IssueMenuStatus = isDeleting || status === 'loading'
-    ? 'loading'
-    : (status ?? 'idle')
-
   const copyLink = (): void => {
-    if (typeof window === 'undefined' || !getCopyUrl) return
-    copy(getCopyUrl())
+    if (typeof window === 'undefined') return
+    const url = getCopyUrl ? getCopyUrl() : window.location.href
+    copy(url)
   }
 
   const triggerConfirm = (options: ConfirmOptions): void => {
@@ -204,16 +197,17 @@ function IssueItemProvider({
       value={{
         target,
         isOwner,
-        menuStatus,
-        onRetry,
-        onDiscard,
+        status,
         copyLink,
         onCopyLink,
-        onDelete,
-        redirectTo,
-        triggerEdit,
+        body,
+        onEdit,
+        editTitle,
         triggerConfirm,
         triggerNotice,
+        onDelete,
+        redirectTo,
+        onRetry,
       }}
     >
       <IssueItem {...props}>
@@ -229,124 +223,69 @@ function IssueItemProvider({
           title="功能尚未開放"
           description={NOTICE_DESCRIPTION}
         />
-        {isOwner && (
-          <IssueFormDialog
-            onSubmit={onEdit}
-            title={editTitle}
-            defaultValues={{ content: body }}
-            dialogProps={editDialogProps}
-          />
-        )}
       </IssueItem>
     </IssueItemContext>
   )
 }
 
-function IssueMenuItem({ label, icon: Icon, ...props }: {
-  label: string
-  icon: RemixiconComponentType
-} & React.ComponentProps<typeof DropdownMenuItem>): React.ReactNode {
+interface IssueMenuItemProps extends React.ComponentProps<typeof DropdownMenuItem> {
+  MenuItem?: React.ComponentType<any>
+  label?: string
+  icon?: RemixiconComponentType
+  title?: string
+  description?: string
+  [key: string]: unknown
+}
+
+function IssueMenuItem({ label, icon: Icon, ...props }: IssueMenuItemProps): React.ReactNode {
   return (
     <DropdownMenuItem {...props}>
       {label}
-      <span className="ml-auto">
-        <Icon />
-      </span>
+      {Icon && (
+        <span className="ml-auto">
+          <Icon />
+        </span>
+      )}
     </DropdownMenuItem>
   )
 }
 
-function EditMenuItem(): React.ReactNode {
-  const { triggerEdit } = useIssueItem()
-
-  return <IssueMenuItem label="編輯" icon={RiEditLine} onClick={triggerEdit} />
-}
-
-function CopyLinkMenuItem(): React.ReactNode {
-  const { copyLink, onCopyLink } = useIssueItem()
-
-  return <IssueMenuItem label="複製連結" icon={RiLink} onClick={onCopyLink ?? copyLink} />
-}
-
-function BookmarkMenuItem(): React.ReactNode {
-  const { triggerNotice } = useIssueItem()
-
-  return <IssueMenuItem label="儲存" icon={RiBookmarkLine} onClick={triggerNotice} />
-}
-
-function DeleteMenuItem(): React.ReactNode {
-  const router = useRouter()
-  const { onDelete, redirectTo, triggerConfirm } = useIssueItem()
-
-  const handleDelete = async (): Promise<void> => {
-    const res = await onDelete?.().catch(() => null)
-    if (!res) return
-
-    toast.add({ type: 'success', description: res.message })
-    if (redirectTo) router.replace(redirectTo)
-  }
-
-  const handleClick = (): void => {
-    triggerConfirm({
-      title: '刪除貼文？',
-      description: '刪除這則貼文後，即無法恢復顯示。',
-      confirmText: '刪除',
-      onConfirm: () => void handleDelete(),
-    })
-  }
-
-  return <IssueMenuItem label="刪除" icon={RiDeleteBin7Line} variant="destructive" onClick={handleClick} />
-}
-
-function RetryMenuItem(): React.ReactNode {
-  const { onRetry } = useIssueItem()
-
-  return <IssueMenuItem label="重傳" icon={RiRefreshLine} onClick={onRetry} />
-}
-
-function DiscardMenuItem(): React.ReactNode {
-  const { onDiscard, triggerConfirm } = useIssueItem()
-
-  const handleClick = (): void => {
-    if (!onDiscard) return
-    triggerConfirm({ title: '捨棄貼文？', confirmText: '捨棄', onConfirm: onDiscard })
-  }
-
-  return <IssueMenuItem label="捨棄" icon={RiDeleteBin7Line} variant="destructive" onClick={handleClick} />
-}
-
-type IssueMenu = Record<string, Record<string, React.ComponentType>>
-
-const issueOwnerMenu: IssueMenu = {
-  manage: { edit: EditMenuItem },
-  share: { copyLink: CopyLinkMenuItem, bookmark: BookmarkMenuItem },
-  danger: { delete: DeleteMenuItem },
-}
-
-const issueViewerMenu: IssueMenu = {
-  share: { copyLink: CopyLinkMenuItem, bookmark: BookmarkMenuItem },
-}
-
-const issueFailedMenu: IssueMenu = {
-  manage: { retry: RetryMenuItem, edit: EditMenuItem },
-  danger: { discard: DiscardMenuItem },
-}
-
-function getIssueMenu(menuStatus: IssueMenuStatus, isOwner: boolean): IssueMenu {
-  if (menuStatus === 'failed') return issueFailedMenu
-  if (isOwner) return issueOwnerMenu
-
-  return issueViewerMenu
+function IssueMenuGroup({ items }: { items: IssueMenuItemProps[] }): React.ReactNode {
+  return (
+    <DropdownMenuGroup>
+      {items.map(({ MenuItem = IssueMenuItem, label, icon, ...props }) => {
+        const itemKey = MenuItem.name || label || (props as { title?: string }).title || 'item'
+        return (
+          <MenuItem
+            key={itemKey}
+            label={label}
+            icon={icon}
+            {...props}
+          />
+        )
+      })}
+    </DropdownMenuGroup>
+  )
 }
 
 const statusIcon: Record<IssueMenuStatus, React.ReactNode> = {
-  idle: <RiMoreLine />,
+  owner: <RiMoreLine />,
+  viewer: <RiMoreLine />,
   loading: <Spinner />,
   failed: <RiAlertLine />,
 }
 
-function IssueDropdownMenu(): React.ReactNode {
-  const { isOwner, menuStatus } = useIssueItem()
+function IssueDropdownMenu({
+  content,
+  children,
+  className,
+}: {
+  content?: Record<string, IssueMenuItemProps[][]>
+  children?: React.ReactNode
+  className?: string
+}): React.ReactNode {
+  const { status } = useIssueItem()
+  const activeContent = content?.[status]
 
   return (
     <DropdownMenu>
@@ -355,22 +294,25 @@ function IssueDropdownMenu(): React.ReactNode {
           <Button
             variant="ghost"
             size="icon-sm"
-            disabled={menuStatus === 'loading'}
-            className={cn(menuStatus === 'failed' && 'text-destructive hover:text-destructive')}
+            disabled={status === 'loading'}
+            className={cn(status === 'failed' && 'text-destructive hover:text-destructive', className)}
           >
-            {statusIcon[menuStatus]}
+            {statusIcon[status]}
           </Button>
         )}
       />
       <DropdownMenuContent align="start">
-        {Object.entries(getIssueMenu(menuStatus, isOwner)).map(([group, items], index) => (
-          <Fragment key={group}>
-            {index > 0 && <DropdownMenuSeparator />}
-            <DropdownMenuGroup>
-              {Object.entries(items).map(([id, MenuItem]) => <MenuItem key={id} />)}
-            </DropdownMenuGroup>
-          </Fragment>
-        ))}
+        {activeContent
+          ? activeContent.map((items, index) => {
+              const groupKey = items.map(item => item.label ?? item.title ?? item.MenuItem?.name ?? 'item').join('-') || index
+              return (
+                <Fragment key={groupKey}>
+                  {index > 0 && <DropdownMenuSeparator />}
+                  <IssueMenuGroup items={items} />
+                </Fragment>
+              )
+            })
+          : children}
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -429,6 +371,9 @@ export {
   IssueDropdownMenu,
   IssueFooter,
   IssueItemProvider,
+  IssueMenuGroup,
+  IssueMenuItem,
+  useIssueItem,
   useStagedIssues,
 }
-export type { IssueMenuStatus, StagedIssue }
+export type { IssueMenuItemProps, IssueMenuStatus, StagedIssue }

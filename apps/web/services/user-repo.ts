@@ -12,7 +12,6 @@ import 'server-only'
 
 const unauthorizedMessage = '請先登入'
 
-// TODO: token 瘋狂帶入
 export function fetchUserRepo(
   token: string | null,
   repoName?: string | null,

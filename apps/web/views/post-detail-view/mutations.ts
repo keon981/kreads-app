@@ -53,16 +53,16 @@ export const commentMutations = {
       },
     }),
 
-  update: (repoName: string, issueNumber: number, commentId: number) =>
+  update: (repoName: string, issueNumber: number) =>
     mutationOptions({
-      mutationKey: ['comment', 'update', repoName, commentId],
-      mutationFn: async (submission: IssueSubmission) => {
+      mutationKey: ['comment', 'update', repoName, issueNumber],
+      mutationFn: async ({ commentId, submission }: { commentId: number, submission: IssueSubmission }) => {
         const body = submission.content.body
         const actionState = await updateCommentAction({ repoName, commentId, content: body })
         return getActionData(actionState)
       },
       gcTime: Infinity,
-      onSuccess: (updatedComment, _variables, _context, { client }) => {
+      onSuccess: (updatedComment, { commentId }, _context, { client }) => {
         const { body, bodyHTML } = updatedComment
 
         // Update comment in comment list
@@ -74,15 +74,15 @@ export const commentMutations = {
       },
     }),
 
-  delete: (repoName: string, issueNumber: number, commentId: number) =>
+  delete: (repoName: string, issueNumber: number) =>
     mutationOptions({
-      mutationKey: ['comment', 'delete', repoName, commentId],
-      mutationFn: async () => {
+      mutationKey: ['comment', 'delete', repoName, issueNumber],
+      mutationFn: async (commentId: number) => {
         const actionState = await deleteCommentAction({ repoName, commentId })
         throwIfActionFailed(actionState)
         return actionState
       },
-      onSuccess: (_actionState, _variables, _context, { client }) => {
+      onSuccess: (_actionState, commentId, _context, { client }) => {
         // Filter out deleted comment
         setCommentList(client, repoName, issueNumber, comments =>
           comments.filter(comment => comment.id !== commentId))
@@ -102,13 +102,3 @@ export const commentMutations = {
       },
     }),
 }
-
-export const commentMutationKeys = {
-  create: (repoName: string, issueNumber: number) => commentMutations.create(repoName, issueNumber).mutationKey,
-  update: (repoName: string, commentId: number) => commentMutations.update(repoName, 0, commentId).mutationKey,
-  delete: (repoName: string, commentId: number) => commentMutations.delete(repoName, 0, commentId).mutationKey,
-}
-
-export const createCommentMutation = commentMutations.create
-export const updateCommentMutation = commentMutations.update
-export const deleteCommentMutation = commentMutations.delete

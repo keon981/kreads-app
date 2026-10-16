@@ -6,10 +6,9 @@ import { useRouter } from 'next/navigation'
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
 
 import { RiChat1Line } from '@remixicon/react'
-import { useCopy } from '@workspace/ui/hooks/use-copy'
 import { cn } from '@workspace/ui/lib/utils'
 
-import { IssueReactionButton, IssueShareButton } from '@/components/blocks/issue/issue-actions'
+import { IssueReactionButton, IssueShareButton } from '@/components/blocks/issue/issue-control'
 import {
   getStagedAuthor,
   IssueComposerItem,
@@ -17,7 +16,8 @@ import {
   IssueFooter,
   IssueItemProvider,
   useStagedIssues,
-} from '@/components/blocks/issue/issue-items'
+} from '@/components/blocks/issue/issue-item'
+import { issueMenuContent } from '@/components/blocks/issue/issue-menu'
 import {
   IssueEmpty,
   IssueItemArticle,
@@ -40,41 +40,27 @@ const POST_EXCERPT_LENGTH = 500
 
 const getShrinkChars = (text: string[]): string => text.slice(0, POST_EXCERPT_LENGTH).join('')
 
+interface PostItemProps extends Omit<React.ComponentProps<typeof IssueItemProvider>, 'body' | 'target'> {
+  post: Issue
+  repoName: string
+  isPrefetched?: boolean
+}
+
 function PostItem({
   post,
   repoName,
-  isOwner = false,
   isPrefetched = false,
   className,
   ...props
-}: {
-  post: Issue
-  repoName: string
-  isOwner?: boolean
-  isPrefetched?: boolean
-} & Omit<React.ComponentProps<typeof IssueItemProvider>, 'body' | 'target' | 'editTitle' | 'getCopyUrl'>): React.ReactNode {
+}: PostItemProps): React.ReactNode {
   const router = useRouter()
-  const isPublished = post.number > 0
-  const href = isPublished ? chatHref(post) : undefined
-
-  const { mutate: updatePost } = useMutation(postMutations.update(repoName, post.number))
-  const {
-    mutateAsync: deletePost,
-    isPending: isDeleting,
-  } = useMutation(postMutations.delete(repoName, post.number))
+  const href = post.number ? chatHref(post) : undefined
 
   // Count code points so emoji aren't split
   const bodyChars = Array.from(post.bodyText)
   const isTruncated = bodyChars.length > POST_EXCERPT_LENGTH
 
-  const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
-
   const getCopyUrl = (): string => `${window.location.origin}${chatHref(post)}`
-
-  const copyLink = (): void => {
-    if (typeof window === 'undefined') return
-    copy(getCopyUrl())
-  }
 
   const handleNavigate = (e: React.MouseEvent<HTMLDivElement>): void => {
     // Clicks inside portals (dialog, dropdown, hover card) still bubble through the React tree
@@ -90,10 +76,6 @@ function PostItem({
       target={{ repoName, issueNumber: post.number }}
       editTitle="編輯貼文"
       getCopyUrl={getCopyUrl}
-      isOwner={isOwner}
-      isDeleting={isDeleting}
-      onEdit={isPublished ? updatePost : undefined}
-      onDelete={isPublished ? deletePost : undefined}
       className={cn(href && 'cursor-pointer', className)}
       onClick={handleNavigate}
       {...props}
@@ -106,50 +88,47 @@ function PostItem({
 
             {href
               ? (
-                  <Link
-                    href={href}
-                    prefetch={isPrefetched ? true : null}
-                    className="transition-opacity hover:opacity-60"
-                  >
-                    <Time date={post.createdAt} />
-                  </Link>
-                )
+                <Link
+                  href={href}
+                  prefetch={isPrefetched ? true : null}
+                  className="transition-opacity hover:opacity-60"
+                >
+                  <Time date={post.createdAt} />
+                </Link>
+              )
               : <Time date={post.createdAt} />}
           </div>
-          <IssueDropdownMenu />
+          <IssueDropdownMenu content={issueMenuContent} />
         </IssueItemTitle>
         {
           href && isTruncated
             ? (
-                <IssueItemArticle className="whitespace-pre-line">
-                  {getShrinkChars(bodyChars)}
-                  …
-                  <Link href={href} className="text-muted-foreground no-underline hover:underline">
-                    展開
-                  </Link>
-                </IssueItemArticle>
-              )
+              <IssueItemArticle className="whitespace-pre-line">
+                {getShrinkChars(bodyChars)}
+                …
+                <Link href={href} className="text-muted-foreground no-underline hover:underline">
+                  展開
+                </Link>
+              </IssueItemArticle>
+            )
             : <IssueItemArticle html={post.bodyHTML} />
         }
         <IssueFooter>
           <IssueReactionButton
-            target={{ repoName, issueNumber: post.number }}
             reaction={{
               reactionCount: post.reactionCount,
               isReacted: post.isReacted,
             }}
-            disabled={!isPublished}
           />
           <IssueItemButton
             size="lg"
-            disabled={!isPublished}
             nativeButton={!href}
             render={href ? <Link href={href} /> : undefined}
           >
             <RiChat1Line />
             {post.commentCount > 0 && post.commentCount}
           </IssueItemButton>
-          <IssueShareButton onClick={copyLink} disabled={!isPublished} />
+          <IssueShareButton />
         </IssueFooter>
       </IssueItemContent>
     </IssueItemProvider>
@@ -164,6 +143,8 @@ function PostList({ repoName, isOwner, prefetchLimit }: {
   const { user } = useAuth()
   const { data: posts } = useSuspenseQuery(postQueries.list(repoName))
   const { mutate: createPost } = useMutation(postMutations.create(repoName))
+  const { mutate: updatePost } = useMutation(postMutations.update(repoName))
+  const { mutateAsync: deletePost } = useMutation(postMutations.delete(repoName))
   const stagedIssues = useStagedIssues(postMutations.create(repoName).mutationKey, createPost)
   const author = getStagedAuthor(user)
 
@@ -196,8 +177,9 @@ function PostList({ repoName, isOwner, prefetchLimit }: {
           }}
           repoName={repoName}
           status={staged.status}
+          onEdit={staged.resubmit}
+          onDelete={staged.discard}
           onRetry={staged.retry}
-          onDiscard={staged.discard}
           isOwner
         />
       ))}
@@ -207,6 +189,8 @@ function PostList({ repoName, isOwner, prefetchLimit }: {
           post={post}
           repoName={repoName}
           isOwner={isOwner}
+          onEdit={submission => updatePost({ issueNumber: post.number, submission })}
+          onDelete={() => deletePost(post.number)}
           isPrefetched={index < prefetchLimit}
         />
       ))}

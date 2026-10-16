@@ -6,9 +6,13 @@ import { useIsFetching, useMutation, useQueryClient, useSuspenseQuery } from '@t
 
 import { Button } from '@workspace/ui/components/button'
 import { Spinner } from '@workspace/ui/components/spinner'
-import { useCopy } from '@workspace/ui/hooks/use-copy'
+import { cn } from '@workspace/ui/lib/utils'
 
-import { IssueReactionButton, IssueReplyButton, IssueShareButton } from '@/components/blocks/issue/issue-actions'
+import {
+  IssueReactionButton,
+  IssueReplyButton,
+  IssueShareButton,
+} from '@/components/blocks/issue/issue-control'
 import {
   getStagedAuthor,
   IssueComposerItem,
@@ -16,7 +20,8 @@ import {
   IssueFooter,
   IssueItemProvider,
   useStagedIssues,
-} from '@/components/blocks/issue/issue-items'
+} from '@/components/blocks/issue/issue-item'
+import { issueMenuContent } from '@/components/blocks/issue/issue-menu'
 import {
   IssueEmpty,
   IssueItemArticle,
@@ -33,7 +38,7 @@ import { postQueries } from '@/hooks/queries/posts'
 
 import { commentMutations } from './mutations'
 
-import type { IssueMenuStatus } from '@/components/blocks/issue/issue-items'
+import type { IssueMenuStatus } from '@/components/blocks/issue/issue-item'
 import type { IssueComment } from '@/types/issue'
 
 // --- Post Components ---
@@ -62,20 +67,13 @@ function PostDetailItem({ repoName, issueNumber, isOwner, redirectTo }: PostDeta
   const isRefreshing = isFetchingPost || isFetchingComments
 
   // mutations
-  const { mutate: updatePost } = useMutation(postMutations.update(repoName, issueNumber))
-  const { mutateAsync: deletePost, isPending: isDeleting } = useMutation(postMutations.delete(repoName, issueNumber))
+  const { mutate: updatePost } = useMutation(postMutations.update(repoName))
+  const { mutateAsync: deletePost, isPending: isDeleting } = useMutation(postMutations.delete(repoName))
   const { mutate: createComment } = useMutation(commentMutations.create(repoName, issueNumber))
-
-  const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
 
   if (!post) notFound()
 
-  const getCopyUrl = (): string => `${window.location.origin}${window.location.pathname}`
-
-  const copyLink = (): void => {
-    if (typeof window === 'undefined') return
-    copy(getCopyUrl())
-  }
+  const status: IssueMenuStatus | undefined = isDeleting ? 'loading' : undefined
 
   const handleRefresh = (): void => {
     queryClient.refetchQueries({ queryKey: postKey })
@@ -93,11 +91,10 @@ function PostDetailItem({ repoName, issueNumber, isOwner, redirectTo }: PostDeta
         body={post.body}
         target={{ repoName, issueNumber }}
         isOwner={isOwner}
-        isDeleting={isDeleting}
+        status={status}
         editTitle="編輯貼文"
-        getCopyUrl={getCopyUrl}
-        onEdit={updatePost}
-        onDelete={deletePost}
+        onEdit={submission => updatePost({ issueNumber, submission })}
+        onDelete={() => deletePost(issueNumber)}
         redirectTo={redirectTo}
         className="flex-col items-start gap-2.5 border-0 border-b last:border-b rounded-none"
       >
@@ -121,14 +118,13 @@ function PostDetailItem({ repoName, issueNumber, isOwner, redirectTo }: PostDeta
               </Button>
             </div>
           </div>
-          <IssueDropdownMenu />
+          <IssueDropdownMenu content={issueMenuContent} />
         </IssueItemHeader>
 
         <IssueItemArticle html={post.bodyHTML} className="ps-0 mt-0 w-full" />
 
         <IssueFooter className="mt-1">
           <IssueReactionButton
-            target={{ repoName, issueNumber }}
             reaction={{ reactionCount: post.reactionCount, isReacted: post.isReacted }}
           />
           <IssueReplyButton
@@ -137,7 +133,7 @@ function PostDetailItem({ repoName, issueNumber, isOwner, redirectTo }: PostDeta
             placeholder={`回覆${post.author?.login ?? 'ghost'}……`}
             count={post.commentCount}
           />
-          <IssueShareButton onClick={copyLink} />
+          <IssueShareButton />
         </IssueFooter>
       </IssueItemProvider>
     </>
@@ -163,6 +159,7 @@ function PostPreviewItem({ repoName, issueNumber }: PostPreviewItemProps): React
     <IssueItemProvider
       body={post.body}
       target={{ repoName, issueNumber }}
+      status="loading"
       editTitle="編輯貼文"
       className="flex-col items-start gap-2.5 border-0 border-b last:border-b rounded-none"
     >
@@ -178,25 +175,22 @@ function PostPreviewItem({ repoName, issueNumber }: PostPreviewItemProps): React
             <Time date={post.createdAt} />
           </div>
         </div>
-        <IssueDropdownMenu />
+        <IssueDropdownMenu content={issueMenuContent} />
       </IssueItemHeader>
 
       <IssueItemArticle html={post.bodyHTML} className="ps-0 mt-0 w-full" />
 
       <IssueFooter className="mt-1">
         <IssueReactionButton
-          target={{ repoName, issueNumber }}
           reaction={{ reactionCount: post.reactionCount, isReacted: post.isReacted }}
-          disabled
         />
         <IssueReplyButton
           onSubmit={() => { }}
           title="回覆"
           placeholder={`回覆${post.author?.login ?? 'ghost'}……`}
           count={post.commentCount}
-          disabled
         />
-        <IssueShareButton disabled />
+        <IssueShareButton />
       </IssueFooter>
     </IssueItemProvider>
   )
@@ -204,56 +198,24 @@ function PostPreviewItem({ repoName, issueNumber }: PostPreviewItemProps): React
 
 // --- Comment Components ---
 
-interface CommentItemProps {
+interface CommentItemProps extends Omit<React.ComponentProps<typeof IssueItemProvider>, 'body' | 'target'> {
   comment: IssueComment
   repoName: string
-  issueNumber: number
-  viewer?: string | null
-  status?: IssueMenuStatus
-  onRetry?: () => void
-  onDiscard?: () => void
 }
 
 function CommentItem({
   comment,
   repoName,
-  issueNumber,
-  viewer,
-  status,
-  onRetry,
-  onDiscard,
+  className,
+  ...props
 }: CommentItemProps): React.ReactNode {
-  const isPublished = comment.id > 0
-  const isOwner = isPublished ? (!!viewer && viewer === `@${comment.author?.login}`) : true
-
-  const { mutate: updateComment } = useMutation(commentMutations.update(repoName, issueNumber, comment.id))
-  const { mutateAsync: deleteComment, isPending: isDeleting } = useMutation(
-    commentMutations.delete(repoName, issueNumber, comment.id),
-  )
-
-  const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
-
-  const getCopyUrl = (): string => `${window.location.origin}${window.location.pathname}`
-
-  const copyLink = (): void => {
-    if (typeof window === 'undefined') return
-    copy(getCopyUrl())
-  }
-
   return (
     <IssueItemProvider
       body={comment.body}
       target={{ repoName, commentId: comment.id }}
-      status={status}
-      onRetry={onRetry}
-      onDiscard={onDiscard}
-      isOwner={isOwner}
-      isDeleting={isDeleting}
       editTitle="編輯留言"
-      getCopyUrl={getCopyUrl}
-      onEdit={isPublished ? updateComment : undefined}
-      onDelete={isPublished ? deleteComment : undefined}
-      className="flex-col items-start gap-2.5"
+      className={cn('flex-col items-start gap-2.5', className)}
+      {...props}
     >
       <IssueItemHeader>
         <div className="flex items-center gap-2.5 min-w-0">
@@ -267,18 +229,16 @@ function CommentItem({
             <Time date={comment.createdAt} />
           </div>
         </div>
-        <IssueDropdownMenu />
+        <IssueDropdownMenu content={issueMenuContent} />
       </IssueItemHeader>
 
       <IssueItemArticle html={comment.bodyHTML} className="ps-0 mt-0 w-full" />
 
       <IssueFooter className="mt-1">
         <IssueReactionButton
-          target={{ repoName, commentId: comment.id }}
           reaction={{ reactionCount: comment.reactionCount, isReacted: comment.isReacted }}
-          disabled={!isPublished}
         />
-        <IssueShareButton onClick={copyLink} disabled={!isPublished} />
+        <IssueShareButton />
       </IssueFooter>
     </IssueItemProvider>
   )
@@ -294,6 +254,8 @@ function CommentList({ repoName, issueNumber, viewer }: CommentListProps): React
   const { user } = useAuth()
   const { data: comments } = useSuspenseQuery(commentQueries.list(repoName, issueNumber))
   const { mutate: createComment } = useMutation(commentMutations.create(repoName, issueNumber))
+  const { mutate: updateComment } = useMutation(commentMutations.update(repoName, issueNumber))
+  const { mutateAsync: deleteComment } = useMutation(commentMutations.delete(repoName, issueNumber))
   const stagedComments = useStagedIssues(commentMutations.create(repoName, issueNumber).mutationKey, createComment)
   const author = getStagedAuthor(user)
 
@@ -305,7 +267,14 @@ function CommentList({ repoName, issueNumber, viewer }: CommentListProps): React
   return (
     <>
       {comments?.map(comment => (
-        <CommentItem key={comment.id} comment={comment} repoName={repoName} issueNumber={issueNumber} viewer={viewer} />
+        <CommentItem
+          key={comment.id}
+          comment={comment}
+          repoName={repoName}
+          isOwner={viewer === `@${comment.author?.login}`}
+          onEdit={submission => updateComment({ commentId: comment.id, submission })}
+          onDelete={() => deleteComment(comment.id)}
+        />
       ))}
       {stagedComments.map(staged => (
         <CommentItem
@@ -319,10 +288,11 @@ function CommentList({ repoName, issueNumber, viewer }: CommentListProps): React
             isReacted: false,
           }}
           repoName={repoName}
-          issueNumber={issueNumber}
+          isOwner
           status={staged.status}
+          onEdit={staged.resubmit}
+          onDelete={staged.discard}
           onRetry={staged.retry}
-          onDiscard={staged.discard}
         />
       ))}
     </>

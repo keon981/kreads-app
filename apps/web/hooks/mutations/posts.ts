@@ -74,16 +74,16 @@ export const postMutations = {
       },
     }),
 
-  update: (repoName: string, issueNumber: number) =>
+  update: (repoName: string) =>
     mutationOptions({
-      mutationKey: ['post', 'update', repoName, issueNumber],
-      mutationFn: async (submission: IssueSubmission) => {
+      mutationKey: ['post', 'update', repoName],
+      mutationFn: async ({ issueNumber, submission }: { issueNumber: number, submission: IssueSubmission }) => {
         const body = submission.content.body
         const actionState = await updatePostAction({ repoName, issueNumber, content: body })
         return getActionData(actionState)
       },
       gcTime: Infinity,
-      onSuccess: (updatedPost, _variables, _context, { client }) => {
+      onSuccess: (updatedPost, { issueNumber }, _context, { client }) => {
         const { body, bodyHTML, bodyText } = updatedPost
 
         // Update post in detail cache
@@ -110,15 +110,15 @@ export const postMutations = {
       },
     }),
 
-  delete: (repoName: string, issueNumber: number) =>
+  delete: (repoName: string) =>
     mutationOptions({
-      mutationKey: ['post', 'delete', repoName, issueNumber],
-      mutationFn: async () => {
+      mutationKey: ['post', 'delete', repoName],
+      mutationFn: async (issueNumber: number) => {
         const actionState = await deletePostAction({ repoName, issueNumber })
         throwIfActionFailed(actionState)
         return actionState
       },
-      onSuccess: (_actionState, _variables, _context, { client }) => {
+      onSuccess: (_actionState, issueNumber, _context, { client }) => {
         // Remove deleted post from list cache
         client.setQueryData(postQueries.list(repoName).queryKey, (currentPosts) => {
           if (!currentPosts) return null
