@@ -139,30 +139,20 @@ function EditMenuItem({
   label = '編輯',
   ...props
 }: { label?: string } & React.ComponentProps<typeof IssueMenuItem>): React.ReactNode {
-  const { body, onEdit, editTitle = '編輯' } = useIssueItem()
-  const { dialogProps, trigger } = useDialog()
+  const { onEdit, triggerEdit } = useIssueItem()
 
   if (!onEdit) return null
 
   return (
-    <>
-      <IssueMenuItem
-        label={label}
-        icon={RiEditLine}
-        closeOnClick={false}
-        {...props}
-        onClick={(e) => {
-          trigger()
-          props.onClick?.(e)
-        }}
-      />
-      <IssueFormDialog
-        onSubmit={onEdit}
-        title={editTitle}
-        defaultValues={{ content: body }}
-        dialogProps={dialogProps}
-      />
-    </>
+    <IssueMenuItem
+      label={label}
+      icon={RiEditLine}
+      {...props}
+      onClick={(e) => {
+        triggerEdit()
+        props.onClick?.(e)
+      }}
+    />
   )
 }
 
