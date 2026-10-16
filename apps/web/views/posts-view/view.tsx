@@ -2,7 +2,6 @@ import { Suspense } from 'react'
 
 import { dehydrate, HydrationBoundary, noop } from '@tanstack/react-query'
 
-import { AboutUser } from '@/components/blocks/user'
 import ArticleLayout from '@/components/layout/article-layout'
 import {
   IssueItemGroup,
@@ -16,6 +15,7 @@ import { fetchIssues } from '@/services/github/issues'
 import { fetchUserRepo } from '@/services/user-repo'
 
 import { PostComposer, PostList } from './item'
+import { AboutUser } from './user'
 
 import type { ViewerUser } from '@/types/user'
 

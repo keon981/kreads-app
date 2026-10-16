@@ -8,7 +8,7 @@ import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
 import { RiChat1Line } from '@remixicon/react'
 import { cn } from '@workspace/ui/lib/utils'
 
-import { IssueReactionButton, IssueShareButton } from '@/components/blocks/issue/issue-control'
+import { IssueReactionButton, IssueShareButton } from '@/components/issue/issue-control'
 import {
   getStagedAuthor,
   IssueComposerItem,
@@ -16,8 +16,8 @@ import {
   IssueFooter,
   IssueItemProvider,
   useStagedIssues,
-} from '@/components/blocks/issue/issue-item'
-import { issueMenuContent } from '@/components/blocks/issue/issue-menu'
+} from '@/components/issue/issue-item'
+import { issueMenuContent } from '@/components/issue/issue-menu'
 import {
   IssueEmpty,
   IssueItemArticle,
@@ -88,14 +88,14 @@ function PostItem({
 
             {href
               ? (
-                <Link
-                  href={href}
-                  prefetch={isPrefetched ? true : null}
-                  className="transition-opacity hover:opacity-60"
-                >
-                  <Time date={post.createdAt} />
-                </Link>
-              )
+                  <Link
+                    href={href}
+                    prefetch={isPrefetched ? true : null}
+                    className="transition-opacity hover:opacity-60"
+                  >
+                    <Time date={post.createdAt} />
+                  </Link>
+                )
               : <Time date={post.createdAt} />}
           </div>
           <IssueDropdownMenu content={issueMenuContent} />
@@ -103,14 +103,14 @@ function PostItem({
         {
           href && isTruncated
             ? (
-              <IssueItemArticle className="whitespace-pre-line">
-                {getShrinkChars(bodyChars)}
-                …
-                <Link href={href} className="text-muted-foreground no-underline hover:underline">
-                  展開
-                </Link>
-              </IssueItemArticle>
-            )
+                <IssueItemArticle className="whitespace-pre-line">
+                  {getShrinkChars(bodyChars)}
+                  …
+                  <Link href={href} className="text-muted-foreground no-underline hover:underline">
+                    展開
+                  </Link>
+                </IssueItemArticle>
+              )
             : <IssueItemArticle html={post.bodyHTML} />
         }
         <IssueFooter>

@@ -14,11 +14,10 @@ import { Drawer, DrawerSwipeArea, DrawerTrigger } from '@workspace/ui/components
 import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
 import { cn } from '@workspace/ui/lib/utils'
 
+import { SignInButton, SignInCard } from '@/components/auth/sign-in'
 import { SettingsDrawerContent } from '@/components/blocks/settings-drawer'
 import { paths } from '@/configs/path-config'
 import { useAuth } from '@/contexts/auth-provider'
-
-import { SignInButton, SignInCard } from '../blocks/sign-in'
 
 import type { BaseUIEvent } from '@base-ui/react/types'
 

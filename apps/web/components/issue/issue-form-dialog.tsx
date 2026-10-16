@@ -46,7 +46,7 @@ function IssueFormDialog({
 }: IssueFormDialogProps) {
   // auth
   const { user } = useAuth()
-  const { name, avatarUrl } = user || {}
+  const { name, image: avatarUrl } = user || {}
 
   // dialog
   const { dialogProps: innerDialogProps } = useDialog()

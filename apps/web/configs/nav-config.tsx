@@ -35,8 +35,8 @@ import {
 import { useTheme } from 'next-themes'
 
 import { AuthDialogTrigger } from '@/components/auth/auth-dialog-trigger'
-import { IssueFormDialog } from '@/components/blocks/issue/issue-form-dialog'
 import { LinkNavItem, NoticeNavItem } from '@/components/blocks/nav-item'
+import { IssueFormDialog } from '@/components/issue/issue-form-dialog'
 import { NOTICE_DESCRIPTION } from '@/configs/constants'
 import { homePaths, paths } from '@/configs/path-config'
 import { useAuth } from '@/contexts/auth-provider'
@@ -198,7 +198,7 @@ export const sidebar: Sidebar = {
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="flex items-center gap-2 font-normal">
                       <Avatar className="size-8">
-                        <AvatarImage src={user.avatarUrl} alt={user.name ?? user.id} />
+                        <AvatarImage src={user.image} alt={user.name ?? user.id} />
                         <AvatarFallback>{(user.name ?? user.id ?? '').slice(0, 1).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">

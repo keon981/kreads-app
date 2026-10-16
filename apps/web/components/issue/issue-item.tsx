@@ -50,7 +50,7 @@ type IssueMenuStatus = 'owner' | 'viewer' | 'failed' | 'loading'
 function getStagedAuthor(user: ReturnType<typeof useAuth>['user']): Issue['author'] {
   if (!user?.id) return null
 
-  return { login: user.id.replace(/^@/, ''), avatarUrl: user.avatarUrl ?? '' }
+  return { login: user.id.replace(/^@/, ''), avatarUrl: user.image ?? '' }
 }
 
 function isStagedMutation(mutation: Mutation<unknown, Error, unknown, unknown>): boolean {
@@ -335,7 +335,7 @@ function IssueComposerItem({
 }: Pick<IssueFormDialogProps, 'onSubmit' | 'title' | 'placeholder'>
   & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>): React.ReactNode {
   const { user } = useAuth()
-  const { name, avatarUrl } = user || {}
+  const { name, image: avatarUrl } = user || {}
 
   return (
     <IssueItem className="last:border-b" {...props}>

@@ -12,7 +12,7 @@ import {
   IssueReactionButton,
   IssueReplyButton,
   IssueShareButton,
-} from '@/components/blocks/issue/issue-control'
+} from '@/components/issue/issue-control'
 import {
   getStagedAuthor,
   IssueComposerItem,
@@ -20,8 +20,8 @@ import {
   IssueFooter,
   IssueItemProvider,
   useStagedIssues,
-} from '@/components/blocks/issue/issue-item'
-import { issueMenuContent } from '@/components/blocks/issue/issue-menu'
+} from '@/components/issue/issue-item'
+import { issueMenuContent } from '@/components/issue/issue-menu'
 import {
   IssueEmpty,
   IssueItemArticle,
@@ -38,7 +38,7 @@ import { postQueries } from '@/hooks/queries/posts'
 
 import { commentMutations } from './mutations'
 
-import type { IssueMenuStatus } from '@/components/blocks/issue/issue-item'
+import type { IssueMenuStatus } from '@/components/issue/issue-item'
 import type { IssueComment } from '@/types/issue'
 
 // --- Post Components ---

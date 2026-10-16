@@ -7,7 +7,7 @@ interface AuthContextProps {
   user: null | {
     id: string | undefined
     name: string | null | undefined
-    avatarUrl: string | undefined
+    image: string | undefined
     repoName: string | undefined
   }
 }

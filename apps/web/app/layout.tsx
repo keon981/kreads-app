@@ -8,7 +8,7 @@ import { Splash } from '@workspace/ui/components/splash'
 import { cn } from '@workspace/ui/lib/utils'
 
 import { getInitialIsMobile } from '@/app/server/device'
-import { Providers } from '@/components/providers'
+import { Providers } from '@/contexts/providers'
 import { ThemeProvider } from '@/contexts/theme-provider'
 import { verifySession } from '@/lib/auth'
 import { env } from '@/lib/env'
@@ -72,7 +72,7 @@ async function RootProviders({ children }: {
         ? {
             id: user.username ?? undefined,
             name: user.name,
-            avatarUrl: user.image ?? undefined,
+            image: user.image ?? undefined,
             repoName: user.repoName ?? undefined,
           }
         : null}

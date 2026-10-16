@@ -1,7 +1,7 @@
 import { Toaster } from '@workspace/ui/components/toast'
 import { DeviceProvider } from '@workspace/ui/contexts/device-provider'
 
-import { SignInDialog } from '@/components/blocks/sign-in'
+import { SignInDialog } from '@/components/auth/sign-in'
 import { AuthProvider } from '@/contexts/auth-provider'
 import { QueryProvider } from '@/contexts/query-provider'
 
