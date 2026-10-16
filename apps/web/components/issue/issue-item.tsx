@@ -109,9 +109,8 @@ interface IssueItemContextValue {
   status: IssueMenuStatus
   copyLink: () => void
   onCopyLink?: DropdownMenuItemOnClick
-  body?: string
   onEdit?: (submission: IssueSubmission) => void
-  editTitle?: string
+  triggerEdit: () => void
   triggerConfirm: (options: ConfirmOptions) => void
   triggerNotice: UseDialogReturn['trigger']
   onDelete?: () => Promise<ActionState | void> | void
@@ -172,7 +171,9 @@ function IssueItemProvider({
     dismiss: dismissConfirmDialog,
   } = useDialog()
   const { dialogProps: noticeDialogProps, trigger: triggerNotice } = useDialog()
+  const { dialogProps: editDialogProps, trigger: openEditDialog } = useDialog()
   const [confirmOptions, setConfirmOptions] = useState<ConfirmOptions>()
+  const [isEditMounted, setIsEditMounted] = useState(false)
 
   const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
 
@@ -180,6 +181,11 @@ function IssueItemProvider({
     if (typeof window === 'undefined') return
     const url = getCopyUrl ? getCopyUrl() : window.location.href
     copy(url)
+  }
+
+  const triggerEdit = (): void => {
+    setIsEditMounted(true)
+    openEditDialog()
   }
 
   const triggerConfirm = (options: ConfirmOptions): void => {
@@ -200,9 +206,8 @@ function IssueItemProvider({
         status,
         copyLink,
         onCopyLink,
-        body,
         onEdit,
-        editTitle,
+        triggerEdit,
         triggerConfirm,
         triggerNotice,
         onDelete,
@@ -212,6 +217,15 @@ function IssueItemProvider({
     >
       <IssueItem {...props}>
         {children}
+        {/* 放在選單外，鍵盤事件才不會沿 React 樹冒泡到選單 typeahead 被攔下；第一次編輯才掛載，避免每個 item 都建立 editor */}
+        {isEditMounted && (
+          <IssueFormDialog
+            onSubmit={onEdit}
+            title={editTitle}
+            defaultValues={{ content: body }}
+            dialogProps={editDialogProps}
+          />
+        )}
         {confirmOptions && (
           <ConfirmDialog
             {...{ ...confirmDialogProps, ...confirmOptions }}

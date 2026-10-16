@@ -2,7 +2,7 @@ import { mutationOptions } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 
 import { createCommentAction, deleteCommentAction, updateCommentAction } from '@/app/server/actions/comments'
-import { setPostDetail, setPostListItem } from '@/hooks/mutations/posts'
+import { invalidatePost, setPostDetail, setPostListItem } from '@/hooks/mutations/posts'
 import { commentQueries } from '@/hooks/queries/comments'
 import { getActionData, throwIfActionFailed } from '@/utils/toolkit'
 
@@ -48,8 +48,8 @@ export const commentMutations = {
           commentCount: post.commentCount + 1,
         }))
 
-        // Invalidate all posts under this repo
-        client.invalidateQueries({ queryKey: ['post', repoName], refetchType: 'none' })
+        // 標記 list 與 detail 過期，下次掛載時與 server 同步
+        invalidatePost(client, repoName, issueNumber)
       },
     }),
 
@@ -97,8 +97,8 @@ export const commentMutations = {
           commentCount: post.commentCount - 1,
         }))
 
-        // Invalidate all posts under this repo
-        client.invalidateQueries({ queryKey: ['post', repoName], refetchType: 'none' })
+        // 標記 list 與 detail 過期，下次掛載時與 server 同步
+        invalidatePost(client, repoName, issueNumber)
       },
     }),
 }

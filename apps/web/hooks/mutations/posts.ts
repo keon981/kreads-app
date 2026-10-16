@@ -17,7 +17,7 @@ export function setPostListItem(
   client.setQueryData(
     postQueries.list(repoName).queryKey,
     (currentPosts) => {
-      if (!currentPosts) return null
+      if (!currentPosts) return currentPosts
       return currentPosts.map(post => (post.number === issueNumber ? update(post) : post))
     },
   )
@@ -32,10 +32,16 @@ export function setPostDetail(
   client.setQueryData(
     postQueries.detail(repoName, issueNumber).queryKey,
     (currentPost) => {
-      if (!currentPost) return null
+      // 回傳原值（undefined）才不會建立 query；回傳 null 會讓 detail 頁誤判為 404
+      if (!currentPost) return currentPost
       return update(currentPost)
     },
   )
+}
+
+export function invalidatePost(client: QueryClient, repoName: string, issueNumber: number): void {
+  client.invalidateQueries({ queryKey: postQueries.list(repoName).queryKey, refetchType: 'none' })
+  client.invalidateQueries({ queryKey: postQueries.detail(repoName, issueNumber).queryKey, refetchType: 'none' })
 }
 
 export function setPostData(
@@ -46,7 +52,7 @@ export function setPostData(
 ): void {
   setPostListItem(client, repoName, issueNumber, update)
   setPostDetail(client, repoName, issueNumber, update)
-  client.invalidateQueries({ queryKey: ['post', repoName], refetchType: 'none' })
+  invalidatePost(client, repoName, issueNumber)
 }
 
 export const postMutations = {
@@ -62,7 +68,7 @@ export const postMutations = {
       onSuccess: (createdPost, _variables, _context, { client }) => {
         // Prepend created post to list cache
         client.setQueryData(postQueries.list(repoName).queryKey, (currentPosts) => {
-          if (!currentPosts) return null
+          if (!currentPosts) return currentPosts
           return [createdPost, ...currentPosts]
         })
 
@@ -102,11 +108,8 @@ export const postMutations = {
           bodyText,
         }))
 
-        // Invalidate all posts under this repo
-        client.invalidateQueries({
-          queryKey: ['post', repoName],
-          refetchType: 'none',
-        })
+        // 標記 list 與 detail 過期，下次掛載時與 server 同步
+        invalidatePost(client, repoName, issueNumber)
       },
     }),
 
@@ -121,7 +124,7 @@ export const postMutations = {
       onSuccess: (_actionState, issueNumber, _context, { client }) => {
         // Remove deleted post from list cache
         client.setQueryData(postQueries.list(repoName).queryKey, (currentPosts) => {
-          if (!currentPosts) return null
+          if (!currentPosts) return currentPosts
           return currentPosts.filter(post => post.number !== issueNumber)
         })
 
