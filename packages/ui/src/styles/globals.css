@@ -149,6 +149,13 @@
   html {
     @apply font-sans;
     }
+
+  :is(input, textarea, select):is(:-webkit-autofill, :autofill) {
+    -webkit-text-fill-color: currentColor !important;
+    -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+    box-shadow: 0 0 0 1000px transparent inset !important;
+    transition: background-color 5000000s ease-in-out 0s !important;
+  }
 }
 
 .typeset-docs {
