@@ -1,53 +1,71 @@
+import { cacheLife, cacheTag } from 'next/cache'
+
 import { db } from '@workspace/server/db/client'
 import { session, user } from '@workspace/server/db/schema/auth-schema'
 import { inviteCode } from '@workspace/server/db/schema/invite-schema'
-import { SECONDS, TIME_ZONE } from '@workspace/ui/configs/constants'
+import { SECONDS } from '@workspace/ui/configs/constants'
 import { formatDateTime } from '@workspace/ui/lib/format'
-import { and, count, desc, eq, gt, isNotNull, sql } from 'drizzle-orm'
+import { and, count, desc, eq, gt, gte, isNotNull, isNull, or } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 
-import { isGithubAdmin, maskInviteCode } from '@/app/server/db/invites'
+import { maskInviteCode } from '@/app/server/db/invites'
 import { isGithubUser } from '@/app/server/db/users'
 
-import type { SQL } from 'drizzle-orm'
-import type { PgColumn } from 'drizzle-orm/pg-core'
 import type {
   ActivityUser,
   DailyActivity,
+  DashboardDetails,
   DashboardStats,
+  DashboardSummary,
   InviterRank,
   RedeemedInvite,
 } from '@/types/stats'
 
 import 'server-only'
 
-// Timestamps are stored in UTC; group them by the calendar day of the configured zone.
-// The zone is inlined (a config value, never user input) so SELECT and GROUP BY stay the same expression
-function dayOf(column: PgColumn): SQL<string> {
-  return sql<string>`to_char(${column} at time zone 'UTC' at time zone ${sql.raw(`'${TIME_ZONE}'`)}, 'YYYY-MM-DD')`
-}
-
 function getRecentDays(days: number): string[] {
   return Array.from({ length: days }, (_, index) => formatDateTime(Date.now() - (days - 1 - index) * SECONDS.day * 1000, { withTime: false }))
 }
 
+// formatDateTime uses the configured time zone, so rows are grouped by that zone's calendar day
+function getCountsByDay(dates: (Date | null)[]): Map<string, number> {
+  const counts = new Map<string, number>()
+  for (const date of dates) {
+    if (!date) continue
+    const day = formatDateTime(date, { withTime: false })
+    counts.set(day, (counts.get(day) ?? 0) + 1)
+  }
+  return counts
+}
+
+const getTime = (list: { time: Date | null }[]) => list.map(row => row.time)
+
 export async function fetchDailyActivity(days: number): Promise<DailyActivity[]> {
   const recentDays = getRecentDays(days)
-  const since = recentDays[0]
-  const registrationDay = dayOf(user.createdAt)
-  const redemptionDay = dayOf(inviteCode.redeemedAt)
-  const loginDay = dayOf(session.createdAt)
+  // One extra day covers the start of the oldest calendar day in the configured zone
+  const since = new Date(
+    Date.now() - (days + 1) * SECONDS.day * 1000,
+  )
 
   const [registrations, redemptions, logins] = await Promise.all([
-    db.select({ day: registrationDay, count: count() }).from(user).where(and(isGithubUser, sql`${registrationDay} >= ${since}`)).groupBy(registrationDay),
-    db.select({ day: redemptionDay, count: count() }).from(inviteCode).where(sql`${redemptionDay} >= ${since}`).groupBy(redemptionDay),
-    db.select({ day: loginDay, count: count() }).from(session).innerJoin(user, eq(session.userId, user.id)).where(and(isGithubUser, sql`${loginDay} >= ${since}`)).groupBy(loginDay),
+    db
+      .select({ time: user.createdAt })
+      .from(user)
+      .where(and(isGithubUser, gte(user.createdAt, since))),
+    db
+      .select({ time: inviteCode.redeemedAt })
+      .from(inviteCode)
+      .where(gte(inviteCode.redeemedAt, since)),
+    db
+      .select({ time: session.createdAt })
+      .from(session)
+      .innerJoin(user, eq(session.userId, user.id))
+      .where(and(isGithubUser, gte(session.createdAt, since))),
   ])
 
-  const toMap = (rows: { day: string, count: number }[]): Map<string, number> => new Map(rows.map(row => [row.day, row.count]))
-  const registrationMap = toMap(registrations)
-  const redemptionMap = toMap(redemptions)
-  const loginMap = toMap(logins)
+  const registrationMap = getCountsByDay(getTime(registrations))
+  const redemptionMap = getCountsByDay(getTime(redemptions))
+  const loginMap = getCountsByDay(getTime(logins))
 
   return recentDays.map(day => ({
     date: day.slice(5).replace('-', '/'),
@@ -58,25 +76,30 @@ export async function fetchDailyActivity(days: number): Promise<DailyActivity[]>
 }
 
 export async function fetchDashboardStats(): Promise<DashboardStats> {
-  const [[users], [invites], [sessions]] = await Promise.all([
+  const now = new Date()
+  const isBanned = and(
+    eq(user.banned, true),
+    or(isNull(user.banExpires), gt(user.banExpires, now)),
+  )
+
+  const [[users], bannedUsers, unregisteredUsers, [invites], [sessions]] = await Promise.all([
     db
-      .select({
-        totalUsers: count(),
-        bannedUsers: count(sql`case when ${user.banned} and (${user.banExpires} is null or ${user.banExpires} > now()) then 1 end`),
-        unregisteredUsers: count(sql`case when ${user.repoName} is null then 1 end`),
-        invitedUsers: count(user.invitedBy),
-      })
+      .select({ totalUsers: count(), invitedUsers: count(user.invitedBy) })
       .from(user)
       .where(isGithubUser),
-    db.select({ totalInvites: count(), redeemedInvites: count(inviteCode.redeemedAt) }).from(inviteCode),
+    db.$count(user, and(isGithubUser, isBanned)),
+    db.$count(user, and(isGithubUser, isNull(user.repoName))),
+    db
+      .select({ totalInvites: count(), redeemedInvites: count(inviteCode.redeemedAt) })
+      .from(inviteCode),
     db
       .select({ activeSessions: count() })
       .from(session)
       .innerJoin(user, eq(session.userId, user.id))
-      .where(and(isGithubUser, gt(session.expiresAt, new Date()))),
+      .where(and(isGithubUser, gt(session.expiresAt, now))),
   ])
 
-  return { ...users, ...invites, ...sessions }
+  return { ...users, bannedUsers, unregisteredUsers, ...invites, ...sessions }
 }
 
 export async function fetchTopInviters(limit: number): Promise<InviterRank[]> {
@@ -112,19 +135,48 @@ export async function fetchRecentUsers(limit: number): Promise<ActivityUser[]> {
     .limit(limit)
 }
 
-export async function fetchRecentRedemptions(isAdmin: boolean, limit: number): Promise<RedeemedInvite[]> {
+export async function fetchRecentRedemptions(limit: number): Promise<RedeemedInvite[]> {
   const rows = await db
     .select({ code: inviteCode.code, redeemedAt: inviteCode.redeemedAt, ...activityUserFields })
     .from(inviteCode)
     .leftJoin(user, eq(inviteCode.redeemedBy, user.id))
-    .where(isAdmin ? isNotNull(inviteCode.redeemedAt) : isGithubAdmin)
+    .where(isNotNull(inviteCode.redeemedAt))
     .orderBy(desc(inviteCode.redeemedAt))
     .limit(limit)
 
   return rows.map(({ code, redeemedAt, name, username, image }) => ({
     code: maskInviteCode(code),
     redeemer: name === null ? null : { name, username, image },
-    // Both filters only match redeemed codes
+    // The filter only matches redeemed codes
     redeemedAt: redeemedAt as Date,
   }))
+}
+
+export async function fetchDashboardSummary(): Promise<DashboardSummary> {
+  const [stats, activity] = await Promise.all([
+    fetchDashboardStats(),
+    fetchDailyActivity(30),
+  ])
+  return { stats, activity }
+}
+
+// Guests and viewer share this copy; it refreshes hourly because every sign-in changes the stats
+export async function fetchDashboardSummaryCache(): Promise<DashboardSummary> {
+  'use cache: remote'
+  cacheTag('viewer', 'guest')
+  cacheLife('hours')
+
+  return fetchDashboardSummary()
+}
+
+// Admin only: these lists name people
+export async function fetchDashboardDetails(): Promise<DashboardDetails> {
+  const [inviters, recentLogins, recentUsers, recentRedemptions] = await Promise.all([
+    fetchTopInviters(5),
+    fetchRecentLogins(5),
+    fetchRecentUsers(5),
+    fetchRecentRedemptions(5),
+  ])
+
+  return { inviters, recentLogins, recentUsers, recentRedemptions }
 }

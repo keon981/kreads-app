@@ -1,7 +1,7 @@
 import { mutationOptions } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 
-import { createCommentAction, deleteCommentAction, updateCommentAction } from '@/app/server/actions/comments'
+import { createCommentAction, deleteCommentAction, updateCommentAction } from '@/app/server/actions/comment'
 import { invalidatePost, setPostDetail, setPostListItem } from '@/hooks/mutations/posts'
 import { commentQueries } from '@/hooks/queries/comments'
 import { getActionData, throwIfActionFailed } from '@/utils/toolkit'

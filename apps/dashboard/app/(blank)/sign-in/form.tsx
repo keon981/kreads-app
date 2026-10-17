@@ -1,20 +1,28 @@
 'use client'
 
+import Link from 'next/link'
+
 import { useActionState } from 'react'
 
 import { RiCommandLine } from '@remixicon/react'
 import { Button } from '@workspace/ui/components/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@workspace/ui/components/field'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@workspace/ui/components/field'
 import { Input } from '@workspace/ui/components/input'
 import { Password } from '@workspace/ui/components/password'
 import { Spinner } from '@workspace/ui/components/spinner'
 
+import { REDIRECT_PARAM } from '@/configs/constants'
+import { paths } from '@/configs/path-config'
 import { env } from '@/lib/env'
 
 import { signInAction } from './action'
 
-export function SignInForm(): React.ReactNode {
+interface SignInFormProps {
+  redirectTo: string
+}
+
+export function SignInForm({ redirectTo }: SignInFormProps): React.ReactNode {
   const [state, formAction, isPending] = useActionState(signInAction, {})
 
   return (
@@ -28,6 +36,7 @@ export function SignInForm(): React.ReactNode {
       </CardHeader>
       <CardContent>
         <form action={formAction}>
+          <input type="hidden" name={REDIRECT_PARAM} value={redirectTo} />
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -42,6 +51,9 @@ export function SignInForm(): React.ReactNode {
               {isPending && <Spinner data-icon="inline-start" />}
               登入
             </Button>
+            <FieldDescription className="text-center">
+              <Link href={paths.dashboard}>先逛逛控制台</Link>
+            </FieldDescription>
           </FieldGroup>
         </form>
       </CardContent>

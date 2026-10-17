@@ -4,6 +4,8 @@ import { z } from 'zod'
 
 export const env = createEnv({
   server: {
+    DASHBOARD_URL: z.url(),
+    REVALIDATE_SECRET: z.string().min(32),
     GITHUB_CLIENT_ID: z.string(),
     GITHUB_CLIENT_SECRET: z.string(),
     INVITE_LIMIT: z.coerce.number().int().positive().default(3),
@@ -17,6 +19,8 @@ export const env = createEnv({
   extends: [vercel(), neonVercel()],
   // Map to process.env
   runtimeEnv: {
+    DASHBOARD_URL: process.env.DASHBOARD_URL,
+    REVALIDATE_SECRET: process.env.REVALIDATE_SECRET,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
     INVITE_LIMIT: process.env.INVITE_LIMIT,

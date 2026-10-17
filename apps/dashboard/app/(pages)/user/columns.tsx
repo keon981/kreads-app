@@ -90,6 +90,17 @@ export function getUserColumns({ isAdmin, onEdit, onAction }: UserColumnsOptions
       sortFn: 'text',
       meta: { label: '分組' },
     }),
+    columnHelper.accessor(row => row.isPublic ?? false, {
+      id: 'isPublic',
+      header: '公開',
+      cell: ({ row }) => (
+        <Badge variant={row.original.isPublic ? 'secondary' : 'outline'}>
+          {row.original.isPublic ? '公開' : '隱私'}
+        </Badge>
+      ),
+      enableSorting: false,
+      meta: { label: '公開' },
+    }),
     columnHelper.accessor('createdAt', {
       header: ({ column }) => <DataTableColumnHeader column={column} title="建立時間" />,
       cell: ({ row }) => (
@@ -139,8 +150,8 @@ export function getUserColumns({ isAdmin, onEdit, onAction }: UserColumnsOptions
     }),
   ])
 
-  // viewer has no email data and no write access, so those columns are left out
+  // Non-admins get no email or isPublic data and no write access, so those columns are left out
   return isAdmin
     ? columns
-    : columns.filter(column => column.id !== 'email' && column.id !== 'actions')
+    : columns.filter(column => column.id !== 'email' && column.id !== 'isPublic' && column.id !== 'actions')
 }

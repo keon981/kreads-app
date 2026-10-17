@@ -22,6 +22,7 @@ export const user = pgTable('user', {
   username: text('username').unique(),
   inviteCode: text('invite_code').unique(),
   invitedBy: text('invited_by').references((): AnyPgColumn => user.id, { onDelete: 'set null' }),
+  isPublic: boolean('is_public').default(false).notNull(),
 })
 
 export const session = pgTable(

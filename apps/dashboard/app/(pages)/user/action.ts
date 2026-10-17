@@ -6,6 +6,7 @@ import { headers } from 'next/headers'
 import { APIError } from 'better-auth/api'
 import * as z from 'zod'
 
+import { updateAudienceTag } from '@/app/server/cache'
 import { isManagedUser } from '@/app/server/db/users'
 import { verifyAdmin } from '@/app/server/session'
 import { assignUserRole } from '@/app/server/user-role'
@@ -56,6 +57,7 @@ export async function updateUserAction(type: UserActionType, userId: string): Pr
   }
 
   revalidatePath(paths.users)
+  updateAudienceTag()
   return {}
 }
 
@@ -74,5 +76,6 @@ export async function updateUserRoleAction(userId: string, _prevState: ActionSta
 
   revalidatePath(paths.users)
   revalidatePath(paths.keys)
+  updateAudienceTag()
   return {}
 }

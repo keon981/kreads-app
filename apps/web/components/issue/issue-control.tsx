@@ -18,7 +18,7 @@ import { toast } from '@workspace/ui/components/toast'
 import { useDebouncedMutation } from '@workspace/ui/hooks/use-debounced-mutation'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
 
-import { toggleReactionAction } from '@/app/server/actions/posts'
+import { toggleReactionAction } from '@/app/server/actions/post'
 import { IssueItemButton } from '@/components/ui/issue'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'

@@ -6,6 +6,7 @@ import * as z from 'zod'
 
 import { randomBytes } from 'node:crypto'
 
+import { updateAudienceTag } from '@/app/server/cache'
 import { deleteUnusedInvites, fetchInviteRedeemer, insertInvite, updateUnusedInviteRole } from '@/app/server/db/invites'
 import { verifyAdmin } from '@/app/server/session'
 import { assignUserRole } from '@/app/server/user-role'
@@ -31,6 +32,7 @@ export async function createInviteAction(): Promise<ActionState> {
   await insertInvite(code, defaultRole)
 
   revalidatePath(paths.keys)
+  updateAudienceTag()
   return {}
 }
 
@@ -57,6 +59,7 @@ export async function updateInviteAction(id: string, _prevState: ActionState, fo
   }
 
   revalidatePath(paths.keys)
+  updateAudienceTag()
   return {}
 }
 
@@ -70,5 +73,6 @@ export async function deleteInvitesAction(ids: string[]): Promise<DeleteInvitesS
   if (count === 0) return { message: '已使用的邀請碼無法刪除' }
 
   revalidatePath(paths.keys)
+  updateAudienceTag()
   return { count }
 }

@@ -1,12 +1,15 @@
 import { revalidateTag } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { after } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+import { hasRole } from '@workspace/server/auth/access'
 import { db } from '@workspace/server/db/client'
 import { user } from '@workspace/server/db/schema/auth-schema'
 import { eq } from 'drizzle-orm'
 
+import { revalidateDashboardCache } from '@/app/server/dashboard'
 import { redeemInviteCode } from '@/app/server/db/invites'
 import { viewerUserTag } from '@/app/server/db/users'
 import {
@@ -82,6 +85,11 @@ export async function GET(request: NextRequest) {
 
   // A cached "not found" for this username would hide the new profile
   revalidateTag(viewerUserTag(username), { expire: 0 })
+
+  // New users start private, so only a new site admin changes the dashboard's lists
+  if (hasRole(redeemed.role, 'admin')) {
+    after(() => revalidateDashboardCache(['viewer', 'guest']))
+  }
 
   // reload session cookie cache
   const requestHeaders = await headers()

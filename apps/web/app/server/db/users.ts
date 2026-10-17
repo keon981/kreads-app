@@ -33,7 +33,26 @@ async function fetchViewerUser(username: string): Promise<ViewerUser | null> {
   return foundUser ? getViewerUser(foundUser) : null
 }
 
+async function fetchUserVisibility(userId: string): Promise<boolean> {
+  const [foundUser] = await db
+    .select({ isPublic: user.isPublic })
+    .from(user)
+    .where(eq(user.id, userId))
+    .limit(1)
+
+  return foundUser?.isPublic ?? false
+}
+
+async function updateUserVisibility(userId: string, isPublic: boolean): Promise<void> {
+  await db
+    .update(user)
+    .set({ isPublic })
+    .where(eq(user.id, userId))
+}
+
 export {
+  fetchUserVisibility,
   fetchViewerUser,
+  updateUserVisibility,
   viewerUserTag,
 }

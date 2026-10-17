@@ -9,6 +9,7 @@ interface AuthContextProps {
     name: string | null | undefined
     image: string | undefined
     repoName: string | undefined
+    isPublic: boolean
   }
 }
 
