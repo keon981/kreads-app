@@ -20,8 +20,8 @@ export function SignInForm(): React.ReactNode {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="items-center text-center">
-        <div className="mx-auto flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <RiCommandLine className="size-5" />
+        <div className="mx-auto flex size-15 items-center justify-center rounded-lg text-primary-foreground">
+          <RiCommandLine className="size-full" />
         </div>
         <CardTitle className="font-heading text-xl">{env.NEXT_PUBLIC_APP_TITLE}</CardTitle>
         <CardDescription>使用後台帳號登入</CardDescription>
@@ -38,7 +38,7 @@ export function SignInForm(): React.ReactNode {
               <Password id="password" name="password" autoComplete="current-password" required />
             </Field>
             <FieldError>{state.message}</FieldError>
-            <Button type="submit" disabled={isPending}>
+            <Button size="lg" type="submit" disabled={isPending}>
               {isPending && <Spinner data-icon="inline-start" />}
               登入
             </Button>
