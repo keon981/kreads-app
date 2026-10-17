@@ -6,9 +6,12 @@ import { CreateInviteButton } from './create-button'
 import { InvitesTable } from './table'
 
 export default async function InvitesPage(): Promise<React.ReactNode> {
-  const audience = getAudience(await getSession())
+  const session = await getSession()
+  const audience = getAudience(session)
   const isAdmin = audience === 'admin'
-  const invites = isAdmin ? await fetchInvites(audience) : await fetchCachedInvites(audience)
+  const invites = isAdmin
+    ? await fetchInvites(audience)
+    : await fetchCachedInvites(audience)
 
   return (
     <SectionPageLayout
