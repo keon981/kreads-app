@@ -1,8 +1,12 @@
 import * as z from 'zod'
 
 import type { AuthSession } from '@workspace/server/auth/options'
+import type { PublicAudience } from '@workspace/server/types/revalidate'
 
 export type SessionUser = AuthSession['user']
+
+// guest is a signed-out visitor
+export type Audience = 'admin' | PublicAudience
 
 export type UserStatus = 'active' | 'banned'
 
@@ -15,10 +19,9 @@ export type AssignableRole = z.infer<typeof AssignableRoleSchema>
 export type AssignableRoleFilter = AssignableRole | 'all'
 
 export interface UserRow {
-  /** Admin only */
-  id?: string
-  /** Admin only */
-  email?: string
+  id?: string //  Admin only
+  email?: string //  Admin only
+  isPublic?: boolean //  Admin only
   name: string
   username: string | null
   image: string | null

@@ -6,10 +6,11 @@ import { cache } from 'react'
 import { hasRole } from '@workspace/server/auth/access'
 
 import { dashboardRoles } from '@/configs/auth-config'
-import { paths } from '@/configs/path-config'
+import { getSignInPath } from '@/configs/path-config'
 import { auth } from '@/lib/auth'
 
 import type { AuthSession } from '@workspace/server/auth/options'
+import type { Audience } from '@/types/user'
 
 import 'server-only'
 
@@ -21,10 +22,15 @@ export const getSession = cache(async (): Promise<AuthSession | null> => {
   return session
 })
 
-// Pages: signed-out visitors go to the sign-in page
-export async function verifySession(): Promise<AuthSession> {
+export function getAudience(session: AuthSession | null): Audience {
+  if (!session) return 'guest'
+
+  return hasRole(session.user.role, 'admin') ? 'admin' : 'viewer'
+}
+
+export async function verifySession(redirectTo: string): Promise<AuthSession> {
   const session = await getSession()
-  if (!session) redirect(paths.signIn)
+  if (!session) redirect(getSignInPath(redirectTo))
 
   return session
 }

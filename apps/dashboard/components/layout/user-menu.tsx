@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 import { useTransition } from 'react'
 
@@ -47,11 +48,12 @@ interface UserMenuContentProps extends Pick<
 }
 
 export function UserMenuContent({ user, ...props }: UserMenuContentProps): React.ReactNode {
+  const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const [isPending, startTransition] = useTransition()
 
   const handleClick = () => {
-    startTransition(() => signOutAction())
+    startTransition(() => signOutAction(pathname))
   }
 
   return (

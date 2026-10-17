@@ -26,109 +26,74 @@ import { ActivityBarChart, ActivityLineChart, InviterChart } from './chart'
 import { formatCount, sumOf } from './utils'
 
 import type { StatCard } from '@/components/ui/stat-card'
-import type { ActivityUser, DailyActivity, DashboardStats, InviterRank, RedeemedInvite } from '@/types/stats'
+import type { DashboardData, DashboardSummary } from '@/types/stats'
 
-interface DashboardData {
-  stats: DashboardStats
-  activity: DailyActivity[]
-  inviters: InviterRank[]
-  recentLogins: ActivityUser[]
-  recentUsers: ActivityUser[]
-  recentRedemptions: RedeemedInvite[]
-}
+type StatCardItem = React.ComponentProps<typeof StatCard> & { id: string }
 
-interface StatCardGroup {
-  id: string
-  title: string
-  cards: (React.ComponentProps<typeof StatCard> & { id: string })[]
-}
+export const publicStatCardIds = ['total', 'new', 'active', 'logins']
 
-export function getStatCards({ stats, activity }: DashboardData): StatCardGroup[] {
+export function getStatCards({ stats, activity }: DashboardSummary): StatCardItem[] {
   const lastWeek = activity.slice(-7)
 
   return [
     {
-      id: 'users',
-      title: '使用者',
-      cards: [
-        {
-          id: 'total',
-          label: '使用者總數',
-          value: formatCount(stats.totalUsers),
-          description: `${formatCount(stats.invitedUsers)} 位透過使用者邀請加入`,
-          icon: <RiTeamLine />,
-        },
-        {
-          id: 'new',
-          label: '近 7 天新註冊',
-          value: formatCount(sumOf(lastWeek, 'registrations')),
-          description: `近 30 天 ${formatCount(sumOf(activity, 'registrations'))} 位`,
-          icon: <RiUserAddLine />,
-          trend: lastWeek.map(day => ({ value: day.registrations })),
-        },
-      ],
+      id: 'total',
+      label: '使用者總數',
+      value: formatCount(stats.totalUsers),
+      description: `${formatCount(stats.invitedUsers)} 位透過使用者邀請加入`,
+      icon: <RiTeamLine />,
     },
     {
-      id: 'invites',
-      title: '邀請碼',
-      cards: [
-        {
-          id: 'redeemed',
-          label: '已核銷',
-          value: formatCount(stats.redeemedInvites),
-          description: `共 ${formatCount(stats.totalInvites)} 組邀請碼`,
-          icon: <RiCoupon3Line />,
-          trend: lastWeek.map(day => ({ value: day.redemptions })),
-        },
-        {
-          id: 'unused',
-          label: '未使用',
-          value: formatCount(stats.totalInvites - stats.redeemedInvites),
-          description: '可用於註冊主站',
-          icon: <RiCouponLine />,
-        },
-      ],
+      id: 'new',
+      label: '近 7 天新註冊',
+      value: formatCount(sumOf(lastWeek, 'registrations')),
+      description: `近 30 天 ${formatCount(sumOf(activity, 'registrations'))} 位`,
+      icon: <RiUserAddLine />,
+      trend: lastWeek.map(day => ({ value: day.registrations })),
     },
     {
-      id: 'sessions',
-      title: '登入活動',
-      cards: [
-        {
-          id: 'active',
-          label: '有效登入',
-          value: formatCount(stats.activeSessions),
-          description: '主站目前登入中的裝置',
-          icon: <RiLoginCircleLine />,
-        },
-        {
-          id: 'logins',
-          label: '近 7 天登入',
-          value: formatCount(sumOf(lastWeek, 'logins')),
-          description: `近 30 天 ${formatCount(sumOf(activity, 'logins'))} 次`,
-          icon: <RiCalendarCheckLine />,
-          trend: lastWeek.map(day => ({ value: day.logins })),
-        },
-      ],
+      id: 'redeemed',
+      label: '已核銷',
+      value: formatCount(stats.redeemedInvites),
+      description: `共 ${formatCount(stats.totalInvites)} 組邀請碼`,
+      icon: <RiCoupon3Line />,
+      trend: lastWeek.map(day => ({ value: day.redemptions })),
     },
     {
-      id: 'status',
-      title: '帳號狀態',
-      cards: [
-        {
-          id: 'banned',
-          label: '停權中',
-          value: formatCount(stats.bannedUsers),
-          description: '無法登入主站',
-          icon: <RiUserForbidLine />,
-        },
-        {
-          id: 'unregistered',
-          label: '未完成註冊',
-          value: formatCount(stats.unregisteredUsers),
-          description: '已授權 GitHub，尚未建立貼文 repo',
-          icon: <RiForbidLine />,
-        },
-      ],
+      id: 'unused',
+      label: '未使用',
+      value: formatCount(stats.totalInvites - stats.redeemedInvites),
+      description: '可用於註冊主站',
+      icon: <RiCouponLine />,
+    },
+    {
+      id: 'active',
+      label: '有效登入',
+      value: formatCount(stats.activeSessions),
+      description: '主站目前登入中的裝置',
+      icon: <RiLoginCircleLine />,
+    },
+    {
+      id: 'logins',
+      label: '近 7 天登入',
+      value: formatCount(sumOf(lastWeek, 'logins')),
+      description: `近 30 天 ${formatCount(sumOf(activity, 'logins'))} 次`,
+      icon: <RiCalendarCheckLine />,
+      trend: lastWeek.map(day => ({ value: day.logins })),
+    },
+    {
+      id: 'banned',
+      label: '停權中',
+      value: formatCount(stats.bannedUsers),
+      description: '無法登入主站',
+      icon: <RiUserForbidLine />,
+    },
+    {
+      id: 'unregistered',
+      label: '未完成註冊',
+      value: formatCount(stats.unregisteredUsers),
+      description: '已授權 GitHub，尚未建立貼文 repo',
+      icon: <RiForbidLine />,
     },
   ]
 }

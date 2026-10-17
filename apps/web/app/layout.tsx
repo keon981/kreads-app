@@ -74,6 +74,7 @@ async function RootProviders({ children }: {
             name: user.name,
             image: user.image ?? undefined,
             repoName: user.repoName ?? undefined,
+            isPublic: user.isPublic ?? false,
           }
         : null}
     >

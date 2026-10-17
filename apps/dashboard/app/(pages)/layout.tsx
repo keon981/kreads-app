@@ -1,6 +1,6 @@
 import { SidebarInset, SidebarProvider } from '@workspace/ui/components/sidebar'
 
-import { verifySession } from '@/app/server/session'
+import { getSession } from '@/app/server/session'
 import { AppHeader } from '@/components/layout/app-header'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 
@@ -9,7 +9,8 @@ export default async function PagesLayout({
 }: {
   children: React.ReactNode
 }): Promise<React.ReactNode> {
-  const { user } = await verifySession()
+  const session = await getSession()
+  const user = session?.user ?? null
 
   return (
     <SidebarProvider

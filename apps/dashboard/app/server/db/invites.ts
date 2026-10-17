@@ -1,16 +1,17 @@
+import { cacheLife, cacheTag } from 'next/cache'
+
 import { db } from '@workspace/server/db/client'
 import { user } from '@workspace/server/db/schema/auth-schema'
 import { inviteCode } from '@workspace/server/db/schema/invite-schema'
 import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
 
-import { isGithubUser, toAssignableRole } from '@/app/server/db/users'
+import { getVisibleUserFilter, toAssignableRole } from '@/app/server/db/users'
 
+import type { PublicAudience } from '@workspace/server/types/revalidate'
 import type { InviteRow } from '@/types/invite'
-import type { AssignableRole } from '@/types/user'
+import type { AssignableRole, Audience } from '@/types/user'
 
 import 'server-only'
-
-export const isGithubAdmin = and(eq(user.role, 'admin'), isGithubUser)
 
 interface InviteQueryRow {
   id?: string
@@ -50,9 +51,9 @@ function toInviteRow({ redeemerName, redeemerUsername, redeemerImage, redeemerRo
   }
 }
 
-// viewer gets one masked row: unused codes could be used to sign up if they leaked
-export async function fetchInvites(isAdmin: boolean): Promise<InviteRow[]> {
-  if (isAdmin) {
+// Non-admins only get masked codes redeemed by users they can see: unused codes could be used to sign up if they leaked
+export async function fetchInvites(audience: Audience): Promise<InviteRow[]> {
+  if (audience === 'admin') {
     const rows = await db
       .select({ ...inviteFields, id: inviteCode.id })
       .from(inviteCode)
@@ -65,8 +66,23 @@ export async function fetchInvites(isAdmin: boolean): Promise<InviteRow[]> {
     .select(inviteFields)
     .from(inviteCode)
     .innerJoin(user, eq(inviteCode.redeemedBy, user.id))
-    .where(isGithubAdmin)
+    .where(getVisibleUserFilter(audience))
+    .orderBy(desc(inviteCode.createdAt))
   return rows.map(row => toInviteRow({ ...row, code: maskInviteCode(row.code) }))
+}
+
+// Same lifetimes as fetchCachedUsers: guests only see site admins' codes, which rarely change
+export async function fetchCachedInvites(audience: PublicAudience): Promise<InviteRow[]> {
+  'use cache: remote'
+  cacheTag(audience)
+
+  if (audience === 'guest') {
+    cacheLife('weeks')
+  } else {
+    cacheLife('days')
+  }
+
+  return fetchInvites(audience)
 }
 
 export async function fetchInviteRedeemer(id: string): Promise<{ redeemedBy: string | null } | undefined> {

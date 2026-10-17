@@ -8,6 +8,8 @@ import {
   RiAddLargeLine,
   RiBookmarkLine,
   RiComputerLine,
+  RiEyeLine,
+  RiEyeOffLine,
   RiHome9Fill,
   RiHome9Line,
   RiListSettingsFill,
@@ -37,10 +39,11 @@ import { useTheme } from 'next-themes'
 import { AuthDialogTrigger } from '@/components/auth/auth-dialog-trigger'
 import { LinkNavItem, NoticeNavItem } from '@/components/blocks/nav-item'
 import { IssueFormDialog } from '@/components/issue/issue-form-dialog'
-import { NOTICE_DESCRIPTION } from '@/configs/constants'
+import { NOTICE_DESCRIPTION, VISIBILITY_DESCRIPTION } from '@/configs/constants'
 import { homePaths, paths } from '@/configs/path-config'
 import { useAuth } from '@/contexts/auth-provider'
 import { postMutations } from '@/hooks/mutations/posts'
+import { useVisibility } from '@/hooks/use-visibility'
 import { signOutWithClient } from '@/lib/auth-client'
 
 import type { RemixiconComponentType } from '@remixicon/react'
@@ -63,6 +66,11 @@ export const themeOptions = [
   { value: 'light', label: '淺色模式', icon: RiSunLine },
   { value: 'dark', label: '深色模式', icon: RiMoonLine },
   { value: 'system', label: '跟隨系統', icon: RiComputerLine },
+] as const
+
+export const visibilityOptions = [
+  { value: 'public', label: '公開', icon: RiEyeLine },
+  { value: 'private', label: '隱私', icon: RiEyeOffLine },
 ] as const
 
 export const sidebar: Sidebar = {
@@ -167,6 +175,7 @@ export const sidebar: Sidebar = {
         const router = useRouter()
         const { isAuth, user } = useAuth()
         const { theme, setTheme } = useTheme()
+        const { isPublic, setIsPublic } = useVisibility()
         const queryClient = useQueryClient()
 
         const handleSignOut = async (): Promise<void> => {
@@ -213,6 +222,27 @@ export const sidebar: Sidebar = {
               {isAuth
                 ? (
                     <DropdownMenuGroup>
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          公開
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="max-w-64">
+                          <DropdownMenuGroup>
+                            <DropdownMenuLabel className="text-xs font-normal">{VISIBILITY_DESCRIPTION}</DropdownMenuLabel>
+                            <DropdownMenuRadioGroup
+                              value={isPublic ? 'public' : 'private'}
+                              onValueChange={value => setIsPublic(value === 'public')}
+                            >
+                              {visibilityOptions.map(({ value, label, icon: Icon }) => (
+                                <DropdownMenuRadioItem key={value} value={value}>
+                                  <Icon />
+                                  {label}
+                                </DropdownMenuRadioItem>
+                              ))}
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuGroup>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
                       <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
                           外觀
