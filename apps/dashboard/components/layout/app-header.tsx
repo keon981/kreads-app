@@ -42,6 +42,7 @@ export function AppHeader({ user }: AppHeaderProps): React.ReactNode {
         <Button
           variant="ghost"
           className="hover:bg-transparent hover:text-muted-foreground active:text-foreground focus-visible:text-foreground hover:scale-90 active:scale-110 focus-visible:scale-110 rounded-full"
+          nativeButton={false}
           render={<Link href={paths.dashboard} onClick={handleIndexClick} />}
         >
 
