@@ -13,13 +13,13 @@ import { Button } from '@workspace/ui/components/button'
 import { ConfirmDialog, NoticeConfirmDialog } from '@workspace/ui/components/confirm-dialog'
 import { DialogTrigger } from '@workspace/ui/components/dialog'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@workspace/ui/components/dropdown-menu'
+  ResponsiveMenu,
+  ResponsiveMenuContent,
+  ResponsiveMenuGroup,
+  ResponsiveMenuItem,
+  ResponsiveMenuSeparator,
+  ResponsiveMenuTrigger,
+} from '@workspace/ui/components/responsive-menu'
 import { Spinner } from '@workspace/ui/components/spinner'
 import { useCopy } from '@workspace/ui/hooks/use-copy'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
@@ -44,13 +44,13 @@ import type { IssueTarget } from '@/types/action'
 import type { Issue, IssueSubmission } from '@/types/issue'
 import type { IssueFormDialogProps } from './issue-form-dialog'
 
-type DropdownMenuItemOnClick = React.ComponentProps<typeof DropdownMenuItem>['onClick']
+type DropdownMenuItemOnClick = React.ComponentProps<typeof ResponsiveMenuItem>['onClick']
 type IssueMenuStatus = 'owner' | 'viewer' | 'failed' | 'loading'
 
 function getStagedAuthor(user: ReturnType<typeof useAuth>['user']): Issue['author'] {
   if (!user?.id) return null
 
-  return { login: user.id.replace(/^@/, ''), avatarUrl: user.image ?? '' }
+  return { login: user.id.replace(/^@/, ''), image: user.image ?? '' }
 }
 
 function isStagedMutation(mutation: Mutation<unknown, Error, unknown, unknown>): boolean {
@@ -242,7 +242,7 @@ function IssueItemProvider({
   )
 }
 
-interface IssueMenuItemProps extends React.ComponentProps<typeof DropdownMenuItem> {
+interface IssueMenuItemProps extends React.ComponentProps<typeof ResponsiveMenuItem> {
   MenuItem?: React.ComponentType<any>
   label?: string
   icon?: RemixiconComponentType
@@ -253,20 +253,20 @@ interface IssueMenuItemProps extends React.ComponentProps<typeof DropdownMenuIte
 
 function IssueMenuItem({ label, icon: Icon, ...props }: IssueMenuItemProps): React.ReactNode {
   return (
-    <DropdownMenuItem {...props}>
+    <ResponsiveMenuItem {...props}>
       {label}
       {Icon && (
         <span className="ml-auto">
           <Icon />
         </span>
       )}
-    </DropdownMenuItem>
+    </ResponsiveMenuItem>
   )
 }
 
 function IssueMenuGroup({ items }: { items: IssueMenuItemProps[] }): React.ReactNode {
   return (
-    <DropdownMenuGroup>
+    <ResponsiveMenuGroup>
       {items.map(({ MenuItem = IssueMenuItem, label, icon, ...props }) => {
         const itemKey = MenuItem.name || label || (props as { title?: string }).title || 'item'
         return (
@@ -278,7 +278,7 @@ function IssueMenuGroup({ items }: { items: IssueMenuItemProps[] }): React.React
           />
         )
       })}
-    </DropdownMenuGroup>
+    </ResponsiveMenuGroup>
   )
 }
 
@@ -302,8 +302,8 @@ function IssueDropdownMenu({
   const activeContent = content?.[status]
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
+    <ResponsiveMenu>
+      <ResponsiveMenuTrigger
         render={(
           <Button
             variant="ghost"
@@ -315,20 +315,20 @@ function IssueDropdownMenu({
           </Button>
         )}
       />
-      <DropdownMenuContent align="start">
+      <ResponsiveMenuContent align="start">
         {activeContent
           ? activeContent.map((items, index) => {
               const groupKey = items.map(item => item.label ?? item.title ?? item.MenuItem?.name ?? 'item').join('-') || index
               return (
                 <Fragment key={groupKey}>
-                  {index > 0 && <DropdownMenuSeparator />}
+                  {index > 0 && <ResponsiveMenuSeparator />}
                   <IssueMenuGroup items={items} />
                 </Fragment>
               )
             })
           : children}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </ResponsiveMenuContent>
+    </ResponsiveMenu>
   )
 }
 
@@ -349,11 +349,11 @@ function IssueComposerItem({
 }: Pick<IssueFormDialogProps, 'onSubmit' | 'title' | 'placeholder'>
   & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>): React.ReactNode {
   const { user } = useAuth()
-  const { name, image: avatarUrl } = user || {}
+  const { name, image } = user || {}
 
   return (
-    <IssueItem className="last:border-b" {...props}>
-      <IssueItemMedia src={avatarUrl} fallback={name ?? undefined} />
+    <IssueItem className="border-b" {...props}>
+      <IssueItemMedia src={image} fallback={name ?? undefined} />
       <IssueItemContent>
         <div className="flex items-center gap-3">
           <IssueFormDialog

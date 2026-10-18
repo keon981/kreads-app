@@ -27,8 +27,8 @@ function toIssueComment(comment: {
     body: comment.body ?? '',
     bodyHTML: comment.body_html ?? '',
     createdAt: comment.created_at,
-    author: comment.user
-      ? { login: comment.user.login, avatarUrl: comment.user.avatar_url }
+    image: comment.user
+      ? { login: comment.user.login, image: comment.user.avatar_url }
       : null,
     reactionCount: comment.reactions?.heart ?? 0,
     isReacted: false,
@@ -41,7 +41,7 @@ function toIssueCommentFromGraphql(comment: GraphqlIssueComment): IssueComment {
     body: comment.body,
     bodyHTML: comment.bodyHTML,
     createdAt: comment.createdAt,
-    author: comment.author,
+    image: comment.author,
     reactionCount: comment.reactions.totalCount,
     isReacted: isViewerReacted(comment.reactionGroups),
   }

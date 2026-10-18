@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { RiCommandLine, RiLoginBoxLine, RiMoonLine, RiSunLine } from '@remixicon/react'
 import { Button } from '@workspace/ui/components/button'
 import { ButtonGroup, ButtonGroupText } from '@workspace/ui/components/button-group'
-import { DropdownMenu, DropdownMenuTrigger } from '@workspace/ui/components/dropdown-menu'
+import { ResponsiveMenu, ResponsiveMenuTrigger } from '@workspace/ui/components/responsive-menu'
 import { Separator } from '@workspace/ui/components/separator'
 import { SidebarTrigger } from '@workspace/ui/components/sidebar'
 import { useTheme } from 'next-themes'
@@ -42,6 +42,7 @@ export function AppHeader({ user }: AppHeaderProps): React.ReactNode {
         <Button
           variant="ghost"
           className="hover:bg-transparent hover:text-muted-foreground active:text-foreground focus-visible:text-foreground hover:scale-90 active:scale-110 focus-visible:scale-110 rounded-full"
+          nativeButton={false}
           render={<Link href={paths.dashboard} onClick={handleIndexClick} />}
         >
 
@@ -86,13 +87,13 @@ function AppHeaderNav({ user, redirectTo }: AppHeaderProps & {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
+    <ResponsiveMenu>
+      <ResponsiveMenuTrigger
         render={<Button variant="ghost" size="icon" className="rounded-full" aria-label="使用者選單" />}
       >
         <UserAvatar user={user} className="size-7" />
-      </DropdownMenuTrigger>
+      </ResponsiveMenuTrigger>
       <UserMenuContent user={user} align="end" sideOffset={8} />
-    </DropdownMenu>
+    </ResponsiveMenu>
   )
 }

@@ -54,7 +54,7 @@ function IssueItem({
   className,
   ...props
 }: {
-  avatarUrl?: string
+  image?: string
   avatarFallback?: string
 } & React.ComponentProps<typeof Item>) {
   return (
@@ -119,10 +119,10 @@ function IssueItemMedia({
 
 function IssueUser({
   login,
-  avatarUrl,
+  image,
   className,
   ...props
-}: React.ComponentProps<'h4'> & { login?: string, avatarUrl?: string }) {
+}: React.ComponentProps<'h4'> & { login?: string, image?: string }) {
   if (!login) {
     return <h4 className={cn('font-bold truncate', className)} {...props}>ghost</h4>
   }
@@ -145,7 +145,7 @@ function IssueUser({
               </p>
             </div>
             <Avatar className="size-16 shrink-0">
-              <AvatarImage src={avatarUrl} />
+              <AvatarImage src={image} />
               <AvatarFallback>{login.slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
           </div>

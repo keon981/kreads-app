@@ -14,12 +14,13 @@ import {
 import { Badge } from '@workspace/ui/components/badge'
 import { Button } from '@workspace/ui/components/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@workspace/ui/components/dropdown-menu'
+  ResponsiveMenu,
+  ResponsiveMenuContent,
+  ResponsiveMenuGroup,
+  ResponsiveMenuItem,
+  ResponsiveMenuSeparator,
+  ResponsiveMenuTrigger,
+} from '@workspace/ui/components/responsive-menu'
 import { formatDateTime } from '@workspace/ui/lib/format'
 
 import { DataTableColumnHeader } from '@/components/blocks/data-table'
@@ -121,28 +122,32 @@ export function getUserColumns({ isAdmin, onEdit, onAction }: UserColumnsOptions
             <Button variant="ghost" size="icon-sm" aria-label={`編輯 ${user.name}`} onClick={() => onEdit(user)}>
               <RiEditLine />
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger
+            <ResponsiveMenu>
+              <ResponsiveMenuTrigger
                 render={<Button variant="ghost" size="icon-sm" aria-label={`${user.name} 的更多操作`} />}
               >
                 <RiMore2Line />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-auto min-w-40">
-                <DropdownMenuItem onClick={() => onAction(isBanned ? 'unban' : 'ban', user)}>
-                  {isBanned ? <RiShieldCheckLine /> : <RiForbidLine />}
-                  {isBanned ? '解除停權' : '停權'}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onAction('revoke', user)}>
-                  <RiLogoutCircleRLine />
-                  撤銷登入
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={() => onAction('remove', user)}>
-                  <RiDeleteBinLine />
-                  刪除
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </ResponsiveMenuTrigger>
+              <ResponsiveMenuContent align="end" className="w-auto min-w-40" title={user.name}>
+                <ResponsiveMenuGroup>
+                  <ResponsiveMenuItem onClick={() => onAction(isBanned ? 'unban' : 'ban', user)}>
+                    {isBanned ? <RiShieldCheckLine /> : <RiForbidLine />}
+                    {isBanned ? '解除停權' : '停權'}
+                  </ResponsiveMenuItem>
+                  <ResponsiveMenuItem onClick={() => onAction('revoke', user)}>
+                    <RiLogoutCircleRLine />
+                    撤銷登入
+                  </ResponsiveMenuItem>
+                </ResponsiveMenuGroup>
+                <ResponsiveMenuSeparator />
+                <ResponsiveMenuGroup>
+                  <ResponsiveMenuItem variant="destructive" onClick={() => onAction('remove', user)}>
+                    <RiDeleteBinLine />
+                    刪除
+                  </ResponsiveMenuItem>
+                </ResponsiveMenuGroup>
+              </ResponsiveMenuContent>
+            </ResponsiveMenu>
           </div>
         )
       },

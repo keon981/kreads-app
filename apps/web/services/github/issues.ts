@@ -58,7 +58,7 @@ function toIssueFromRest(issue: {
     bodyText: getTextFromHtml(issue.body_html ?? ''),
     createdAt: issue.created_at,
     author: issue.user
-      ? { login: issue.user.login, avatarUrl: issue.user.avatar_url }
+      ? { login: issue.user.login, image: issue.user.avatar_url }
       : null,
     reactionCount: issue.reactions?.heart ?? 0,
     isReacted: false,

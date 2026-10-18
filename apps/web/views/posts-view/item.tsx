@@ -80,11 +80,11 @@ function PostItem({
       onClick={handleNavigate}
       {...props}
     >
-      <IssueItemMedia src={post.author?.avatarUrl} login={post.author?.login} />
+      <IssueItemMedia src={post.author?.image} login={post.author?.login} />
       <IssueItemContent>
         <IssueItemTitle>
           <div className="flex flex-1 min-w-0 items-center gap-1.5">
-            <IssueUser login={post.author?.login} avatarUrl={post.author?.avatarUrl} />
+            <IssueUser login={post.author?.login} image={post.author?.image} />
 
             {href
               ? (

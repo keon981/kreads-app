@@ -46,7 +46,7 @@ function IssueFormDialog({
 }: IssueFormDialogProps) {
   // auth
   const { user } = useAuth()
-  const { name, image: avatarUrl } = user || {}
+  const { name, image } = user || {}
 
   // dialog
   const { dialogProps: innerDialogProps } = useDialog()
@@ -88,7 +88,8 @@ function IssueFormDialog({
       },
       submittedAt: new Date().toISOString(),
     })
-    setContent(body)
+    const isEdit = defaultValues !== undefined
+    setContent(isEdit ? body : '')
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -128,13 +129,13 @@ function IssueFormDialog({
                 {/* 頭像 */}
                 <div className="flex flex-col">
                   <Avatar>
-                    <AvatarImage src={avatarUrl} />
+                    <AvatarImage src={image} />
                     <AvatarFallback>
                       {name?.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="mt-3 flex-1 flex justify-center">
-                    <div className="w-0.5 h-full bg-accent border" />
+                    <div className="w-0.5 h-full bg-border border" />
                   </div>
                 </div>
 
@@ -152,7 +153,7 @@ function IssueFormDialog({
               {/* bottom */}
               <section className="mt-2.5 ps-2 flex items-center gap-x-5 opacity-40">
                 <Avatar size="xs">
-                  <AvatarImage src={avatarUrl} />
+                  <AvatarImage src={image} />
                   <AvatarFallback>
                     {name?.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
@@ -167,7 +168,7 @@ function IssueFormDialog({
             <DialogFooter className="shrink-0 mx-0 mb-0 p-6 pt-1 border-0 bg-transparent">
               {message
                 && <p className="me-auto text-sm text-destructive">{message}</p>}
-              <Button type="submit" variant="outline">
+              <Button type="submit" variant="outline" disabled={!value.length}>
                 發佈
               </Button>
             </DialogFooter>
