@@ -14,12 +14,13 @@ import {
 import { Badge } from '@workspace/ui/components/badge'
 import { Button } from '@workspace/ui/components/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@workspace/ui/components/dropdown-menu'
+  ResponsiveMenu,
+  ResponsiveMenuContent,
+  ResponsiveMenuGroup,
+  ResponsiveMenuItem,
+  ResponsiveMenuSeparator,
+  ResponsiveMenuTrigger,
+} from '@workspace/ui/components/responsive-menu'
 import { formatDateTime } from '@workspace/ui/lib/format'
 
 import { DataTableColumnHeader } from '@/components/blocks/data-table'
@@ -90,6 +91,17 @@ export function getUserColumns({ isAdmin, onEdit, onAction }: UserColumnsOptions
       sortFn: 'text',
       meta: { label: '分組' },
     }),
+    columnHelper.accessor(row => row.isPublic ?? false, {
+      id: 'isPublic',
+      header: '公開',
+      cell: ({ row }) => (
+        <Badge variant={row.original.isPublic ? 'secondary' : 'outline'}>
+          {row.original.isPublic ? '公開' : '隱私'}
+        </Badge>
+      ),
+      enableSorting: false,
+      meta: { label: '公開' },
+    }),
     columnHelper.accessor('createdAt', {
       header: ({ column }) => <DataTableColumnHeader column={column} title="建立時間" />,
       cell: ({ row }) => (
@@ -110,28 +122,32 @@ export function getUserColumns({ isAdmin, onEdit, onAction }: UserColumnsOptions
             <Button variant="ghost" size="icon-sm" aria-label={`編輯 ${user.name}`} onClick={() => onEdit(user)}>
               <RiEditLine />
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger
+            <ResponsiveMenu>
+              <ResponsiveMenuTrigger
                 render={<Button variant="ghost" size="icon-sm" aria-label={`${user.name} 的更多操作`} />}
               >
                 <RiMore2Line />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-auto min-w-40">
-                <DropdownMenuItem onClick={() => onAction(isBanned ? 'unban' : 'ban', user)}>
-                  {isBanned ? <RiShieldCheckLine /> : <RiForbidLine />}
-                  {isBanned ? '解除停權' : '停權'}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onAction('revoke', user)}>
-                  <RiLogoutCircleRLine />
-                  撤銷登入
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={() => onAction('remove', user)}>
-                  <RiDeleteBinLine />
-                  刪除
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </ResponsiveMenuTrigger>
+              <ResponsiveMenuContent align="end" className="w-auto min-w-40" title={user.name}>
+                <ResponsiveMenuGroup>
+                  <ResponsiveMenuItem onClick={() => onAction(isBanned ? 'unban' : 'ban', user)}>
+                    {isBanned ? <RiShieldCheckLine /> : <RiForbidLine />}
+                    {isBanned ? '解除停權' : '停權'}
+                  </ResponsiveMenuItem>
+                  <ResponsiveMenuItem onClick={() => onAction('revoke', user)}>
+                    <RiLogoutCircleRLine />
+                    撤銷登入
+                  </ResponsiveMenuItem>
+                </ResponsiveMenuGroup>
+                <ResponsiveMenuSeparator />
+                <ResponsiveMenuGroup>
+                  <ResponsiveMenuItem variant="destructive" onClick={() => onAction('remove', user)}>
+                    <RiDeleteBinLine />
+                    刪除
+                  </ResponsiveMenuItem>
+                </ResponsiveMenuGroup>
+              </ResponsiveMenuContent>
+            </ResponsiveMenu>
           </div>
         )
       },
@@ -139,8 +155,8 @@ export function getUserColumns({ isAdmin, onEdit, onAction }: UserColumnsOptions
     }),
   ])
 
-  // viewer has no email data and no write access, so those columns are left out
+  // Non-admins get no email or isPublic data and no write access, so those columns are left out
   return isAdmin
     ? columns
-    : columns.filter(column => column.id !== 'email' && column.id !== 'actions')
+    : columns.filter(column => column.id !== 'email' && column.id !== 'isPublic' && column.id !== 'actions')
 }

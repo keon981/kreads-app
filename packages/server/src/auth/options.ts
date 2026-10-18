@@ -65,6 +65,12 @@ export function createAuthOptions({ env, localPort }: AuthOptionsConfig) {
           required: false,
           input: false,
         },
+        isPublic: {
+          type: 'boolean',
+          required: false,
+          defaultValue: false,
+          input: false,
+        },
       },
     },
     plugins: [

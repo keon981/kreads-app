@@ -101,12 +101,12 @@ function PostDetailItem({ repoName, issueNumber, isOwner, redirectTo }: PostDeta
         <IssueItemHeader>
           <div className="flex items-center gap-2.5 min-w-0">
             <IssueItemMedia
-              src={post.author?.avatarUrl}
+              src={post.author?.image}
               login={post.author?.login}
               className="group-has-data-[slot=item-description]/item:translate-y-0 group-has-data-[slot=item-description]/item:self-center"
             />
             <div className="flex items-center gap-1.5 min-w-0">
-              <IssueUser login={post.author?.login} avatarUrl={post.author?.avatarUrl} className="text-base" />
+              <IssueUser login={post.author?.login} image={post.author?.image} className="text-base" />
               <Button
                 type="button"
                 variant="ghost"
@@ -166,12 +166,12 @@ function PostPreviewItem({ repoName, issueNumber }: PostPreviewItemProps): React
       <IssueItemHeader>
         <div className="flex items-center gap-2.5 min-w-0">
           <IssueItemMedia
-            src={post.author?.avatarUrl}
+            src={post.author?.image}
             login={post.author?.login}
             className="group-has-data-[slot=item-description]/item:translate-y-0 group-has-data-[slot=item-description]/item:self-center"
           />
           <div className="flex items-center gap-1.5 min-w-0">
-            <IssueUser login={post.author?.login} avatarUrl={post.author?.avatarUrl} className="text-base" />
+            <IssueUser login={post.author?.login} image={post.author?.image} className="text-base" />
             <Time date={post.createdAt} />
           </div>
         </div>
@@ -220,12 +220,12 @@ function CommentItem({
       <IssueItemHeader>
         <div className="flex items-center gap-2.5 min-w-0">
           <IssueItemMedia
-            src={comment.author?.avatarUrl}
-            login={comment.author?.login}
+            src={comment.image?.image}
+            login={comment.image?.login}
             className="group-has-data-[slot=item-description]/item:translate-y-0 group-has-data-[slot=item-description]/item:self-center"
           />
           <div className="flex items-center gap-1.5 min-w-0">
-            <IssueUser login={comment.author?.login} avatarUrl={comment.author?.avatarUrl} className="text-base" />
+            <IssueUser login={comment.image?.login} image={comment.image?.image} className="text-base" />
             <Time date={comment.createdAt} />
           </div>
         </div>
@@ -271,7 +271,7 @@ function CommentList({ repoName, issueNumber, viewer }: CommentListProps): React
           key={comment.id}
           comment={comment}
           repoName={repoName}
-          isOwner={viewer === `@${comment.author?.login}`}
+          isOwner={viewer === `@${comment.image?.login}`}
           onEdit={submission => updateComment({ commentId: comment.id, submission })}
           onDelete={() => deleteComment(comment.id)}
         />
@@ -283,7 +283,7 @@ function CommentList({ repoName, issueNumber, viewer }: CommentListProps): React
             id: 0,
             ...staged.submission.content,
             createdAt: staged.submission.submittedAt,
-            author,
+            image: author,
             reactionCount: 0,
             isReacted: false,
           }}

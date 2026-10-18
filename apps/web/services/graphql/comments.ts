@@ -9,7 +9,7 @@ interface GraphqlIssueComment {
   createdAt: string
   author: {
     login: string
-    avatarUrl: string
+    image: string
   } | null
   reactions: {
     totalCount: number
@@ -38,7 +38,7 @@ const ISSUE_COMMENTS_QUERY = `
             body
             bodyHTML
             createdAt
-            author { login avatarUrl }
+            author { login image: avatarUrl }
             reactions(content: ${env.REACTION_EMOJI.toUpperCase()}) { totalCount }
             reactionGroups { content viewerHasReacted }
           }

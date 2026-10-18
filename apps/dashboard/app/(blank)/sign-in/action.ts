@@ -6,8 +6,10 @@ import { redirect } from 'next/navigation'
 import { APIError } from 'better-auth/api'
 import * as z from 'zod'
 
-import { paths } from '@/configs/path-config'
+import { REDIRECT_PARAM } from '@/configs/constants'
 import { auth } from '@/lib/auth'
+
+import { RedirectPathSchema } from './data'
 
 import type { ActionState } from '@workspace/server/types/action'
 
@@ -28,5 +30,6 @@ export async function signInAction(_prevState: ActionState, formData: FormData):
     return { message: error.status === 'UNAUTHORIZED' ? 'Email 或密碼錯誤' : error.message }
   }
 
-  redirect(paths.dashboard)
+  const redirectTo = RedirectPathSchema.parse(formData.get(REDIRECT_PARAM))
+  redirect(redirectTo)
 }

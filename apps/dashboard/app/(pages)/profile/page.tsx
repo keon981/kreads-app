@@ -9,12 +9,13 @@ import { verifySession } from '@/app/server/session'
 import { SectionPageLayout } from '@/components/layout/section-page-layout'
 import { StatCard } from '@/components/ui/stat-card'
 import { UserAvatar } from '@/components/ui/user-avatar'
+import { paths } from '@/configs/path-config'
 
 import { getProfileStats } from './data'
 import { AccountSettings } from './form'
 
 export default async function ProfilePage(): Promise<React.ReactNode> {
-  const { user } = await verifySession()
+  const { user } = await verifySession(paths.profile)
   const { activeSessions, lastSignInAt } = await fetchSessionSummary(user.id)
   const isViewer = hasRole(user.role, 'viewer')
 

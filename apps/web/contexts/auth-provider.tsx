@@ -2,14 +2,11 @@
 
 import React, { use, useMemo } from 'react'
 
+import type { AuthUser } from '@/types/auth'
+
 interface AuthContextProps {
   isAuth: boolean
-  user: null | {
-    id: string | undefined
-    name: string | null | undefined
-    image: string | undefined
-    repoName: string | undefined
-  }
+  user: null | AuthUser
 }
 
 const AuthContext = React.createContext<AuthContextProps | null>(null)

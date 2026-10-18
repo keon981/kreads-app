@@ -31,13 +31,19 @@ interface UsersTableProps {
 }
 
 export function UsersTable({ users, isAdmin }: UsersTableProps): React.ReactNode {
+  // state
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
   const [editTarget, setEditTarget] = useState<UserRow | null>(null)
+
+  // dialog
   const { dialogProps: confirmDialogProps, trigger: openConfirm, dismiss: closeConfirm } = useDialog()
   const { dialogProps: editSheetProps, trigger: openEditSheet, dismiss: closeEditSheet } = useDialog()
+
+  // transition
   const [isPending, startTransition] = useTransition()
 
-  function runAction(type: UserActionType, user: UserRow): void {
+  // fn
+  function handleAction(type: UserActionType, user: UserRow): void {
     if (!user.id) return
     const userId = user.id
 
@@ -63,7 +69,7 @@ export function UsersTable({ users, isAdmin }: UsersTableProps): React.ReactNode
         setPendingAction({ type, user })
         openConfirm()
       } else {
-        runAction(type, user)
+        handleAction(type, user)
       }
     },
   })
@@ -106,7 +112,7 @@ export function UsersTable({ users, isAdmin }: UsersTableProps): React.ReactNode
         {...confirmDialogProps}
         message={pendingAction && getActionConfirmMessage(pendingAction.type, pendingAction.user)}
         isPending={isPending}
-        onConfirm={() => pendingAction && runAction(pendingAction.type, pendingAction.user)}
+        onConfirm={() => pendingAction && handleAction(pendingAction.type, pendingAction.user)}
       />
     </>
   )

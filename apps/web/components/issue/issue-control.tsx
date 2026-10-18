@@ -18,7 +18,7 @@ import { toast } from '@workspace/ui/components/toast'
 import { useDebouncedMutation } from '@workspace/ui/hooks/use-debounced-mutation'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
 
-import { toggleReactionAction } from '@/app/server/actions/posts'
+import { toggleReactionAction } from '@/app/server/actions/post'
 import { IssueItemButton } from '@/components/ui/issue'
 import { useAuth } from '@/contexts/auth-provider'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
@@ -30,7 +30,7 @@ import {
 } from './issue-item'
 
 import type { RemixiconComponentType } from '@remixicon/react'
-import type { DropdownMenuItem } from '@workspace/ui/components/dropdown-menu'
+import type { ResponsiveMenuItem } from '@workspace/ui/components/responsive-menu'
 import type { IssueTarget } from '@/types/action'
 import type { IssueFormDialogProps } from './issue-form-dialog'
 
@@ -123,7 +123,7 @@ function IssueShareButton(props: IssueItemButtonProps): React.ReactNode {
 
 // --- Menu Items & Content ---
 
-export interface IssueMenuItemEntry extends React.ComponentProps<typeof DropdownMenuItem> {
+export interface IssueMenuItemEntry extends React.ComponentProps<typeof ResponsiveMenuItem> {
   MenuItem?: React.ComponentType<any>
   label?: string
   icon?: RemixiconComponentType

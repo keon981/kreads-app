@@ -1,22 +1,23 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 import { useTransition } from 'react'
 
 import { RiLogoutBoxRLine, RiPaletteLine, RiUserSettingsLine } from '@remixicon/react'
 import {
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-} from '@workspace/ui/components/dropdown-menu'
+  ResponsiveMenuContent,
+  ResponsiveMenuGroup,
+  ResponsiveMenuItem,
+  ResponsiveMenuLabel,
+  ResponsiveMenuRadioGroup,
+  ResponsiveMenuRadioItem,
+  ResponsiveMenuSeparator,
+  ResponsiveMenuSub,
+  ResponsiveMenuSubContent,
+  ResponsiveMenuSubTrigger,
+} from '@workspace/ui/components/responsive-menu'
 import { useTheme } from 'next-themes'
 
 import { signOutAction } from '@/app/server/actions/auth'
@@ -40,60 +41,63 @@ export function UserSummary({ user }: UserSummaryProps): React.ReactNode {
 }
 
 interface UserMenuContentProps extends Pick<
-  React.ComponentProps<typeof DropdownMenuContent>,
+  React.ComponentProps<typeof ResponsiveMenuContent>,
   'side' | 'align' | 'sideOffset'
 > {
   user: Pick<SessionUser, 'name' | 'email' | 'image'>
 }
 
 export function UserMenuContent({ user, ...props }: UserMenuContentProps): React.ReactNode {
+  const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const [isPending, startTransition] = useTransition()
 
   const handleClick = () => {
-    startTransition(() => signOutAction())
+    startTransition(() => signOutAction(pathname))
   }
 
   return (
-    <DropdownMenuContent className="min-w-56" {...props}>
-      <DropdownMenuGroup>
-        <DropdownMenuLabel className="flex items-center gap-2 font-normal">
+    <ResponsiveMenuContent className="min-w-56" {...props}>
+      <ResponsiveMenuGroup>
+        <ResponsiveMenuLabel className="flex items-center gap-2 font-normal">
           <UserAvatar user={user} className="size-8" />
           <UserSummary user={user} />
-        </DropdownMenuLabel>
-      </DropdownMenuGroup>
-      <DropdownMenuSeparator />
-      <DropdownMenuGroup>
-        <DropdownMenuItem render={<Link href={paths.profile} />}>
+        </ResponsiveMenuLabel>
+      </ResponsiveMenuGroup>
+      <ResponsiveMenuSeparator />
+      <ResponsiveMenuGroup>
+        <ResponsiveMenuItem render={<Link href={paths.profile} />}>
           <RiUserSettingsLine />
           個人設定
-        </DropdownMenuItem>
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
+        </ResponsiveMenuItem>
+        <ResponsiveMenuSub>
+          <ResponsiveMenuSubTrigger>
             <RiPaletteLine />
             外觀
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+          </ResponsiveMenuSubTrigger>
+          <ResponsiveMenuSubContent title="外觀">
+            <ResponsiveMenuRadioGroup value={theme} onValueChange={setTheme}>
               {themeOptions.map(({ value, label, icon: Icon }) => (
-                <DropdownMenuRadioItem key={value} value={value}>
+                <ResponsiveMenuRadioItem key={value} value={value}>
                   <Icon />
                   {label}
-                </DropdownMenuRadioItem>
+                </ResponsiveMenuRadioItem>
               ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-      </DropdownMenuGroup>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem
-        variant="destructive"
-        disabled={isPending}
-        onClick={handleClick}
-      >
-        <RiLogoutBoxRLine />
-        登出
-      </DropdownMenuItem>
-    </DropdownMenuContent>
+            </ResponsiveMenuRadioGroup>
+          </ResponsiveMenuSubContent>
+        </ResponsiveMenuSub>
+      </ResponsiveMenuGroup>
+      <ResponsiveMenuSeparator />
+      <ResponsiveMenuGroup>
+        <ResponsiveMenuItem
+          variant="destructive"
+          disabled={isPending}
+          onClick={handleClick}
+        >
+          <RiLogoutBoxRLine />
+          登出
+        </ResponsiveMenuItem>
+      </ResponsiveMenuGroup>
+    </ResponsiveMenuContent>
   )
 }

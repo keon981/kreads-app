@@ -34,3 +34,17 @@ export interface DashboardStats {
   redeemedInvites: number
   activeSessions: number
 }
+
+export interface DashboardSummary {
+  stats: DashboardStats
+  activity: DailyActivity[]
+}
+
+export interface DashboardDetails {
+  inviters: InviterRank[]
+  recentLogins: ActivityUser[]
+  recentUsers: ActivityUser[]
+  recentRedemptions: RedeemedInvite[]
+}
+
+export type DashboardData = DashboardSummary & DashboardDetails

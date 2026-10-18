@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import { RiArrowUpDownLine } from '@remixicon/react'
-import { DropdownMenu, DropdownMenuTrigger } from '@workspace/ui/components/dropdown-menu'
+import { RiArrowUpDownLine, RiLoginBoxLine } from '@remixicon/react'
+import { ResponsiveMenu, ResponsiveMenuTrigger } from '@workspace/ui/components/responsive-menu'
 import {
   Sidebar,
   SidebarContent,
@@ -24,6 +24,7 @@ import { MobileTabBar } from '@/components/layout/mobile-tab-bar'
 import { UserMenuContent, UserSummary } from '@/components/layout/user-menu'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { getActiveNavItem, navGroups } from '@/configs/nav-config'
+import { getSignInPath } from '@/configs/path-config'
 
 import type { SessionUser } from '@/types/user'
 
@@ -31,7 +32,7 @@ import type { SessionUser } from '@/types/user'
 const menuButtonClassName = 'justify-start px-2 group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:*:not-first:hidden'
 
 interface AppSidebarProps {
-  user: SessionUser
+  user: SessionUser | null
 }
 
 function AppSidebarBody({ user }: AppSidebarProps): React.ReactNode {
@@ -69,21 +70,35 @@ function AppSidebarBody({ user }: AppSidebarProps): React.ReactNode {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={(
+            {user
+              ? (
+                  <ResponsiveMenu>
+                    <ResponsiveMenuTrigger
+                      render={(
+                        <SidebarMenuButton
+                          size="lg"
+                          className={`${menuButtonClassName} data-popup-open:bg-sidebar-accent`}
+                        />
+                      )}
+                    >
+                      <UserAvatar user={user} className="size-8" />
+                      <UserSummary user={user} />
+                      <RiArrowUpDownLine className="ml-auto size-4!" />
+                    </ResponsiveMenuTrigger>
+                    <UserMenuContent user={user} side="right" align="end" sideOffset={8} />
+                  </ResponsiveMenu>
+                )
+              : (
                   <SidebarMenuButton
                     size="lg"
-                    className={`${menuButtonClassName} data-popup-open:bg-sidebar-accent`}
-                  />
+                    tooltip="登入"
+                    className={menuButtonClassName}
+                    render={<Link href={getSignInPath(pathname)} />}
+                  >
+                    <RiLoginBoxLine />
+                    <span>登入</span>
+                  </SidebarMenuButton>
                 )}
-              >
-                <UserAvatar user={user} className="size-8" />
-                <UserSummary user={user} />
-                <RiArrowUpDownLine className="ml-auto size-4!" />
-              </DropdownMenuTrigger>
-              <UserMenuContent user={user} side="right" align="end" sideOffset={8} />
-            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

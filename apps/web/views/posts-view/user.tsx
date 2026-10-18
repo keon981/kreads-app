@@ -36,22 +36,29 @@ import { useCopy } from '@workspace/ui/hooks/use-copy'
 import { paths } from '@/configs/path-config'
 import { getAbsoluteUrl, invitePath } from '@/utils/navigation'
 
-interface Props {
+import type { AuthUser } from '@/types/auth'
+
+interface Props extends Partial<AuthUser> {
   children?: React.ReactNode
-  name: string
   id: string
-  avatarUrl?: string
   inviteCode?: string | null
 }
 
-export function AboutUser({ name, id, children, avatarUrl, inviteCode }: Props) {
+export function AboutUser({
+  name = '',
+  id = '',
+  children,
+  image,
+  repoName,
+  inviteCode,
+}: Props) {
   const login = id.replace(/^@/, '')
-  const githubUrl = `https://github.com/${login}`
+  const githubUrl = `https://github.com/${repoName}`
   const shareUrl = getAbsoluteUrl(paths.user(login))
   const inviteUrl = inviteCode ? getAbsoluteUrl(invitePath(inviteCode)) : ''
 
   return (
-    <Card className="gap-0 bg-transparent border-0 rounded-none">
+    <Card className="gap-0 bg-transparent border-0 border-b border-border rounded-none">
       <CardHeader className="[--card-spacing:--spacing(4)] gap-0">
         <CardTitle className="text-2xl/tight">
           {name}
@@ -59,9 +66,9 @@ export function AboutUser({ name, id, children, avatarUrl, inviteCode }: Props) 
         <CardDescription>{id}</CardDescription>
         <CardAction>
           <Avatar className="size-21">
-            <AvatarImage src={avatarUrl} />
+            <AvatarImage src={image} />
             <AvatarFallback>
-              {name.slice(0, 2).toUpperCase()}
+              {name?.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </CardAction>
