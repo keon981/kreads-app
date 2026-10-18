@@ -13,6 +13,7 @@ import { paths } from '@/configs/path-config'
 
 import { getProfileStats } from './data'
 import { AccountSettings } from './form'
+import { LogoutButton } from './logout-button'
 
 export default async function ProfilePage(): Promise<React.ReactNode> {
   const { user } = await verifySession(paths.profile)
@@ -54,6 +55,7 @@ export default async function ProfilePage(): Promise<React.ReactNode> {
         </CardContent>
       </Card>
       <AccountSettings email={user.email} isViewer={isViewer} />
+      <LogoutButton />
     </SectionPageLayout>
   )
 }

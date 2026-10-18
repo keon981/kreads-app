@@ -9,8 +9,9 @@ import { and, count, desc, eq, gt, gte, isNotNull, isNull, or } from 'drizzle-or
 import { alias } from 'drizzle-orm/pg-core'
 
 import { maskInviteCode } from '@/app/server/db/invites'
-import { isGithubUser } from '@/app/server/db/users'
+import { getVisibleUserFilter, isGithubUser } from '@/app/server/db/users'
 
+import type { PublicAudience } from '@workspace/server/types/revalidate'
 import type {
   ActivityUser,
   DailyActivity,
@@ -20,6 +21,7 @@ import type {
   InviterRank,
   RedeemedInvite,
 } from '@/types/stats'
+import type { Audience } from '@/types/user'
 
 import 'server-only'
 
@@ -102,13 +104,14 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
   return { ...users, bannedUsers, unregisteredUsers, ...invites, ...sessions }
 }
 
-export async function fetchTopInviters(limit: number): Promise<InviterRank[]> {
+export async function fetchTopInviters(limit: number, audience: Audience = 'admin'): Promise<InviterRank[]> {
   const invitee = alias(user, 'invitee')
 
   return db
     .select({ name: user.name, username: user.username, count: count(invitee.id) })
     .from(invitee)
     .innerJoin(user, eq(invitee.invitedBy, user.id))
+    .where(getVisibleUserFilter(audience))
     .groupBy(user.id)
     .orderBy(desc(count(invitee.id)))
     .limit(limit)
@@ -116,31 +119,48 @@ export async function fetchTopInviters(limit: number): Promise<InviterRank[]> {
 
 const activityUserFields = { name: user.name, username: user.username, image: user.image }
 
-export async function fetchRecentLogins(limit: number): Promise<ActivityUser[]> {
+export async function fetchRecentLogins(limit: number, audience: Audience = 'admin'): Promise<ActivityUser[]> {
   return db
     .select({ ...activityUserFields, time: session.createdAt })
     .from(session)
     .innerJoin(user, eq(session.userId, user.id))
-    .where(isGithubUser)
+    .where(getVisibleUserFilter(audience))
     .orderBy(desc(session.createdAt))
     .limit(limit)
 }
 
-export async function fetchRecentUsers(limit: number): Promise<ActivityUser[]> {
+export async function fetchRecentUsers(limit: number, audience: Audience = 'admin'): Promise<ActivityUser[]> {
   return db
     .select({ ...activityUserFields, time: user.createdAt })
     .from(user)
-    .where(isGithubUser)
+    .where(getVisibleUserFilter(audience))
     .orderBy(desc(user.createdAt))
     .limit(limit)
 }
 
-export async function fetchRecentRedemptions(limit: number): Promise<RedeemedInvite[]> {
+export async function fetchRecentRedemptions(limit: number, audience: Audience = 'admin'): Promise<RedeemedInvite[]> {
+  if (audience === 'admin') {
+    const rows = await db
+      .select({ code: inviteCode.code, redeemedAt: inviteCode.redeemedAt, ...activityUserFields })
+      .from(inviteCode)
+      .leftJoin(user, eq(inviteCode.redeemedBy, user.id))
+      .where(isNotNull(inviteCode.redeemedAt))
+      .orderBy(desc(inviteCode.redeemedAt))
+      .limit(limit)
+
+    return rows.map(({ code, redeemedAt, name, username, image }) => ({
+      code: maskInviteCode(code),
+      redeemer: name === null ? null : { name, username, image },
+      // The filter only matches redeemed codes
+      redeemedAt: redeemedAt as Date,
+    }))
+  }
+
   const rows = await db
     .select({ code: inviteCode.code, redeemedAt: inviteCode.redeemedAt, ...activityUserFields })
     .from(inviteCode)
-    .leftJoin(user, eq(inviteCode.redeemedBy, user.id))
-    .where(isNotNull(inviteCode.redeemedAt))
+    .innerJoin(user, eq(inviteCode.redeemedBy, user.id))
+    .where(and(isNotNull(inviteCode.redeemedAt), getVisibleUserFilter(audience)))
     .orderBy(desc(inviteCode.redeemedAt))
     .limit(limit)
 
@@ -169,14 +189,22 @@ export async function fetchDashboardSummaryCache(): Promise<DashboardSummary> {
   return fetchDashboardSummary()
 }
 
-// Admin only: these lists name people
-export async function fetchDashboardDetails(): Promise<DashboardDetails> {
+export async function fetchDashboardDetails(audience: Audience = 'admin'): Promise<DashboardDetails> {
   const [inviters, recentLogins, recentUsers, recentRedemptions] = await Promise.all([
-    fetchTopInviters(5),
-    fetchRecentLogins(5),
-    fetchRecentUsers(5),
-    fetchRecentRedemptions(5),
+    fetchTopInviters(5, audience),
+    fetchRecentLogins(5, audience),
+    fetchRecentUsers(5, audience),
+    fetchRecentRedemptions(5, audience),
   ])
 
   return { inviters, recentLogins, recentUsers, recentRedemptions }
+}
+
+// Non-admins read cached details filtered by what their role allows
+export async function fetchDashboardDetailsCache(audience: PublicAudience): Promise<DashboardDetails> {
+  'use cache: remote'
+  cacheTag(audience)
+  cacheLife('hours')
+
+  return fetchDashboardDetails(audience)
 }

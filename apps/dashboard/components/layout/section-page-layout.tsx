@@ -32,9 +32,7 @@ export function SectionPageLayout({
             <p className="text-muted-foreground">{description}</p>
           )}
         </hgroup>
-        {actions && (
-          <div className="flex flex-wrap items-center gap-2">{actions}</div>
-        )}
+        <div className="flex flex-wrap items-center gap-2">{actions}</div>
       </div>
       {children}
     </div>

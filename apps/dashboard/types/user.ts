@@ -18,13 +18,16 @@ export type AssignableRole = z.infer<typeof AssignableRoleSchema>
 
 export type AssignableRoleFilter = AssignableRole | 'all'
 
-export interface UserRow {
+export interface ViewerUser {
+  name: string
+  username?: string | null
+  image?: string | null
+}
+
+export interface UserRow extends ViewerUser {
   id?: string //  Admin only
   email?: string //  Admin only
   isPublic?: boolean //  Admin only
-  name: string
-  username: string | null
-  image: string | null
   role: AssignableRole
   status: UserStatus
   createdAt: Date

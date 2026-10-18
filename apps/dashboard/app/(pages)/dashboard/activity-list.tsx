@@ -1,43 +1,59 @@
-import { formatDateTime } from '@workspace/ui/lib/format'
+import { RiInbox2Fill } from '@remixicon/react'
+import { Empty, EmptyDescription } from '@workspace/ui/components/empty'
+import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '@workspace/ui/components/item'
+import { Time } from '@workspace/ui/components/time'
 import { cn } from '@workspace/ui/lib/utils'
+
+import { UserAvatar } from '@/components/ui/user-avatar'
 
 import { sumOf } from './utils'
 
 import type { DailyActivity } from '@/types/stats'
+import type { ViewerUser } from '@/types/user'
+import type { SideCard } from './data'
 
-export function ActivityEmpty({ className, ...props }: React.ComponentProps<'p'>): React.ReactNode {
-  return <p className={cn('text-muted-foreground', className)} {...props} />
+export function ActivityEmpty({ className, ...props }: React.ComponentProps<'p'>) {
+  return <p className={cn('text-sm text-muted-foreground', className)} {...props} />
 }
 
-export function ActivityList({ className, ...props }: React.ComponentProps<'ul'>): React.ReactNode {
-  return <ul className={cn('flex flex-col gap-3', className)} {...props} />
+export interface ActivityEntry extends Omit<SideCard, 'content'>, ViewerUser {
+  time: Date
 }
 
-export function ActivityItem({ className, ...props }: React.ComponentProps<'li'>): React.ReactNode {
-  return <li className={cn('flex items-center gap-3', className)} {...props} />
-}
+export function ActivityCard({ items, emptyText }: {
+  items: ActivityEntry[]
+  emptyText: string
+}) {
+  if (items.length !== 0) {
+    return (
+      <Empty>
+        <RiInbox2Fill className="bg-muted" />
+        <EmptyDescription>
+          {emptyText}
+        </EmptyDescription>
+      </Empty>
+    )
+  }
 
-export function ActivityItemContent({ className, ...props }: React.ComponentProps<'div'>): React.ReactNode {
-  return <div className={cn('flex min-w-0 flex-1 flex-col', className)} {...props} />
-}
-
-export function ActivityItemTitle({ className, ...props }: React.ComponentProps<'span'>): React.ReactNode {
-  return <span className={cn('truncate text-sm font-medium', className)} {...props} />
-}
-
-export function ActivityItemDescription({ className, ...props }: React.ComponentProps<'span'>): React.ReactNode {
-  return <span className={cn('truncate text-xs text-muted-foreground', className)} {...props} />
-}
-
-interface ActivityItemTimeProps extends Omit<React.ComponentProps<'time'>, 'dateTime' | 'children'> {
-  date: Date
-}
-
-export function ActivityItemTime({ date, className, ...props }: ActivityItemTimeProps): React.ReactNode {
   return (
-    <time dateTime={date.toISOString()} className={cn('shrink-0 text-sm text-muted-foreground tabular-nums', className)} {...props}>
-      {formatDateTime(date)}
-    </time>
+    <ItemGroup>
+      {items.map(item => (
+        (
+          <Item key={item.id}>
+            {item.image && <UserAvatar user={item} className="size-8" />}
+            <ItemContent>
+              <ItemTitle className="font-normal">{item.title}</ItemTitle>
+              <ItemDescription>
+                {item.description}
+              </ItemDescription>
+            </ItemContent>
+            <ItemContent>
+              <Time date={item.time} />
+            </ItemContent>
+          </Item>
+        )
+      ))}
+    </ItemGroup>
   )
 }
 
@@ -45,7 +61,7 @@ interface DailyLoginStripProps {
   activity: DailyActivity[]
 }
 
-export function DailyLoginStrip({ activity }: DailyLoginStripProps): React.ReactNode {
+export function DailyLoginStrip({ activity }: DailyLoginStripProps) {
   const maxLogins = Math.max(...activity.map(day => day.logins), 1)
 
   return (
