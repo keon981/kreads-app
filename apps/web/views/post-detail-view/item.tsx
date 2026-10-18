@@ -6,6 +6,7 @@ import { useIsFetching, useMutation, useQueryClient, useSuspenseQuery } from '@t
 
 import { Button } from '@workspace/ui/components/button'
 import { Spinner } from '@workspace/ui/components/spinner'
+import { Time } from '@workspace/ui/components/time'
 import { cn } from '@workspace/ui/lib/utils'
 
 import {
@@ -30,7 +31,6 @@ import {
   IssueItemSkeleton,
   IssueUser,
 } from '@/components/ui/issue'
-import { Time } from '@/components/ui/time'
 import { useAuth } from '@/contexts/auth-provider'
 import { postMutations } from '@/hooks/mutations/posts'
 import { commentQueries } from '@/hooks/queries/comments'

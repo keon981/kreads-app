@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
 
 import { RiChat1Line } from '@remixicon/react'
+import { Time } from '@workspace/ui/components/time'
 import { cn } from '@workspace/ui/lib/utils'
 
 import { IssueReactionButton, IssueShareButton } from '@/components/issue/issue-control'
@@ -28,7 +29,6 @@ import {
   IssueItemTitle,
   IssueUser,
 } from '@/components/ui/issue'
-import { Time } from '@/components/ui/time'
 import { useAuth } from '@/contexts/auth-provider'
 import { postMutations } from '@/hooks/mutations/posts'
 import { postQueries } from '@/hooks/queries/posts'
