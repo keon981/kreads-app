@@ -3,8 +3,8 @@ import { REDIRECT_PARAM } from '@/configs/constants'
 export const paths = {
   signIn: '/sign-in',
   dashboard: '/dashboard',
-  users: '/users',
-  keys: '/keys',
+  users: '/user',
+  keys: '/key',
   profile: '/profile',
 }
 
