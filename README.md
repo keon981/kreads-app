@@ -1,149 +1,151 @@
 # Kreads
 
-以 GitHub Issues 儲存內容的 Threads 風格多人社群平台。
+[繁體中文](README.ZH_TW.md)
 
-## 🎮 線上體驗
+A Threads-style multi-user social platform that stores its content in GitHub Issues.
 
-| | 網址 | 說明 |
+## 🎮 Live Demo
+
+| | URL | Notes |
 | --- | --- | --- |
-| 🌐 主站 | [kreads-app-virid.vercel.app](https://kreads-app-virid.vercel.app) | 免登入即可瀏覽貼文 |
-| 📊 後台 | [kreads-dashboard-app.vercel.app](https://kreads-dashboard-app.vercel.app) | 使用下方遊客帳號登入參觀 |
+| 🌐 Site | [kreads-app-virid.vercel.app](https://kreads-app-virid.vercel.app) | Browse posts without signing in |
+| 📊 Dashboard | [kreads-dashboard-app.vercel.app](https://kreads-dashboard-app.vercel.app) | Sign in with the guest account below |
 
-後台遊客帳號（唯讀）：
+Dashboard guest account (read-only):
 
-- **Email**：`admin@mail.com`
-- **密碼**：`123456`
+- **Email**: `admin@mail.com`
+- **Password**: `123456`
 
-## ✨ 專案介紹
+## ✨ About
 
-**GitHub Issues** 📝 = 免費、穩定、原生支援 Markdown、留言與表情回應的內容儲存
+**GitHub Issues** 📝 = free, reliable content storage with built-in Markdown, comments, and reactions
 
-**Threads** 🧵 = 簡潔的短文社群
+**Threads** 🧵 = a clean short-form social network
 
-**Kreads** 🚀 = 每個人的貼文都存在自己 GitHub repo 的多人社群！
+**Kreads** 🚀 = a multi-user social network where everyone's posts live in their own GitHub repo!
 
-Kreads 的貼文不存在平台的資料庫，而是存在每位使用者自己的 GitHub public repo：Issue 就是貼文、Issue comment 就是留言、Reaction 就是按讚。平台只保存帳號與邀請關係，內容始終屬於使用者自己。
+Kreads doesn't keep posts in its own database. Each user's posts live in their own public GitHub repo: an Issue is a post, an Issue comment is a reply, and a Reaction is a like. The platform only stores accounts and invitations, so users always own their content.
 
-專案以 pnpm monorepo 組成，包含主站與管理後台兩個 Next.js App，共用 UI 元件庫、資料庫 schema 與驗證設定。
+The project is a pnpm monorepo with two Next.js apps, the main site and an admin dashboard, which share a UI component library, the database schema, and the auth setup.
 
-## 🚀 亮點功能
+## 🚀 Highlights
 
-1. 📝 以 GitHub Issues 儲存內容
-   - 註冊時自動在使用者的 GitHub 帳號建立 public repo，貼文、留言、按讚分別對應 Issue、Comment、Reaction
-   - 登入後以使用者自己的 GitHub token 存取 GraphQL API，未登入的訪客也能瀏覽
-2. 🎟️ 邀請制註冊
-   - 管理員發放的一次性邀請碼
-   - 每位使用者都有個人邀請連結，可邀請 3 位朋友加入
-3. 💬 社群互動
-   - Markdown 編輯器發文，可編輯、刪除
-   - 在任何人的貼文留言、按讚
-4. 📊 管理後台
-   - 儀表板：使用者、邀請碼核銷與登入活動的統計和趨勢圖
-   - 使用者管理：封鎖、撤銷登入、刪除、調整權限
-   - 邀請碼管理：產生、設定權限、批次刪除
-   - 依身分顯示資料：管理員看到完整資料，遊客帳號與未登入訪客只看到公開資料
-5. ✨ 使用體驗
-   - 響應式設計：桌面版側欄、行動版底部 Tab Bar
-   - 淺色／深色主題
-   - 骨架屏載入狀態
+1. 📝 Content stored in GitHub Issues
+   - Sign-up creates a public repo on the user's GitHub account; posts, replies, and likes map to Issues, Comments, and Reactions
+   - Signed-in users call the GraphQL API with their own GitHub token, and visitors can browse without signing in
+2. 🎟️ Invite-only sign-up
+   - One-time invite codes issued by admins
+   - Every user gets a personal invite link to bring in 3 friends
+3. 💬 Social interactions
+   - Write posts in a Markdown editor, then edit or delete them
+   - Reply to and like anyone's posts
+4. 📊 Admin dashboard
+   - Overview: stats and trend charts for users, invite redemptions, and sign-ins
+   - User management: ban, revoke sessions, delete, change roles
+   - Invite code management: create, set roles, bulk delete
+   - Role-based data: admins see everything, while the guest account and signed-out visitors only see public data
+5. ✨ User experience
+   - Responsive layout: sidebar on desktop, bottom tab bar on mobile
+   - Light and dark themes
+   - Skeleton loading states
 
-## 📝 使用說明
+## 📝 Usage
 
-### 主站
+### Site
 
-#### 註冊
+#### Sign Up
 
-1. 開啟朋友分享的邀請連結（已註冊的使用者可以在個人頁點「邀請」複製）
-2. 輸入要用來存放貼文的 repo 名稱
-3. 透過 GitHub 授權登入
-4. Kreads 會在你的 GitHub 帳號下建立這個 public repo（已存在就直接沿用），之後的貼文都存在這裡
+1. Open an invite link from a friend (signed-up users can copy theirs with the "Invite" button on their profile)
+2. Enter a name for the repo that will store your posts
+3. Sign in with GitHub
+4. Kreads creates this public repo on your GitHub account (or reuses it if it already exists), and all your posts are stored there
 
-<img src="./docs/repo.png" alt="註冊時建立的 repo" width="500">
+<img src="./docs/repo.png" alt="Repo created at sign-up" width="500">
 
-> 例如 [keon981/kreads-posts](https://github.com/keon981/kreads-posts/issues)
+> For example, [keon981/kreads-posts](https://github.com/keon981/kreads-posts/issues)
 
-#### 發文與互動
+#### Posting and Interactions
 
 | Kreads | GitHub |
 | --- | --- |
-| 發文 | 在你的 repo 建立 Issue |
-| 編輯貼文 | 更新 Issue 內容 |
-| 刪除貼文 | 關閉 Issue |
-| 留言 | 以你的帳號在 Issue 下留言 |
-| 按讚 | 對 Issue 或留言加上 ❤️ Reaction |
+| Create a post | Opens an Issue in your repo |
+| Edit a post | Updates the Issue body |
+| Delete a post | Closes the Issue |
+| Reply | Comments on the Issue as you |
+| Like | Adds a ❤️ Reaction to the Issue or comment |
 
-在設定選單可以切換「公開／隱私」，決定是否出現在後台的公開使用者列表。
+Use the "Public / Private" option in the settings menu to choose whether you appear in the dashboard's public user list.
 
-### 後台
+### Dashboard
 
-使用[線上體驗](#-線上體驗)的遊客帳號登入後，可以瀏覽：
+Sign in with the guest account from [Live Demo](#-live-demo) to look around:
 
-| 頁面 | 管理員 | 遊客帳號 |
+| Page | Admin | Guest account |
 | --- | --- | --- |
-| 儀表板 | 完整統計卡、趨勢圖與最近活動 | 公開統計卡 |
-| 使用者 | 所有使用者，可封鎖、撤銷登入、刪除、調整權限 | 管理員與設為公開的使用者 |
-| 邀請碼 | 所有邀請碼，可產生、設定權限、刪除 | 已核銷的邀請碼（部分遮蔽） |
+| Overview | All stat cards, trend charts, and recent activity | Public stat cards |
+| Users | All users, with ban, revoke sessions, delete, and change role | Admins and users who chose public |
+| Invite codes | All invite codes, with create, set role, and delete | Redeemed invite codes (partly masked) |
 
-## 🛠️ 技術棧
+## 🛠️ Tech Stack
 
-- **框架**：Next.js 16（App Router、Cache Components）+ React 19 + TypeScript
-- **驗證**：better-auth（GitHub OAuth、Email／密碼登入、角色權限）
-- **資料庫**：Neon Postgres + Drizzle ORM
-- **GitHub API**：Octokit（REST + GraphQL）
-- **資料請求**：TanStack Query
-- **狀態管理**：Zustand
-- **UI**：shadcn/ui（Base UI）+ Tailwind CSS 4 + Remix Icon
-- **編輯器**：Tiptap（Markdown）
-- **表格與圖表**：TanStack Table、Recharts
-- **資料驗證**：Zod
-- **Monorepo**：pnpm workspace + Vite+
-- **元件開發**：Storybook
-- **程式碼規範**：ESLint（@antfu/eslint-config）
-- **部署**：Vercel
+- **Framework**: Next.js 16 (App Router, Cache Components) + React 19 + TypeScript
+- **Auth**: better-auth (GitHub OAuth, email and password sign-in, role-based access)
+- **Database**: Neon Postgres + Drizzle ORM
+- **GitHub API**: Octokit (REST + GraphQL)
+- **Data fetching**: TanStack Query
+- **State management**: Zustand
+- **UI**: shadcn/ui (Base UI) + Tailwind CSS 4 + Remix Icon
+- **Editor**: Tiptap (Markdown)
+- **Tables and charts**: TanStack Table, Recharts
+- **Validation**: Zod
+- **Monorepo**: pnpm workspace + Vite+
+- **Component development**: Storybook
+- **Linting**: ESLint (@antfu/eslint-config)
+- **Deployment**: Vercel
 
 ```text
 kreads-app/
 ├── apps/
-│   ├── web/                    # 主站
-│   │   ├── app/                # 路由：個人頁、貼文頁、登入／註冊、API
-│   │   ├── components/         # 貼文、驗證、版面元件
-│   │   ├── services/github/    # GitHub Issues、Comments、Reactions
-│   │   ├── views/              # 頁面元件
-│   │   └── proxy.ts            # 登入保護、附加 GitHub token
-│   └── dashboard/              # 管理後台
-│       ├── app/(pages)/        # 儀表板、使用者、邀請碼、個人設定
-│       └── components/         # 資料表格、統計卡片、版面元件
+│   ├── web/                    # Main site
+│   │   ├── app/                # Routes: profiles, posts, sign-in / sign-up, API
+│   │   ├── components/         # Post, auth, and layout components
+│   │   ├── services/github/    # GitHub Issues, Comments, Reactions
+│   │   ├── views/              # Page components
+│   │   └── proxy.ts            # Route protection, attaches the GitHub token
+│   └── dashboard/              # Admin dashboard
+│       ├── app/(pages)/        # Overview, users, invite codes, account settings
+│       └── components/         # Data tables, stat cards, layout components
 ├── packages/
-│   ├── ui/                     # 共用 UI 元件庫（shadcn/ui）與 Storybook
-│   ├── server/                 # 共用資料庫 schema、migrations、驗證設定
-│   ├── eslint-config/          # 共用 ESLint 設定
-│   └── typescript-config/      # 共用 tsconfig
-└── docs/                       # README 圖片
+│   ├── ui/                     # Shared UI library (shadcn/ui) and Storybook
+│   ├── server/                 # Shared database schema, migrations, auth setup
+│   ├── eslint-config/          # Shared ESLint config
+│   └── typescript-config/      # Shared tsconfig
+└── docs/                       # README images
 ```
 
-## 📦 安裝與使用
+## 📦 Getting Started
 
-### 環境需求
+### Requirements
 
 - Node.js 22+
-- pnpm 11+ 與 [Vite+](https://viteplus.dev/guide/)（`vp` 指令）
-- [Neon](https://neon.com/) Postgres 資料庫
+- pnpm 11+ and [Vite+](https://viteplus.dev/guide/) (the `vp` command)
+- A [Neon](https://neon.com/) Postgres database
 
-### 1. 建立 GitHub OAuth App
+### 1. Create a GitHub OAuth App
 
-1. 前往 [GitHub Settings > Developer settings > OAuth Apps](https://github.com/settings/developers)，點擊「New OAuth App」
+1. Go to [GitHub Settings > Developer settings > OAuth Apps](https://github.com/settings/developers) and click "New OAuth App"
 
-   <img src="./docs/oauth-app.png" alt="建立 GitHub OAuth App" width="700">
+   <img src="./docs/oauth-app.png" alt="Create a GitHub OAuth App" width="700">
 
-2. 填寫應用資訊：
-   - **Application name**：Kreads
-   - **Homepage URL**：`http://localhost:3000`
-   - **Authorization callback URL**：`http://localhost:3000/api/auth/callback/github`
-3. 建立後取得 `Client ID`，並產生 `Client Secret`
+2. Fill in the app details:
+   - **Application name**: Kreads
+   - **Homepage URL**: `http://localhost:3000`
+   - **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github`
+3. After creating the app, copy the `Client ID` and generate a `Client Secret`
 
-> 一個 OAuth App 只能設定一組 callback URL，本機與部署環境需要各建立一個，例如圖中的 `kreads-app-local` 與 `kreads-app-preview`。
+> An OAuth App only allows one callback URL, so create one for local development and one for each deployment, like `kreads-app-local` and `kreads-app-preview` in the screenshot.
 
-### 2. 安裝與設定
+### 2. Install and Configure
 
 ```bash
 git clone https://github.com/keon981/kreads-app.git
@@ -155,13 +157,13 @@ cp apps/dashboard/.env.example apps/dashboard/.env
 cp packages/server/.env.example packages/server/.env
 ```
 
-依照各 `.env` 檔案中的註解，填入 GitHub OAuth App 與資料庫連線資訊。
+Fill in your GitHub OAuth App and database connection details, following the comments in each `.env` file.
 
-### 3. 啟動
+### 3. Run
 
 ```bash
-vp run drizzle:migrate   # 建立資料表
-vp run dev               # 主站 http://localhost:3000、後台 http://localhost:3001
+vp run drizzle:migrate   # Create the database tables
+vp run dev               # Site at http://localhost:3000, dashboard at http://localhost:3001
 ```
 
 ---
