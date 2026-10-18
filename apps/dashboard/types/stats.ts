@@ -1,4 +1,4 @@
-import type { InviteRedeemer } from './invite'
+import type { ViewerUser } from './user'
 
 export interface DailyActivity {
   /** MM/DD */
@@ -8,20 +8,18 @@ export interface DailyActivity {
   logins: number
 }
 
-export interface InviterRank {
-  name: string
-  username: string | null
+export interface InviterRank extends ViewerUser {
   count: number
 }
 
-export interface ActivityUser extends InviteRedeemer {
+export interface ActivityUser extends ViewerUser {
   time: Date
 }
 
 export interface RedeemedInvite {
   /** Always masked */
   code: string
-  redeemer: InviteRedeemer | null
+  redeemer: ViewerUser | null
   redeemedAt: Date
 }
 
