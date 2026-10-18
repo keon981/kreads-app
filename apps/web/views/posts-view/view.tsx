@@ -57,9 +57,8 @@ export async function UserPostsView({ user }: UserPostsViewProps): Promise<React
   return (
     <ArticleLayout>
       <AboutUser
-        name={user?.name ?? ''}
+        {...user}
         id={user?.username}
-        avatarUrl={user?.avatarUrl}
         inviteCode={ownerInviteCode}
       />
       {/* new post */}
@@ -94,7 +93,7 @@ export function UserPostsViewSkeleton({
       <AboutUser
         name={user?.name ?? ''}
         id={user?.username ?? ''}
-        avatarUrl={user?.avatarUrl}
+        image={user?.image}
       />
       <IssueItemGroup className="">
         {Array.from({ length }, (_, i) => (

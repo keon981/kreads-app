@@ -3,7 +3,7 @@ import type { Octokit } from '@octokit/rest'
 interface ViewerUser {
   username: string
   name: string
-  avatarUrl?: string
+  image?: string
   repoName: string
 }
 

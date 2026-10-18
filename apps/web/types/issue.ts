@@ -7,7 +7,7 @@ interface Issue {
   createdAt: string
   author: {
     login: string
-    avatarUrl: string
+    image: string
   } | null
   reactionCount: number
   isReacted: boolean
@@ -19,9 +19,9 @@ interface IssueComment {
   body: string
   bodyHTML: string
   createdAt: string
-  author: {
+  image: {
     login: string
-    avatarUrl: string
+    image: string
   } | null
   reactionCount: number
   isReacted: boolean

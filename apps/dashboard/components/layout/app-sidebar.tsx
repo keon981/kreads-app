@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { RiArrowUpDownLine, RiLoginBoxLine } from '@remixicon/react'
-import { DropdownMenu, DropdownMenuTrigger } from '@workspace/ui/components/dropdown-menu'
+import { ResponsiveMenu, ResponsiveMenuTrigger } from '@workspace/ui/components/responsive-menu'
 import {
   Sidebar,
   SidebarContent,
@@ -72,8 +72,8 @@ function AppSidebarBody({ user }: AppSidebarProps): React.ReactNode {
           <SidebarMenuItem>
             {user
               ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
+                  <ResponsiveMenu>
+                    <ResponsiveMenuTrigger
                       render={(
                         <SidebarMenuButton
                           size="lg"
@@ -84,9 +84,9 @@ function AppSidebarBody({ user }: AppSidebarProps): React.ReactNode {
                       <UserAvatar user={user} className="size-8" />
                       <UserSummary user={user} />
                       <RiArrowUpDownLine className="ml-auto size-4!" />
-                    </DropdownMenuTrigger>
+                    </ResponsiveMenuTrigger>
                     <UserMenuContent user={user} side="right" align="end" sideOffset={8} />
-                  </DropdownMenu>
+                  </ResponsiveMenu>
                 )
               : (
                   <SidebarMenuButton

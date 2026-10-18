@@ -30,7 +30,7 @@ import {
 } from './issue-item'
 
 import type { RemixiconComponentType } from '@remixicon/react'
-import type { DropdownMenuItem } from '@workspace/ui/components/dropdown-menu'
+import type { ResponsiveMenuItem } from '@workspace/ui/components/responsive-menu'
 import type { IssueTarget } from '@/types/action'
 import type { IssueFormDialogProps } from './issue-form-dialog'
 
@@ -123,7 +123,7 @@ function IssueShareButton(props: IssueItemButtonProps): React.ReactNode {
 
 // --- Menu Items & Content ---
 
-export interface IssueMenuItemEntry extends React.ComponentProps<typeof DropdownMenuItem> {
+export interface IssueMenuItemEntry extends React.ComponentProps<typeof ResponsiveMenuItem> {
   MenuItem?: React.ComponentType<any>
   label?: string
   icon?: RemixiconComponentType

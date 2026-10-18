@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@workspace/ui/components/dialog'
+import { Separator } from '@workspace/ui/components/separator'
 
 export interface ConfirmMessage {
   title: string
@@ -34,6 +35,7 @@ export function ConfirmDialog({ message, isPending = false, onConfirm, ...props 
             <DialogDescription className="px-6 pb-5 text-center text-base">{message.description}</DialogDescription>
           )}
         </DialogHeader>
+        <Separator />
         <DialogFooter className="gap-0 p-0">
           <ButtonGroup className="h-12 flex-1">
             <DialogClose render={<Button variant="ghost" disabled={isPending} className="h-full flex-1" />}>

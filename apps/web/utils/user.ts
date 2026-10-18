@@ -10,7 +10,7 @@ export function getViewerUser(data: Partial<AuthSession['user']>): ViewerUser | 
   return {
     username: data.username,
     name: data?.name ?? '',
-    avatarUrl: data.image ?? undefined,
+    image: data.image ?? undefined,
     repoName: data.repoName,
   }
 }
