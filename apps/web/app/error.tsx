@@ -3,8 +3,7 @@
 import { useEffect } from 'react'
 
 import { RiRefreshLine } from '@remixicon/react'
-
-import { ErrorLayout } from '@/components/layout/error-layout'
+import { ErrorLayout } from '@workspace/ui/components/error-layout'
 
 interface ErrorPageProps {
   error: Error & { digest?: string }

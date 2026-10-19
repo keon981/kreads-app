@@ -1,10 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-
 import React from 'react'
-
-import { useQueryClient } from '@tanstack/react-query'
 
 import { RiArrowRightSLine, RiContrast2Line, RiEyeLine, RiLogoutBoxRLine } from '@remixicon/react'
 import {
@@ -21,8 +17,8 @@ import { useTheme } from 'next-themes'
 import { VISIBILITY_DESCRIPTION } from '@/configs/constants'
 import { themeOptions, visibilityOptions } from '@/configs/nav-config'
 import { useAuth } from '@/contexts/auth-provider'
+import { useAuthActions } from '@/hooks/use-auth-actions'
 import { useVisibility } from '@/hooks/use-visibility'
-import { signOutWithClient } from '@/lib/auth-client'
 
 export function SettingsDrawerContent({
   view,
@@ -31,17 +27,10 @@ export function SettingsDrawerContent({
   view: string
   onViewChange: (view: string) => void
 }): React.ReactNode {
-  const router = useRouter()
   const { isAuth } = useAuth()
   const { theme, setTheme } = useTheme()
   const { isPublic, setIsPublic } = useVisibility()
-  const queryClient = useQueryClient()
-
-  const handleSignOut = async (): Promise<void> => {
-    await signOutWithClient()
-    queryClient.clear()
-    router.refresh()
-  }
+  const { signOut } = useAuthActions()
 
   return (
     <>
@@ -73,7 +62,7 @@ export function SettingsDrawerContent({
             </TabsList>
             {isAuth && (
               <DrawerClose
-                onClick={handleSignOut}
+                onClick={signOut}
                 className="flex w-full items-center gap-3 px-4 py-3 text-base text-destructive"
               >
                 <RiLogoutBoxRLine className="size-6 shrink-0" />

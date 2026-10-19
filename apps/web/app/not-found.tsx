@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
-import { ErrorLayout } from '@/components/layout/error-layout'
+import { ErrorLayout } from '@workspace/ui/components/error-layout'
+
 import { paths } from '@/configs/path-config'
 
 export default function NotFound(): React.ReactNode {

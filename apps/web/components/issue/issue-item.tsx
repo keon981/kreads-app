@@ -44,7 +44,6 @@ import type { IssueTarget } from '@/types/action'
 import type { Issue, IssueSubmission } from '@/types/issue'
 import type { IssueFormDialogProps } from './issue-form-dialog'
 
-type DropdownMenuItemOnClick = React.ComponentProps<typeof ResponsiveMenuItem>['onClick']
 type IssueMenuStatus = 'owner' | 'viewer' | 'failed' | 'loading'
 
 function getStagedAuthor(user: ReturnType<typeof useAuth>['user']): Issue['author'] {
@@ -107,8 +106,8 @@ interface IssueItemContextValue {
   target?: IssueTarget
   isOwner: boolean
   status: IssueMenuStatus
-  copyLink: () => void
-  onCopyLink?: DropdownMenuItemOnClick
+  onCopyLink?: (url?: string) => void
+  getLinkUrl: () => string
   onEdit?: (submission: IssueSubmission) => void
   triggerEdit: () => void
   triggerConfirm: (options: ConfirmOptions) => void
@@ -161,7 +160,7 @@ function IssueItemProvider({
   onDelete?: () => Promise<ActionState | void> | void
   redirectTo?: string
   onRetry?: () => void
-  onCopyLink?: DropdownMenuItemOnClick
+  onCopyLink?: (url?: string) => void
 } & Omit<React.ComponentProps<typeof IssueItem>, 'onSubmit'>): React.ReactNode {
   const status = resolveStatus(propStatus, isOwner)
 
@@ -177,10 +176,12 @@ function IssueItemProvider({
 
   const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
 
-  const copyLink = (): void => {
+  const getLinkUrl = (): string => (getCopyUrl ? getCopyUrl() : window.location.href)
+
+  const copyLink = (url?: string): void => {
     if (typeof window === 'undefined') return
-    const url = getCopyUrl ? getCopyUrl() : window.location.href
-    copy(url)
+    copy(url ?? '')
+    onCopyLink?.(url)
   }
 
   const triggerEdit = (): void => {
@@ -204,8 +205,8 @@ function IssueItemProvider({
         target,
         isOwner,
         status,
-        copyLink,
-        onCopyLink,
+        onCopyLink: () => copyLink(getLinkUrl()),
+        getLinkUrl,
         onEdit,
         triggerEdit,
         triggerConfirm,
