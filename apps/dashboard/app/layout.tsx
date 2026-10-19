@@ -1,10 +1,5 @@
 import type { Metadata } from 'next'
 
-import { Suspense } from 'react'
-
-import { DeviceProvider } from '@workspace/ui/contexts/device-provider'
-
-import { getInitialIsMobile } from '@/app/server/device'
 import { Providers } from '@/components/providers'
 import { env } from '@/lib/env'
 import { fontClassName } from '@/lib/font'
@@ -27,28 +22,10 @@ export default function RootLayout({
       className={fontClassName}
     >
       <body>
-        <Suspense>
-          <DeviceRoot>
-            <Providers>
-              {children}
-            </Providers>
-          </DeviceRoot>
-        </Suspense>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
-  )
-}
-
-interface DeviceRootProps {
-  children: React.ReactNode
-}
-
-async function DeviceRoot({ children }: DeviceRootProps): Promise<React.ReactNode> {
-  const initialIsMobile = await getInitialIsMobile()
-
-  return (
-    <DeviceProvider initialIsMobile={initialIsMobile}>
-      {children}
-    </DeviceProvider>
   )
 }

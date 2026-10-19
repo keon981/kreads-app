@@ -11,5 +11,4 @@ const fontMono = Geist_Mono({
   variable: '--font-mono',
 })
 
-// Shared by the root layout and global-not-found, which renders without the layout
 export const fontClassName = cn('antialiased', fontMono.variable, 'font-sans', spaceGrotesk.variable, oxaniumHeading.variable)
