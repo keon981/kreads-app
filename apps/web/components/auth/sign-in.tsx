@@ -25,11 +25,10 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@workspace/ui/components/drawer'
-import { toast } from '@workspace/ui/components/toast'
 import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
 import { cn } from '@workspace/ui/lib/utils'
 
-import { signInWithGitHub } from '@/lib/auth-client'
+import { useAuthActions } from '@/hooks/use-auth-actions'
 import { useSignInDialog } from '@/store/sign-in-dialog'
 
 import type { ButtonProps } from '@workspace/ui/components/button'
@@ -65,42 +64,18 @@ export function SignInButton({
   disabled,
   ...props
 }: ButtonProps) {
-  const [isLoading, setIsLoading] = React.useState(false)
+  const { isPending, signIn } = useAuthActions()
 
-  const handleClick: ButtonProps['onClick'] = async (e) => {
+  const handleClick: ButtonProps['onClick'] = (e) => {
     onClick?.(e)
-    if (e.defaultPrevented || isLoading) return
-
-    setIsLoading(true)
-    const toastId = toast.add({
-      type: 'loading',
-      description: '正在前往 GitHub 登入...',
-    })
-
-    try {
-      const res = await signInWithGitHub()
-      if (res?.error) {
-        toast.update(toastId, {
-          type: 'error',
-          description: res.error.message || '登入失敗，請稍後再試',
-          timeout: 5000,
-        })
-        setIsLoading(false)
-      }
-    } catch (error) {
-      toast.update(toastId, {
-        type: 'error',
-        description: error instanceof Error ? error.message : '登入失敗，請稍後再試',
-        timeout: 5000,
-      })
-      setIsLoading(false)
-    }
+    if (e.defaultPrevented || isPending) return
+    signIn()
   }
 
   return (
     <Button
       onClick={handleClick}
-      disabled={disabled || isLoading}
+      disabled={disabled || isPending}
       {...props}
     >
       {children}

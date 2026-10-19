@@ -32,6 +32,7 @@ import {
   InputGroupInput,
 } from '@workspace/ui/components/input-group'
 import { useCopy } from '@workspace/ui/hooks/use-copy'
+import { useShare } from '@workspace/ui/hooks/use-share'
 
 import { paths } from '@/configs/path-config'
 import { getAbsoluteUrl, invitePath } from '@/utils/navigation'
@@ -56,6 +57,7 @@ export function AboutUser({
   const githubUrl = `https://github.com/${repoName}`
   const shareUrl = getAbsoluteUrl(paths.user(login))
   const inviteUrl = inviteCode ? getAbsoluteUrl(invitePath(inviteCode)) : ''
+  const share = useShare()
 
   return (
     <Card className="gap-0 bg-transparent border-0 border-b border-border rounded-none">
@@ -87,7 +89,13 @@ export function AboutUser({
         </ButtonGroup>
         <div className="w-full flex gap-2">
           <ShareDialog shareUrl={shareUrl}>
-            <DialogTrigger render={<Button type="button" variant="outline" className="flex-1" />}>
+            <DialogTrigger
+              render={<Button type="button" variant="outline" className="flex-1" />}
+              onClick={(event) => {
+                // 手機改叫出系統分享選單，不開 Dialog
+                if (share({ url: shareUrl })) event.preventBaseUIHandler()
+              }}
+            >
               分享
             </DialogTrigger>
           </ShareDialog>

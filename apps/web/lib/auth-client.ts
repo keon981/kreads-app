@@ -31,6 +31,6 @@ export function signInWithGitHub() {
   })
 }
 
-export async function signOutWithClient() {
-  await authClient.signOut()
+export function signOutWithClient() {
+  return authClient.signOut()
 }
