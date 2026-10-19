@@ -77,6 +77,8 @@ function AppHeaderNav({ user, redirectTo }: AppHeaderProps & {
   if (!user) {
     return (
       <Button
+        variant="ghost"
+        className="bg-foreground text-background lg:hidden rounded-2xl active:scale-95"
         nativeButton={false}
         render={<Link href={redirectTo} />}
       >

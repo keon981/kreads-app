@@ -1,8 +1,8 @@
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 import type { ComponentType, ReactNode } from 'react'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
 import {
   RiAddLargeLine,
@@ -43,8 +43,8 @@ import { NOTICE_DESCRIPTION, VISIBILITY_DESCRIPTION } from '@/configs/constants'
 import { homePaths, paths } from '@/configs/path-config'
 import { useAuth } from '@/contexts/auth-provider'
 import { postMutations } from '@/hooks/mutations/posts'
+import { useAuthActions } from '@/hooks/use-auth-actions'
 import { useVisibility } from '@/hooks/use-visibility'
-import { signOutWithClient } from '@/lib/auth-client'
 
 import type { RemixiconComponentType } from '@remixicon/react'
 import type { NavItemProps } from '@/components/blocks/nav-item'
@@ -172,17 +172,10 @@ export const sidebar: Sidebar = {
       id: 'settings',
       icon: RiListSettingsFill,
       NavItem({ children }: NavItemProps): ReactNode {
-        const router = useRouter()
         const { isAuth, user } = useAuth()
         const { theme, setTheme } = useTheme()
         const { isPublic, setIsPublic } = useVisibility()
-        const queryClient = useQueryClient()
-
-        const handleSignOut = async (): Promise<void> => {
-          await signOutWithClient()
-          queryClient.clear()
-          router.refresh()
-        }
+        const { signOut } = useAuthActions()
 
         const themeRadioGroup = (
           <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
@@ -251,7 +244,7 @@ export const sidebar: Sidebar = {
                           {themeRadioGroup}
                         </DropdownMenuSubContent>
                       </DropdownMenuSub>
-                      <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
+                      <DropdownMenuItem variant="destructive" onClick={signOut}>
                         登出
                       </DropdownMenuItem>
                     </DropdownMenuGroup>

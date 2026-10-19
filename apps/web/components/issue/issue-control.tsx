@@ -15,8 +15,10 @@ import {
 } from '@remixicon/react'
 import { DialogTrigger } from '@workspace/ui/components/dialog'
 import { toast } from '@workspace/ui/components/toast'
+import { useCopy } from '@workspace/ui/hooks/use-copy'
 import { useDebouncedMutation } from '@workspace/ui/hooks/use-debounced-mutation'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
+import { useShare } from '@workspace/ui/hooks/use-share'
 
 import { toggleReactionAction } from '@/app/server/actions/post'
 import { IssueItemButton } from '@/components/ui/issue'
@@ -114,8 +116,19 @@ function IssueReplyButton({
 }
 
 function IssueShareButton(props: IssueItemButtonProps): React.ReactNode {
+  const { status, getLinkUrl } = useIssueItem()
+  const share = useShare()
+  const [, copy] = useCopy({ successMessage: '已複製連結至剪貼簿' })
+
+  const isDisabled = status === 'loading' || status === 'failed'
+
+  const handleClick = (): void => {
+    const url = getLinkUrl()
+    if (!share({ url })) copy(url)
+  }
+
   return (
-    <IssueItemButton {...props}>
+    <IssueItemButton {...props} disabled={isDisabled} onClick={handleClick}>
       <RiShareForwardLine />
     </IssueItemButton>
   )
@@ -157,9 +170,9 @@ function EditMenuItem({
 }
 
 function CopyLinkMenuItem(): React.ReactNode {
-  const { copyLink, onCopyLink } = useIssueItem()
+  const { getLinkUrl, onCopyLink } = useIssueItem()
 
-  return <IssueMenuItem label="複製連結" icon={RiLink} onClick={onCopyLink ?? copyLink} />
+  return <IssueMenuItem label="複製連結" icon={RiLink} onClick={() => onCopyLink?.(getLinkUrl())} />
 }
 
 function BookmarkMenuItem(): React.ReactNode {
