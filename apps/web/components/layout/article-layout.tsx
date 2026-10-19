@@ -66,7 +66,6 @@ function MobileHeader(): React.ReactNode {
   return (
     <Drawer
       swipeDirection="left"
-      modal={false}
       open={isOpen}
       onOpenChange={setIsOpen}
       onOpenChangeComplete={(open) => {
