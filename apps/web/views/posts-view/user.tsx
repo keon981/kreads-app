@@ -88,7 +88,7 @@ export function AboutUser({
         <div className="w-full flex gap-2">
           <ShareDialog shareUrl={shareUrl}>
             <DialogTrigger render={<Button type="button" variant="outline" className="flex-1" />}>
-              Share
+              分享
             </DialogTrigger>
           </ShareDialog>
           {inviteUrl && (

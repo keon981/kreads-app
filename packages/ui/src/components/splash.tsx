@@ -18,7 +18,7 @@ function Splash({ className, ...props }: React.ComponentProps<'div'>): React.Rea
       data-slot="splash"
       role="status"
       aria-label="Loading"
-      className={cn('fixed inset-0 z-100 bg-background', className)}
+      className={cn('fixed z-100 bottom-0 left-0 right-0 min-h-dvh w-dvw inset-0 overflow-hidden bg-background pb-[env(safe-area-inset-bottom)]', className)}
       {...props}
     />
   )

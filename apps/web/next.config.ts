@@ -7,6 +7,9 @@ const devAllowedOrigins: string[] = JSON.parse(
 const nextConfig: NextConfig = {
   allowedDevOrigins: devAllowedOrigins,
   cacheComponents: true,
+  experimental: {
+    globalNotFound: true,
+  },
   transpilePackages: ['@workspace/server', '@workspace/ui'],
   async redirects() {
     const username = process.env.NEXT_PUBLIC_HOME_USERNAME
