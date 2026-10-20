@@ -43,10 +43,6 @@ interface ToggleReactionState extends IssueTarget {
   viewer: string
 }
 
-interface ReactionActionState extends ActionState {
-  isReacted?: boolean
-}
-
 export async function createPostAction(input: { content: string }): Promise<IssueActionState<Issue>> {
   const result = PostFormSchema.safeParse(input)
   if (!result.success) {
@@ -93,7 +89,7 @@ export async function deletePostAction(target: IssueTarget): Promise<ActionState
   }
 }
 
-export async function toggleReactionAction(state: ToggleReactionState): Promise<ReactionActionState> {
+export async function toggleReactionAction(state: ToggleReactionState): Promise<ActionState> {
   try {
     const token = await fetchAccessTokenCache()
     const { data, userRepo } = parseWithUserRepo(token, ReactionSchema, state)
@@ -104,18 +100,18 @@ export async function toggleReactionAction(state: ToggleReactionState): Promise<
 
     if (isReacted) {
       const status = await createIssueReaction(userRepo, subject)
-      return { status, isReacted: true }
+      return { status }
     } else {
       const reactions = await fetchIssueReactions(userRepo, subject)
       const viewerReaction = reactions.find(reaction => `@${reaction.login}` === viewer)
-      if (!viewerReaction) return { status: HttpStatusCode.Ok, isReacted: false }
+      if (!viewerReaction) return { status: HttpStatusCode.Ok }
 
       const status = await deleteIssueReaction(
         userRepo,
         subject,
         viewerReaction.id,
       )
-      return { status, isReacted: false }
+      return { status }
     }
   } catch (err) {
     return catchParseWithUserRepoError(err, state.isReacted ? '按讚失敗，請再試一次' : '收回讚失敗，請再試一次')

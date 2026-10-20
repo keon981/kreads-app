@@ -19,8 +19,6 @@ import { SettingsDrawerContent } from '@/components/blocks/settings-drawer'
 import { paths } from '@/configs/path-config'
 import { useAuth } from '@/contexts/auth-provider'
 
-import type { BaseUIEvent } from '@base-ui/react/types'
-
 interface PageParams {
   id?: string
   number?: string
@@ -53,21 +51,11 @@ function PostBackButton({ className }: PostBackButtonProps): React.ReactNode {
 
 function MobileHeader(): React.ReactNode {
   const params = useParams<PageParams>()
-  const [isOpen, setIsOpen] = React.useState(false)
   const [view, setView] = React.useState('menu')
-
-  const handleTriggerClick = (event: BaseUIEvent<React.MouseEvent<HTMLButtonElement>>): void => {
-    if (!isOpen || view === 'menu') return
-
-    event.preventBaseUIHandler()
-    setView('menu')
-  }
 
   return (
     <Drawer
       swipeDirection="left"
-      open={isOpen}
-      onOpenChange={setIsOpen}
       onOpenChangeComplete={(open) => {
         if (!open) setView('menu')
       }}
@@ -81,11 +69,10 @@ function MobileHeader(): React.ReactNode {
             : (
                 <DrawerTrigger
                   render={<Button variant="ghost" size="icon-lg" />}
-                  onClick={handleTriggerClick}
                   className="aria-expanded:bg-transparent"
-                  aria-label={isOpen ? '返回' : '設定'}
+                  aria-label="設定"
                 >
-                  {isOpen ? <RiArrowLeftLine /> : <RiMenu2Line />}
+                  <RiMenu2Line />
                 </DrawerTrigger>
               )}
         </div>

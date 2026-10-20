@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useSuspenseInfiniteQuery } from '@tanstack/react-query'
 
 import { RiChat1Line } from '@remixicon/react'
 import { Time } from '@workspace/ui/components/time'
@@ -138,10 +138,18 @@ function PostItem({
 function PostList({ repoName, isOwner, prefetchLimit }: {
   repoName: string
   isOwner: boolean
-  prefetchLimit: number
-}): React.ReactNode {
+}
+
+function PostList({ repoName, isOwner }: PostListProps): React.ReactNode {
   const { user } = useAuth()
-  const { data: posts } = useSuspenseQuery(postQueries.list(repoName))
+  const {
+    data,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    fetchNextPage,
+  } = useSuspenseInfiniteQuery(postQueries.list(repoName))
   const { mutate: createPost } = useMutation(postMutations.create(repoName))
   const { mutate: updatePost } = useMutation(postMutations.update(repoName))
   const { mutateAsync: deletePost } = useMutation(postMutations.delete(repoName))

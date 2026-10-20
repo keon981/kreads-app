@@ -1,8 +1,12 @@
 import type { AuthSession } from '@workspace/server/auth/options'
-import type { ViewerUser } from '@/types/user'
+import type { UserRepo, ViewerUser } from '@/types/user'
 
 export function isUserActive(session: AuthSession | null) {
   return !!session?.user.repoName
+}
+
+export function getRepoName({ owner, repo }: Pick<UserRepo, 'owner' | 'repo'>): string {
+  return `${owner}/${repo}`
 }
 
 export function getViewerUser(data: Partial<AuthSession['user']>): ViewerUser | null {

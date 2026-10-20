@@ -1,6 +1,12 @@
+import { applyGuestCacheLife } from '@/lib/guest-cache'
+import { fetchUserRepo } from '@/services/user-repo'
+import { getActionData } from '@/utils/toolkit'
+import { getRepoName } from '@/utils/user'
+
 import { ISSUE_COMMENTS_QUERY } from '../graphql/comments'
 import { isViewerReacted } from './reactions'
 
+import type { IssueActionState } from '@/types/action'
 import type { IssueComment } from '@/types/issue'
 import type { UserRepo } from '@/types/user'
 import type { GraphqlIssueComment, GraphqlIssueCommentsResponse } from '../graphql/comments'
@@ -49,18 +55,20 @@ function toIssueCommentFromGraphql(comment: GraphqlIssueComment): IssueComment {
 
 /* === Issue Comments === */
 
-async function fetchIssueCommentsWithRest(
-  { octokit, owner, repo }: UserRepo,
-  issueNumber: number,
-): Promise<IssueComment[]> {
-  const { data } = await octokit.rest.issues.listComments({
-    owner,
-    repo,
-    issue_number: issueNumber,
-    per_page: perPage,
-    mediaType: { format: 'full' }, // return body & body_html
+async function fetchIssueCommentsWithRest(repoName: string, issueNumber: number): Promise<IssueActionState<IssueComment[]>> {
+  'use cache: remote'
+
+  return applyGuestCacheLife(async () => {
+    const { octokit, owner, repo } = fetchUserRepo(null, repoName)
+    const { data } = await octokit.rest.issues.listComments({
+      owner,
+      repo,
+      issue_number: issueNumber,
+      per_page: perPage,
+      mediaType: { format: 'full' }, // return body & body_html
+    })
+    return data.map(toIssueComment)
   })
-  return data.map(toIssueComment)
 }
 
 async function fetchIssueCommentsWithGraphql(
@@ -80,9 +88,10 @@ async function fetchIssueComments(
   userRepo: UserRepo & { error: boolean },
   issueNumber: number,
 ): Promise<IssueComment[]> {
-  return userRepo.error
-    ? fetchIssueCommentsWithRest(userRepo, issueNumber)
-    : fetchIssueCommentsWithGraphql(userRepo, issueNumber)
+  if (!userRepo.error) return fetchIssueCommentsWithGraphql(userRepo, issueNumber)
+
+  const commentsResult = await fetchIssueCommentsWithRest(getRepoName(userRepo), issueNumber)
+  return getActionData(commentsResult)
 }
 
 async function createIssueComment(

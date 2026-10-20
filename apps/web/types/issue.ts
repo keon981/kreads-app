@@ -14,6 +14,12 @@ interface Issue {
   commentCount: number
 }
 
+interface IssuePage {
+  posts: Issue[]
+  nextCursor: string | null
+  isTruncated: boolean
+}
+
 interface IssueComment {
   id: number
   body: string
@@ -40,6 +46,7 @@ interface IssueSubmission {
 export type {
   Issue,
   IssueComment,
+  IssuePage,
   IssueReaction,
   IssueSubmission,
 }

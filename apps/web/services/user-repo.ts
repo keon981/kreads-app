@@ -1,6 +1,7 @@
 import * as z from 'zod'
 
 import { HttpStatusCode } from '@/configs/constants'
+import { env } from '@/lib/env'
 import { createOctokit } from '@/lib/octokit'
 import { isRequestError } from '@/utils/toolkit'
 
@@ -19,8 +20,12 @@ export function fetchUserRepo(
 ): UserRepo & { error: boolean } {
   const [owner, repo] = repoName?.split('/') ?? ['', '']
 
+  const octokit = token
+    ? createOctokit(token, options)
+    : createOctokit(env.GITHUB_READ_TOKEN, { ...options, autoSignOut: false })
+
   return {
-    octokit: createOctokit(token ?? undefined, options),
+    octokit,
     owner,
     repo,
     error: !token,

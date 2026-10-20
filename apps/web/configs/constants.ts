@@ -9,6 +9,7 @@ enum HttpStatusCode {
   Forbidden, // 403
   NotFound, // 404
   Gone = 410,
+  TooManyRequests = 429,
   InternalServerError = 500,
 }
 
