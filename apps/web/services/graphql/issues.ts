@@ -28,6 +28,10 @@ interface GraphqlIssuesResponse {
   repository: {
     issues: {
       nodes: GraphqlIssue[]
+      pageInfo: {
+        hasNextPage: boolean
+        endCursor: string | null
+      }
     }
   }
 }
@@ -53,16 +57,21 @@ const ISSUE_FIELDS = `
 
 // issue list
 const ISSUES_QUERY = `
-  query GetIssues($owner: String!, $repo: String!, $first: Int!) {
+  query GetIssues($owner: String!, $repo: String!, $first: Int!, $after: String) {
     repository(owner: $owner, name: $repo) {
       issues(
         first: $first
+        after: $after
         states: OPEN
         filterBy: { createdBy: $owner }
         orderBy: { field: CREATED_AT, direction: DESC }
       ) {
         nodes {
           ...IssueFields
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
         }
       }
     }

@@ -11,7 +11,7 @@ export async function fetchApi<T>(path: string, params?: Record<string, string>)
   }
   if (!res.ok) {
     const body: { message?: string } = await res.json().catch(() => ({}))
-    throw new Error(body.message ?? '讀取失敗，請再試一次')
+    throw new Error(body.message ?? '讀取失敗，請再試一次', { cause: res.status })
   }
 
   return res.json()

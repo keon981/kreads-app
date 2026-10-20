@@ -2,11 +2,15 @@
 
 import { notFound } from 'next/navigation'
 
-import { useIsFetching, useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import React, { Suspense } from 'react'
+
+import { useIsFetching, useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 
 import { Button } from '@workspace/ui/components/button'
+import { Separator } from '@workspace/ui/components/separator'
 import { Spinner } from '@workspace/ui/components/spinner'
 import { Time } from '@workspace/ui/components/time'
+import { useIsHydrated } from '@workspace/ui/hooks/use-hydrated'
 import { cn } from '@workspace/ui/lib/utils'
 
 import {
@@ -34,16 +38,19 @@ import {
 import { useAuth } from '@/contexts/auth-provider'
 import { postMutations } from '@/hooks/mutations/posts'
 import { commentQueries } from '@/hooks/queries/comments'
-import { postQueries } from '@/hooks/queries/posts'
+import { getPostFromList, postQueries } from '@/hooks/queries/posts'
 
 import { commentMutations } from './mutations'
 
 import type { IssueMenuStatus } from '@/components/issue/issue-item'
-import type { IssueComment } from '@/types/issue'
+import type { Issue, IssueComment } from '@/types/issue'
 
 // --- Post Components ---
 
+const getReplyPlaceholder = (post: Issue): string => `回覆${post.author?.login ?? 'ghost'}……`
+
 interface PostDetailItemProps {
+  post: Issue
   repoName: string
   issueNumber: number
   isOwner: boolean
@@ -51,27 +58,22 @@ interface PostDetailItemProps {
 }
 
 // 貼文詳情卡片
-function PostDetailItem({ repoName, issueNumber, isOwner, redirectTo }: PostDetailItemProps): React.ReactNode {
+function PostDetailItem({ post, repoName, issueNumber, isOwner, redirectTo }: PostDetailItemProps): React.ReactNode {
   const queryClient = useQueryClient()
 
   // query keys
   const postKey = postQueries.detail(repoName, issueNumber).queryKey
   const commentsKey = commentQueries.list(repoName, issueNumber).queryKey
 
-  // query
-  const { data: post } = useSuspenseQuery(postQueries.detail(repoName, issueNumber))
-
   // fetching state
   const isFetchingPost = useIsFetching({ queryKey: postKey }) > 0
-  const isFetchingComments = useIsFetching({ queryKey: commentsKey }) > 0
-  const isRefreshing = isFetchingPost || isFetchingComments
+  const isRefetchingComments = useIsFetching({ queryKey: commentsKey, predicate: query => query.state.data !== undefined }) > 0
+  const isRefreshing = isFetchingPost || isRefetchingComments
 
   // mutations
   const { mutate: updatePost } = useMutation(postMutations.update(repoName))
   const { mutateAsync: deletePost, isPending: isDeleting } = useMutation(postMutations.delete(repoName))
   const { mutate: createComment } = useMutation(commentMutations.create(repoName, issueNumber))
-
-  if (!post) notFound()
 
   const status: IssueMenuStatus | undefined = isDeleting ? 'loading' : undefined
 
@@ -130,7 +132,7 @@ function PostDetailItem({ repoName, issueNumber, isOwner, redirectTo }: PostDeta
           <IssueReplyButton
             onSubmit={createComment}
             title="回覆"
-            placeholder={`回覆${post.author?.login ?? 'ghost'}……`}
+            placeholder={getReplyPlaceholder(post)}
             count={post.commentCount}
           />
           <IssueShareButton />
@@ -149,9 +151,7 @@ interface PostPreviewItemProps {
 function PostPreviewItem({ repoName, issueNumber }: PostPreviewItemProps): React.ReactNode {
   const queryClient = useQueryClient()
   const postDetail = queryClient.getQueryData(postQueries.detail(repoName, issueNumber).queryKey)
-  const postList = queryClient.getQueryData(postQueries.list(repoName).queryKey)
-  const postFromList = postList?.find(item => item.number === issueNumber)
-  const post = postDetail ?? postFromList
+  const post = postDetail ?? getPostFromList(queryClient, repoName, issueNumber)
 
   if (!post) return <IssueItemSkeleton />
 
@@ -187,7 +187,7 @@ function PostPreviewItem({ repoName, issueNumber }: PostPreviewItemProps): React
         <IssueReplyButton
           onSubmit={() => { }}
           title="回覆"
-          placeholder={`回覆${post.author?.login ?? 'ghost'}……`}
+          placeholder={getReplyPlaceholder(post)}
           count={post.commentCount}
         />
         <IssueShareButton />
@@ -196,23 +196,87 @@ function PostPreviewItem({ repoName, issueNumber }: PostPreviewItemProps): React
   )
 }
 
+interface PostWithCommentsProps extends Omit<PostDetailItemProps, 'post'> {
+  viewer: string | null
+  isActive: boolean
+}
+
+function PostWithComments({
+  repoName,
+  issueNumber,
+  isOwner,
+  redirectTo,
+  viewer,
+  isActive,
+}: PostWithCommentsProps): React.ReactNode {
+  const queryClient = useQueryClient()
+  const { data: post } = useSuspenseQuery({
+    ...postQueries.detail(repoName, issueNumber),
+    initialData: () => getPostFromList(queryClient, repoName, issueNumber),
+    initialDataUpdatedAt: () => queryClient.getQueryState(postQueries.list(repoName).queryKey)?.dataUpdatedAt,
+  })
+
+  if (!post) notFound()
+
+  return (
+    <>
+      <PostDetailItem
+        post={post}
+        repoName={repoName}
+        issueNumber={issueNumber}
+        isOwner={isOwner}
+        redirectTo={redirectTo}
+      />
+      {isActive && (
+        <CommentComposer
+          repoName={repoName}
+          issueNumber={issueNumber}
+          placeholder={getReplyPlaceholder(post)}
+        />
+      )}
+      <CommentList
+        repoName={repoName}
+        issueNumber={issueNumber}
+        commentCount={post.commentCount}
+        viewer={viewer}
+      />
+    </>
+  )
+}
+
+// Client only: the post comes from the browser's list cache, and fetchApi's relative URL fails on the server
+function PostDetail(props: PostWithCommentsProps): React.ReactNode {
+  const isHydrated = useIsHydrated()
+  const preview = <PostPreviewItem repoName={props.repoName} issueNumber={props.issueNumber} />
+
+  if (!isHydrated) return preview
+
+  return (
+    <Suspense fallback={preview}>
+      <PostWithComments {...props} />
+    </Suspense>
+  )
+}
+
 // --- Comment Components ---
 
 interface CommentItemProps extends Omit<React.ComponentProps<typeof IssueItemProvider>, 'body' | 'target'> {
   comment: IssueComment
   repoName: string
+  issueNumber: number
 }
 
 function CommentItem({
   comment,
   repoName,
+  issueNumber,
   className,
   ...props
 }: CommentItemProps): React.ReactNode {
   return (
     <IssueItemProvider
       body={comment.body}
-      target={{ repoName, commentId: comment.id }}
+      target={{ repoName, issueNumber, commentId: comment.id }}
       editTitle="編輯留言"
       className={cn('flex-col items-start gap-2.5', className)}
       {...props}
@@ -247,34 +311,55 @@ function CommentItem({
 interface CommentListProps {
   repoName: string
   issueNumber: number
+  commentCount: number
   viewer: string | null
 }
 
-function CommentList({ repoName, issueNumber, viewer }: CommentListProps): React.ReactNode {
+function CommentList({ repoName, issueNumber, commentCount, viewer }: CommentListProps): React.ReactNode {
+  const queryClient = useQueryClient()
   const { user } = useAuth()
-  const { data: comments } = useSuspenseQuery(commentQueries.list(repoName, issueNumber))
+  // Seed an empty list when the post has no comments, dated by the post fetch so it goes stale with it
+  const { data: comments, isError } = useQuery({
+    ...commentQueries.list(repoName, issueNumber),
+    initialData: () => (commentCount === 0 ? [] : undefined),
+    initialDataUpdatedAt: () => queryClient.getQueryState(postQueries.detail(repoName, issueNumber).queryKey)?.dataUpdatedAt,
+  })
   const { mutate: createComment } = useMutation(commentMutations.create(repoName, issueNumber))
   const { mutate: updateComment } = useMutation(commentMutations.update(repoName, issueNumber))
   const { mutateAsync: deleteComment } = useMutation(commentMutations.delete(repoName, issueNumber))
   const stagedComments = useStagedIssues(commentMutations.create(repoName, issueNumber).mutationKey, createComment)
   const author = getStagedAuthor(user)
 
-  const hasItems = stagedComments.length > 0 || (comments && comments.length > 0)
+  if (!comments) {
+    if (isError) return <IssueEmpty>留言載入失敗，請稍後再試</IssueEmpty>
+
+    return (
+      <>
+        <IssueItemSkeleton />
+        <IssueItemSkeleton />
+      </>
+    )
+  }
+
+  const hasItems = stagedComments.length > 0 || comments.length > 0
   if (!hasItems) {
     return <IssueEmpty>尚無留言</IssueEmpty>
   }
 
   return (
     <>
-      {comments?.map(comment => (
-        <CommentItem
-          key={comment.id}
-          comment={comment}
-          repoName={repoName}
-          isOwner={viewer === `@${comment.image?.login}`}
-          onEdit={submission => updateComment({ commentId: comment.id, submission })}
-          onDelete={() => deleteComment(comment.id)}
-        />
+      {comments.map((comment, index) => (
+        <React.Fragment key={comment.id}>
+          <CommentItem
+            comment={comment}
+            repoName={repoName}
+            issueNumber={issueNumber}
+            isOwner={viewer === `@${comment.image?.login}`}
+            onEdit={submission => updateComment({ commentId: comment.id, submission })}
+            onDelete={() => deleteComment(comment.id)}
+          />
+          {index + 1 !== comments.length && <Separator />}
+        </React.Fragment>
       ))}
       {stagedComments.map(staged => (
         <CommentItem
@@ -288,6 +373,7 @@ function CommentList({ repoName, issueNumber, viewer }: CommentListProps): React
             isReacted: false,
           }}
           repoName={repoName}
+          issueNumber={issueNumber}
           isOwner
           status={staged.status}
           onEdit={staged.resubmit}
@@ -311,4 +397,4 @@ function CommentComposer({ repoName, issueNumber, placeholder }: CommentComposer
   return <IssueComposerItem onSubmit={createComment} title="回覆" placeholder={placeholder} />
 }
 
-export { CommentComposer, CommentList, PostDetailItem, PostPreviewItem }
+export { PostDetail, PostPreviewItem }

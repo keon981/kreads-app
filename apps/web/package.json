@@ -26,6 +26,7 @@
     "next-themes": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "usehooks-ts": "catalog:",
     "zod": "catalog:",
     "zustand": "^5.0.15"
   },

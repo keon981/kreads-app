@@ -22,7 +22,6 @@
     "@tiptap/starter-kit": "3.31.4",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
-    "es-toolkit": "^1.52.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "recharts": "catalog:",

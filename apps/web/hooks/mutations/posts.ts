@@ -8,19 +8,30 @@ import { getActionData, throwIfActionFailed } from '@/utils/toolkit'
 
 import type { Issue, IssueSubmission } from '@/types/issue'
 
+export function setPostList(
+  client: QueryClient,
+  repoName: string,
+  update: (posts: Issue[], pageIndex: number) => Issue[],
+): void {
+  client.setQueryData(postQueries.list(repoName).queryKey, (currentData) => {
+    if (!currentData) return currentData
+
+    return {
+      ...currentData,
+      pages: currentData.pages.map((page, pageIndex) =>
+        (page ? { ...page, posts: update(page.posts, pageIndex) } : page)),
+    }
+  })
+}
+
 export function setPostListItem(
   client: QueryClient,
   repoName: string,
   issueNumber: number,
   update: (post: Issue) => Issue,
 ): void {
-  client.setQueryData(
-    postQueries.list(repoName).queryKey,
-    (currentPosts) => {
-      if (!currentPosts) return currentPosts
-      return currentPosts.map(post => (post.number === issueNumber ? update(post) : post))
-    },
-  )
+  setPostList(client, repoName, posts =>
+    posts.map(post => (post.number === issueNumber ? update(post) : post)))
 }
 
 export function setPostDetail(
@@ -44,17 +55,6 @@ export function invalidatePost(client: QueryClient, repoName: string, issueNumbe
   client.invalidateQueries({ queryKey: postQueries.detail(repoName, issueNumber).queryKey, refetchType: 'none' })
 }
 
-export function setPostData(
-  client: QueryClient,
-  repoName: string,
-  issueNumber: number,
-  update: (post: Issue) => Issue,
-): void {
-  setPostListItem(client, repoName, issueNumber, update)
-  setPostDetail(client, repoName, issueNumber, update)
-  invalidatePost(client, repoName, issueNumber)
-}
-
 export const postMutations = {
   create: (repoName: string) =>
     mutationOptions({
@@ -67,10 +67,8 @@ export const postMutations = {
       gcTime: Infinity,
       onSuccess: (createdPost, _variables, _context, { client }) => {
         // Prepend created post to list cache
-        client.setQueryData(postQueries.list(repoName).queryKey, (currentPosts) => {
-          if (!currentPosts) return currentPosts
-          return [createdPost, ...currentPosts]
-        })
+        setPostList(client, repoName, (posts, pageIndex) =>
+          (pageIndex === 0 ? [createdPost, ...posts] : posts))
 
         // Invalidate list query to sync with server
         client.invalidateQueries({
@@ -123,10 +121,8 @@ export const postMutations = {
       },
       onSuccess: (_actionState, issueNumber, _context, { client }) => {
         // Remove deleted post from list cache
-        client.setQueryData(postQueries.list(repoName).queryKey, (currentPosts) => {
-          if (!currentPosts) return currentPosts
-          return currentPosts.filter(post => post.number !== issueNumber)
-        })
+        setPostList(client, repoName, posts =>
+          posts.filter(post => post.number !== issueNumber))
 
         // Invalidate list query
         client.invalidateQueries({

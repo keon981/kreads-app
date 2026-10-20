@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation'
 
+import { useMutation } from '@tanstack/react-query'
+
 import {
   RiBookmarkLine,
   RiChat1Line,
@@ -16,13 +18,12 @@ import {
 import { DialogTrigger } from '@workspace/ui/components/dialog'
 import { toast } from '@workspace/ui/components/toast'
 import { useCopy } from '@workspace/ui/hooks/use-copy'
-import { useDebouncedMutation } from '@workspace/ui/hooks/use-debounced-mutation'
 import { useDialog } from '@workspace/ui/hooks/use-dialog'
 import { useShare } from '@workspace/ui/hooks/use-share'
 
-import { toggleReactionAction } from '@/app/server/actions/post'
 import { IssueItemButton } from '@/components/ui/issue'
 import { useAuth } from '@/contexts/auth-provider'
+import { reactionMutations } from '@/hooks/mutations/reactions'
 import { useAuthGuard } from '@/hooks/use-auth-guard'
 
 import { IssueFormDialog } from './issue-form-dialog'
@@ -51,34 +52,14 @@ function IssueReactionButton({ target, reaction, ...props }: {
 } & IssueItemButtonProps): React.ReactNode {
   const { user } = useAuth()
   const { target: contextTarget } = useIssueItem()
-  const activeTarget = target ?? contextTarget
+  const { mutate: toggleReaction } = useMutation(reactionMutations.toggle(target ?? contextTarget))
 
-  const serverIsReacted = reaction?.isReacted ?? false
-  const serverReactionCount = reaction?.reactionCount ?? 0
-  const viewer = user?.id ?? ''
-
-  const { data: isReacted, mutate: setIsReacted } = useDebouncedMutation({
-    data: serverIsReacted,
-    mutationFn: async (nextIsReacted) => {
-      if (!activeTarget) return
-      const res = await toggleReactionAction({
-        ...activeTarget,
-        isReacted: nextIsReacted,
-        viewer,
-      })
-
-      if (res.isReacted === undefined) throw new Error(res.message)
-    },
-    onError: (error) => {
-      toast.add({ type: 'error', description: error.message })
-    },
-  })
-
-  const reactionCount = serverReactionCount + Number(isReacted) - Number(serverIsReacted)
+  const isReacted = reaction?.isReacted ?? false
+  const reactionCount = reaction?.reactionCount ?? 0
 
   const handleClickHeart = (): void => {
     if (!reaction) return
-    setIsReacted(prev => !prev)
+    toggleReaction({ reaction, viewer: user?.id ?? '' })
   }
 
   const onAuthGuardClick = useAuthGuard(handleClickHeart)
