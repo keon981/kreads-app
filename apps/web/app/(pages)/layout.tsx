@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 
 import { SidebarInset, SidebarProvider } from '@workspace/ui/components/sidebar'
+import { Splash, SplashDismiss, SplashProvider } from '@workspace/ui/components/splash'
 
 import Loading from '@/app/loading'
 import { getInitialIsMobile } from '@/app/server/device'
@@ -15,18 +16,25 @@ export default function Layout({
   children: React.ReactNode
 }): React.ReactNode {
   return (
-    <Suspense fallback={<Loading />}>
-      <RootProviders>
-        <SidebarProvider>
-          <Suspense fallback={<AppNavSkeleton />}>
-            <AppNav />
-          </Suspense>
-          <SidebarInset className="flex-row items-start justify-center gap-4">
-            {children}
-          </SidebarInset>
-        </SidebarProvider>
-      </RootProviders>
-    </Suspense>
+    <SplashProvider>
+      {/* Must stay outside the Suspense, or the splash waits on the session */}
+      <Splash>
+        <Loading />
+      </Splash>
+      <Suspense fallback={<Loading />}>
+        <RootProviders>
+          <SplashDismiss />
+          <SidebarProvider>
+            <Suspense fallback={<AppNavSkeleton />}>
+              <AppNav />
+            </Suspense>
+            <SidebarInset className="flex-row items-start justify-center gap-4">
+              {children}
+            </SidebarInset>
+          </SidebarProvider>
+        </RootProviders>
+      </Suspense>
+    </SplashProvider>
   )
 }
 

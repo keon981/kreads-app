@@ -4,7 +4,6 @@ const SCROLL_KEYS = new Set(['ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 
 
 const PASSIVE_LISTENER_OPTIONS: AddEventListenerOptions = { passive: true }
 
-// Only user input counts: `scroll` also fires for scroll restoration and programmatic scrolling
 export function useHasScrollIntent(): boolean {
   const { value: hasScrollIntent, setTrue: setHasScrollIntent } = useBoolean(false)
 

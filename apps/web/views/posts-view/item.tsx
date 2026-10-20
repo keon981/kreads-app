@@ -3,11 +3,16 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+import React, { useEffect } from 'react'
+
 import { useMutation, useSuspenseInfiniteQuery } from '@tanstack/react-query'
 
 import { RiChat1Line } from '@remixicon/react'
+import { Separator } from '@workspace/ui/components/separator'
 import { Time } from '@workspace/ui/components/time'
+import { useHasScrollIntent } from '@workspace/ui/hooks/use-scroll-intent'
 import { cn } from '@workspace/ui/lib/utils'
+import { useIntersectionObserver } from 'usehooks-ts'
 
 import { IssueReactionButton, IssueShareButton } from '@/components/issue/issue-control'
 import {
@@ -26,12 +31,14 @@ import {
   IssueItemContent,
   IssueItemGroup,
   IssueItemMedia,
+  IssueItemSkeleton,
   IssueItemTitle,
   IssueUser,
 } from '@/components/ui/issue'
 import { useAuth } from '@/contexts/auth-provider'
 import { postMutations } from '@/hooks/mutations/posts'
 import { postQueries } from '@/hooks/queries/posts'
+import { useSignInDialog } from '@/store/sign-in-dialog'
 import { chatHref } from '@/utils/navigation'
 
 import type { Issue } from '@/types/issue'
@@ -43,13 +50,11 @@ const getShrinkChars = (text: string[]): string => text.slice(0, POST_EXCERPT_LE
 interface PostItemProps extends Omit<React.ComponentProps<typeof IssueItemProvider>, 'body' | 'target'> {
   post: Issue
   repoName: string
-  isPrefetched?: boolean
 }
 
 function PostItem({
   post,
   repoName,
-  isPrefetched = false,
   className,
   ...props
 }: PostItemProps): React.ReactNode {
@@ -88,11 +93,7 @@ function PostItem({
 
             {href
               ? (
-                  <Link
-                    href={href}
-                    prefetch={isPrefetched ? true : null}
-                    className="transition-opacity hover:opacity-60"
-                  >
+                  <Link href={href} className="transition-opacity hover:opacity-60">
                     <Time date={post.createdAt} />
                   </Link>
                 )
@@ -135,7 +136,19 @@ function PostItem({
   )
 }
 
-function PostList({ repoName, isOwner, prefetchLimit }: {
+function SignInWall(): React.ReactNode {
+  const { ref, isIntersecting } = useIntersectionObserver({ freezeOnceVisible: true })
+  const hasScrollIntent = useHasScrollIntent()
+  const triggerSignInDialog = useSignInDialog(state => state.trigger)
+
+  useEffect(() => {
+    if (isIntersecting && hasScrollIntent) triggerSignInDialog()
+  }, [isIntersecting, hasScrollIntent, triggerSignInDialog])
+
+  return <div ref={ref} className="h-px" />
+}
+
+interface PostListProps {
   repoName: string
   isOwner: boolean
 }
@@ -155,11 +168,22 @@ function PostList({ repoName, isOwner }: PostListProps): React.ReactNode {
   const { mutateAsync: deletePost } = useMutation(postMutations.delete(repoName))
   const stagedIssues = useStagedIssues(postMutations.create(repoName).mutationKey, createPost)
   const author = getStagedAuthor(user)
+  const { ref: loadMoreRef } = useIntersectionObserver({
+    rootMargin: '0px 0px 400px 0px',
+    onChange: (isIntersecting) => {
+      if (isIntersecting) fetchNextPage()
+    },
+  })
 
-  const hasItems = stagedIssues.length > 0 || (posts && posts.length > 0)
+  // Unmounted while fetching so it re-checks visibility, and after a failed page so it cannot loop
+  const canLoadMore = hasNextPage && !isFetching && !isFetchNextPageError
+
+  const [firstPage] = data.pages
+  const posts = data.pages.flatMap(page => page?.posts ?? [])
+  const hasItems = stagedIssues.length > 0 || posts.length > 0
 
   if (!hasItems) {
-    const message = posts ? '此人很懶，什麼都沒留下' : '此個人檔案不公開。'
+    const message = firstPage ? '此人很懶，什麼都沒留下' : '此個人檔案不公開。'
 
     return (
       <IssueEmpty className="rounded-none">
@@ -191,17 +215,21 @@ function PostList({ repoName, isOwner }: PostListProps): React.ReactNode {
           isOwner
         />
       ))}
-      {posts?.map((post, index) => (
-        <PostItem
-          key={post.number}
-          post={post}
-          repoName={repoName}
-          isOwner={isOwner}
-          onEdit={submission => updatePost({ issueNumber: post.number, submission })}
-          onDelete={() => deletePost(post.number)}
-          isPrefetched={index < prefetchLimit}
-        />
+      {posts.map((post, index) => (
+        <React.Fragment key={post.number}>
+          <PostItem
+            post={post}
+            repoName={repoName}
+            isOwner={isOwner}
+            onEdit={submission => updatePost({ issueNumber: post.number, submission })}
+            onDelete={() => deletePost(post.number)}
+          />
+          {index + 1 !== posts.length && <Separator />}
+        </React.Fragment>
       ))}
+      {(isFetchingNextPage || isFetchNextPageError) && <IssueItemSkeleton />}
+      {canLoadMore && <div ref={loadMoreRef} className="h-px" />}
+      {firstPage?.isTruncated && <SignInWall />}
     </IssueItemGroup>
   )
 }

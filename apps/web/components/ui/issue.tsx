@@ -60,7 +60,7 @@ function IssueItem({
   return (
     <Item
       {...props}
-      className={cn('flex-nowrap items-start rounded-none border-0 border-b last:border-b-0 p-3 md:p-6', className)}
+      className={cn('flex-nowrap items-start rounded-none border-0 p-3 md:p-6', className)}
       variant="outline"
     >
       {children}
