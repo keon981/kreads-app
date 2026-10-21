@@ -22,8 +22,6 @@ export function setCommentList(
   client.invalidateQueries({ queryKey, refetchType: 'none' })
 }
 
-export const setCommentsData = setCommentList
-
 export const commentMutations = {
   create: (repoName: string, issueNumber: number) =>
     mutationOptions({

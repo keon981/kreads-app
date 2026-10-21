@@ -5,7 +5,7 @@ import type { IssueActionState } from '@/types/action'
 
 export function throwIfActionFailed(state: ActionState): void {
   if (state.status && state.status < HttpStatusCode.BadRequest) return
-  throw new Error(state.message ?? '操作失敗，請再試一次')
+  throw new Error(state.message ?? '操作失敗，請再試一次', { cause: state.status })
 }
 
 export function getActionData<T>(state: IssueActionState<T>): T {
